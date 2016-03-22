@@ -1,0 +1,61 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <context:component-scan base-package="org.reactome.server.tools.search" />
+
+    <context:property-placeholder location="classpath:/web.properties" />
+
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+
+    <mvc:annotation-driven />
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <!-- Production implementation of the JavaMailSender interface, supporting
+    both JavaMail MimeMessages and Spring SimpleMailMessages -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail_host}" />
+        <property name="port" value="${mail_port}" />
+        <property name="username" value="${mail_username}" />
+		<property name="password" value="${mail_password}" />
+
+		<!-- The name of the property, following JavaBean naming conventions -->
+		<property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">${mail_enable_auth}</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.debug">true</prop>
+            </props>
+        </property>
+
+    </bean>
+
+    <!-- Configuration for the Interactors-Core components -->
+    <bean id="interactorsDB" class="org.reactome.server.tools.interactors.database.InteractorsDatabase">
+        <constructor-arg name="fileName" value="${interactors.static.db}"/>
+    </bean>
+
+    <bean id="interactionResourceService" class="org.reactome.server.tools.interactors.service.InteractionResourceService">
+        <constructor-arg name="database" ref="interactorsDB"/>
+    </bean>
+    <bean id="interactorResourceService" class="org.reactome.server.tools.interactors.service.InteractorResourceService">
+        <constructor-arg name="database" ref="interactorsDB"/>
+    </bean>
+    <bean id="interactionService" class="org.reactome.server.tools.interactors.service.InteractionService">
+        <constructor-arg name="database" ref="interactorsDB"/>
+    </bean>
+
+
+</beans>
