@@ -14,6 +14,8 @@ import org.reactome.server.tools.search.solr.ISolrConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -44,7 +46,16 @@ public class SearchService {
     private static Integer port;
 
     @Autowired
+//    @Qualifier(value = "interactionService")
     private InteractionService interactionService;
+
+
+//    @Autowired(required = false)
+//    public void setInteractionService(InteractionService interactionService) {
+//        this.interactionService = interactionService;
+//    }
+
+
 
     /**
      * Constructor for Spring Dependency Injection and loading MavenProperties
@@ -58,7 +69,7 @@ public class SearchService {
     private void loadProperties() throws SearchServiceException {
         try {
             Properties databaseProperties = new Properties();
-            databaseProperties.load(getClass().getResourceAsStream("/web.properties"));
+            databaseProperties.load(getClass().getResourceAsStream("/reactome.properties"));
             host = databaseProperties.getProperty("database_host");
             database = databaseProperties.getProperty("database_name");
             currentDatabase = databaseProperties.getProperty("database_currentDatabase");
