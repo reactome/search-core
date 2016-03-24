@@ -38,12 +38,18 @@ public class SearchService {
     @Autowired
     private ISolrConverter solrConverter;
 
-    private static String host;
-    private static String database;
-    private static String currentDatabase;
-    private static String user;
-    private static String password;
-    private static Integer port;
+    @Value("${database_host}")
+    private  String host;
+    @Value("${database_name}")
+    private  String database;
+    @Value("${database_currentDatabase}")
+    private  String currentDatabase;
+    @Value("${database_user}")
+    private  String user;
+    @Value("${database_password}")
+    private  String password;
+    @Value("${database_port}")
+    private  Integer port;
 
     @Autowired
 //    @Qualifier(value = "interactionService")
@@ -62,25 +68,7 @@ public class SearchService {
      *
      * @throws SearchServiceException
      */
-    public SearchService() throws SearchServiceException {
-        loadProperties();
-    }
-
-    private void loadProperties() throws SearchServiceException {
-        try {
-            Properties databaseProperties = new Properties();
-            databaseProperties.load(getClass().getResourceAsStream("/reactome.properties"));
-            host = databaseProperties.getProperty("database_host");
-            database = databaseProperties.getProperty("database_name");
-            currentDatabase = databaseProperties.getProperty("database_currentDatabase");
-            user = databaseProperties.getProperty("database_user");
-            password = databaseProperties.getProperty("database_password");
-            port = Integer.valueOf(databaseProperties.getProperty("database_port"));
-        } catch (IOException e) {
-            logger.error("Error when loading Database Properties ", e);
-            throw new SearchServiceException("Error when loading Database Properties ", e);
-        }
-    }
+    public SearchService(){}
 
     /**
      * Gets Faceting information for a specific query + filters.
