@@ -1,8 +1,10 @@
 package org.reactome.server.tools.search.domain;
 
 /**
- * Created by flo on 7/4/14.
+ * @author Florian Korninger (fkorn@ebi.ac.uk)
+ * @version 1.0
  */
+@SuppressWarnings("unused")
 public class Regulation {
 
     private EntityReference regulator;

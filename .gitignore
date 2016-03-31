@@ -4,7 +4,7 @@
 .log
 
 *target*
-*.jar
+
+#*.jar
 *.war
 *.ear
-*.class

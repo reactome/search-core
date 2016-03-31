@@ -5,6 +5,7 @@ package org.reactome.server.tools.search.domain;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class Literature {
 
     private String title;

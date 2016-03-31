@@ -8,6 +8,7 @@ import java.util.Comparator;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class EntityReference implements Comparator<EnrichedEntry> {
     private String name;
     private String stId;

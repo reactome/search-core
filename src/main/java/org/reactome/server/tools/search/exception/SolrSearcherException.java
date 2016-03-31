@@ -6,12 +6,12 @@ package org.reactome.server.tools.search.exception;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class SolrSearcherException extends Exception {
 
     public SolrSearcherException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SolrSearcherException(String message) { super(message);
-    }
+    public SolrSearcherException(String message) { super(message); }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class ReferenceEntity {
 
     private String referenceName;

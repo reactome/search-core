@@ -1,9 +1,14 @@
 package org.reactome.server.tools.search.exception;
 
 /**
- * Created by flo on 6/30/14.
+ * TODO IMPLEMENT
+ *
+ * @author Florian Korninger (fkorn@ebi.ac.uk)
+ * @version 1.0
  */
+@SuppressWarnings("unused")
 public class EnricherException extends Exception{
+
     protected EnricherException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

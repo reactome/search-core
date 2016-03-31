@@ -7,6 +7,7 @@ import java.util.List;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class CatalystActivity {
     private GoTerm activity;
     private EntityReference physicalEntity;

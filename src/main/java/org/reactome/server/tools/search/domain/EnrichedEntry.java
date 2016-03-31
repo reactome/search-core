@@ -12,6 +12,7 @@ import java.util.Set;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class EnrichedEntry extends Entry {
 
     private Set<Node> locationsPathwayBrowser;
@@ -23,8 +24,8 @@ public class EnrichedEntry extends Entry {
     private List<EntityReference> orthologousEvents;
     private List<Disease> diseases;
 
-    private Map<String, List<CrossReference>>  crossReferences;
-    private Map<String, List<EntityReference>> referedEntities; // this can be refered Inputs Outputs ... but also from a ReferenceEntity to a Ewaas
+    private Map<String, List<CrossReference>> crossReferences;
+    private Map<String, List<EntityReference>> referredEntities; // this can be referred Inputs Outputs ... but also from a ReferenceEntity to a Ewas
 
     private EntityReference reverseReaction;
 
@@ -52,14 +53,12 @@ public class EnrichedEntry extends Entry {
     private Map<String, List<Regulation>> regulatingEntities;
 
     private List<ModifiedResidue> modifiedResidues;
+    private Collection<String> availableSpecies;
+    private List<Interaction> interactionList;
 
     public Set<Node> getLocationsPathwayBrowser() {
         return locationsPathwayBrowser;
     }
-
-    public Collection<String> availableSpecies;
-
-    public List<Interaction> interactionList;
 
     public void setLocationsPathwayBrowser(Set<Node> locationsPathwayBrowser) {
         this.locationsPathwayBrowser = locationsPathwayBrowser;
@@ -113,12 +112,12 @@ public class EnrichedEntry extends Entry {
         this.crossReferences = crossReferences;
     }
 
-    public Map<String, List<EntityReference>> getReferedEntities() {
-        return referedEntities;
+    public Map<String, List<EntityReference>> getReferredEntities() {
+        return referredEntities;
     }
 
-    public void setReferedEntities(Map<String, List<EntityReference>> referedEntities) {
-        this.referedEntities = referedEntities;
+    public void setReferredEntities(Map<String, List<EntityReference>> referredEntities) {
+        this.referredEntities = referredEntities;
     }
 
     public EntityReference getReverseReaction() {
@@ -273,19 +272,19 @@ public class EnrichedEntry extends Entry {
         this.modifiedResidues = modifiedResidues;
     }
 
-    public List<Interaction> getInteractionList() {
-        return interactionList;
-    }
-
-    public void setInteractionList(List<Interaction> interactionList) {
-        this.interactionList = interactionList;
-    }
-
     public Collection<String> getAvailableSpecies() {
         return availableSpecies;
     }
 
     public void setAvailableSpecies(Collection<String> availableSpecies) {
         this.availableSpecies = availableSpecies;
+    }
+
+    public List<Interaction> getInteractionList() {
+        return interactionList;
+    }
+
+    public void setInteractionList(List<Interaction> interactionList) {
+        this.interactionList = interactionList;
     }
 }

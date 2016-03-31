@@ -33,74 +33,76 @@ import java.util.List;
  * @version 1.0
  */
 @Component
-public class SolrCore {
+class SolrCore {
 
-    private SolrClient solrClient;
+    private final SolrClient solrClient;
     private final static Logger logger = Logger.getRootLogger();
 
-    private final static String DEFAULT_REQUEST_HANDLER     =  "/select";
-    private final static String SEARCH_REQUEST_HANDLER      =  "/search";
-    private final static String CLUSTERED_REQUEST_HANDLER   =  "/browse";
-    private final static String SUGGEST_REQUEST_HANDLER     =  "/suggest";
-    private final static String EXISTS_REQUEST_HANDLER      =  "/exists";
-    private final static String FACET_REQUEST_HANDLER       =  "/facet";
-    private final static String TOTAL_FACET_REQUEST_HANDLER =  "/facetall";
-    private final static String SPELLCHECK_REQUEST_HANDLER  =  "/spellcheck";
-    private final static String INTACT_REQUEST_HANDLER      =  "/intactdetail";
+    //    private final static String DEFAULT_REQUEST_HANDLER     =  "/select";
+    private final static String SEARCH_REQUEST_HANDLER = "/search";
+    private final static String CLUSTERED_REQUEST_HANDLER = "/browse";
+    private final static String SUGGEST_REQUEST_HANDLER = "/suggest";
+    private final static String EXISTS_REQUEST_HANDLER = "/exists";
+    private final static String FACET_REQUEST_HANDLER = "/facet";
+    private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
+    private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
+    private final static String INTACT_REQUEST_HANDLER = "/intactdetail";
 
-    private final static String SOLR_SPELLCHECK_QUERY       =  "spellcheck.q";
-    private final static String SOLR_GROUP_OFFSET           =  "group.offset";
-    private final static String SOLR_GROUP_LIMIT            =  "group.limit";
+    private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
+    private final static String SOLR_GROUP_OFFSET = "group.offset";
+    private final static String SOLR_GROUP_LIMIT = "group.limit";
 
-    private final static String SPECIES_FACET               =  "species_facet";
-    private final static String TYPE_FACET                  =  "type_facet";
-    private final static String KEYWORD_FACET               =  "keywords_facet";
-    private final static String COMPARTMENT_FACET           =  "compartment_facet";
+    private final static String SPECIES_FACET = "species_facet";
+    private final static String TYPE_FACET = "type_facet";
+    private final static String KEYWORD_FACET = "keywords_facet";
+    private final static String COMPARTMENT_FACET = "compartment_facet";
 
-    private final static String SPECIES_TAG                 =  "{!tag=sf}";
-    private final static String TYPE_TAG                    =  "{!tag=tf}";
-    private final static String KEYWORD_TAG                 =  "{!tag=kf}";
-    private final static String COMPARTMENT_TAG             =  "{!tag=cf}";
+    private final static String SPECIES_TAG = "{!tag=sf}";
+    private final static String TYPE_TAG = "{!tag=tf}";
+    private final static String KEYWORD_TAG = "{!tag=kf}";
+    private final static String COMPARTMENT_TAG = "{!tag=cf}";
 
-    private final static String DB_ID                       =  "dbId";
-    private final static String ST_ID                       =  "stId";
-    private final static String OLD_ST_ID                   =  "oldStId";
-    private final static String ALL_FIELDS                  =  "*:*";
+    //    private final static String DB_ID                       =  "dbId";
+//    private final static String ST_ID                       =  "stId";
+//    private final static String OLD_ST_ID                   =  "oldStId";
+    private final static String ALL_FIELDS = "*:*";
 
     /**
      * Constructor for Dependency Injection
-     * InitializessolrClient
+     * InitializeSolrClient
      * since Solr 4.2 Solr is using by default a poolingClientConnectionManager
+     *
      * @param url solr URL
      */
     @Autowired
-    public SolrCore(@Value("${solr_url}")String url,
-                    @Value("${solr_user}")String user,
-                    @Value("${solr_password}")String password) {
+    public SolrCore(@Value("${solr_url}") String url,
+                    @Value("${solr_user}") String user,
+                    @Value("${solr_password}") String password) {
 
         logger.setLevel(Level.INFO);
         logger.addAppender(new ConsoleAppender(new PatternLayout("%-6r [%p] %c - %m%n")));
 
-        if(user!=null && !user.isEmpty() && password!=null && !password.isEmpty()) {
+        if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
             HttpClientBuilder builder = HttpClientBuilder.create().addInterceptorFirst(new PreemptiveAuthInterceptor());
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user, password);
             credentialsProvider.setCredentials(AuthScope.ANY, credentials);
             HttpClient client = builder.setDefaultCredentialsProvider(credentialsProvider).build();
-            solrClient = new HttpSolrClient(url,client);
-        }else{
-            solrClient = new  HttpSolrClient(url);
+            solrClient = new HttpSolrClient(url, client);
+        } else {
+            solrClient = new HttpSolrClient(url);
         }
         logger.info("solrClient initialized");
     }
 
     /**
      * Query for checking if this specific String exists in the index
+     *
      * @param query String of the query parameter given
      * @return true if there are results
      * @throws SolrSearcherException
      */
-    public boolean existsQuery (String query) throws SolrSearcherException {
+    boolean existsQuery(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setRequestHandler(EXISTS_REQUEST_HANDLER);
         solrQuery.setQuery(query);
@@ -109,7 +111,7 @@ public class SolrCore {
         return queryResponse.getResults().getNumFound() > 0;
     }
 
-    public QueryResponse intactDetail(String query) throws SolrSearcherException {
+    QueryResponse intactDetail(String query) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
 
         parameters.setRequestHandler(INTACT_REQUEST_HANDLER);
@@ -119,12 +121,13 @@ public class SolrCore {
 
     /**
      * Converts all parameters of the given queryObject to Solr parameters and queries Solr Server
-     *  With this search handler the result will be clustered
+     * With this search handler the result will be clustered
+     *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse searchCluster(Query queryObject) throws SolrSearcherException {
+    QueryResponse searchCluster(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
 
         parameters.setRequestHandler(CLUSTERED_REQUEST_HANDLER);
@@ -133,21 +136,23 @@ public class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
 
-        if(queryObject.getStart() != null && queryObject.getRows() != null) {
+        if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.set(SOLR_GROUP_OFFSET, queryObject.getStart());
             parameters.set(SOLR_GROUP_LIMIT, queryObject.getRows());
         }
         parameters.setQuery(queryObject.getQuery());
         return querysolrClient(parameters);
     }
+
     /**
      * Converts all parameters of the given queryObject to Solr parameters and queries Solr Server
      * With this search handler the result will not be clustered
+     *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse search (Query queryObject) throws SolrSearcherException {
+    QueryResponse search(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
 
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
@@ -156,7 +161,7 @@ public class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
 
-        if(queryObject.getStart() != null && queryObject.getRows() != null) {
+        if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.setStart(queryObject.getStart());
             parameters.setRows(queryObject.getRows());
         }
@@ -164,29 +169,30 @@ public class SolrCore {
         return querysolrClient(parameters);
     }
 
-    /**
-     * Queries Solr Server for a single given for given id
-     * @param id can be dbId of stId
-     * @return QueryResponse
-     * @throws org.reactome.server.tools.search.exception.SolrSearcherException
-     */
-    public QueryResponse searchById(String id) throws SolrSearcherException {
-        SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setRequestHandler(DEFAULT_REQUEST_HANDLER);
-        solrQuery.setStart(0);
-        solrQuery.setRows(1);
-        solrQuery.setQuery(DB_ID + ":" + id + " OR " + ST_ID + ":" + id + " OR " + OLD_ST_ID + ":" + id);
-        return querysolrClient(solrQuery);
-    }
+//    /**
+//     * Queries Solr Server for a single given for given id
+//     * @param id can be dbId of stId
+//     * @return QueryResponse
+//     * @throws org.reactome.server.tools.search.exception.SolrSearcherException
+//     */
+//    public QueryResponse searchById(String id) throws SolrSearcherException {
+//        SolrQuery solrQuery = new SolrQuery();
+//        solrQuery.setRequestHandler(DEFAULT_REQUEST_HANDLER);
+//        solrQuery.setStart(0);
+//        solrQuery.setRows(1);
+//        solrQuery.setQuery(DB_ID + ":" + id + " OR " + ST_ID + ":" + id + " OR " + OLD_ST_ID + ":" + id);
+//        return querysolrClient(solrQuery);
+//    }
 
     /**
      * Method for autocompletion
      * Properties (eg number of suggestions returned are set in the solrconfig.xml)
+     *
      * @param query String of the query parameter given
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse getAutocompleteSuggestions(String query) throws SolrSearcherException {
+    QueryResponse getAutocompleteSuggestions(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setRequestHandler(SUGGEST_REQUEST_HANDLER);
         solrQuery.set(SOLR_SPELLCHECK_QUERY, query);
@@ -196,11 +202,12 @@ public class SolrCore {
     /**
      * Method for spellcheck and suggestions
      * Properties (eg number of suggestions returned are set in the solrconfig.xml)
+     *
      * @param query String of the query parameter given
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse getSpellcheckSuggestions(String query) throws SolrSearcherException {
+    QueryResponse getSpellcheckSuggestions(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setRequestHandler(SPELLCHECK_REQUEST_HANDLER);
         solrQuery.set(SOLR_SPELLCHECK_QUERY, query);
@@ -213,11 +220,12 @@ public class SolrCore {
     /**
      * Method gets Faceting Info considering Filter of other possible FacetFields
      * Tags are used to exclude filtering Parameters from the same Faceting Field
+     *
      * @param queryObject QueryObject (query, types, species, keywords, compartments)
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
+    QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FACET_REQUEST_HANDLER);
         if (queryObject.getSpecies() != null) {
@@ -238,10 +246,11 @@ public class SolrCore {
 
     /**
      * Method gets all faceting information for the fields: species, types, compartments, keywords
+     *
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
      */
-    public QueryResponse getFacetingInformation() throws SolrSearcherException {
+    QueryResponse getFacetingInformation() throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(TOTAL_FACET_REQUEST_HANDLER);
         parameters.setQuery(ALL_FIELDS);
@@ -250,7 +259,8 @@ public class SolrCore {
 
     /**
      * Helper Method to construct the filter that is sent to Solr
-     * @param facet list of selected faceting parameters
+     *
+     * @param facet     list of selected faceting parameters
      * @param fieldName name of the faceting field
      * @return filterQuery ready to get sent to solr
      */
@@ -270,6 +280,7 @@ public class SolrCore {
 
     /**
      * executes a Query
+     *
      * @param query SolrQuery Object
      * @return QueryResponse
      * @throws org.reactome.server.tools.search.exception.SolrSearcherException
@@ -277,16 +288,16 @@ public class SolrCore {
     private QueryResponse querysolrClient(SolrQuery query) throws SolrSearcherException {
         try {
             return solrClient.query(query);
-        } catch (IOException|SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             logger.error("Solr exception occurred with query: " + query, e);
             throw new SolrSearcherException("Solr exception occurred with query: " + query, e);
         }
     }
 
-    /**
-     * Shutdown only closes the connection to Solr
-     * never used
-     */
+//    /**
+//     * Shutdown only closes the connection to Solr
+//     * never used
+//     */
 //    private void closesolrClient() {
 //        solrClient.shutdown();
 //        logger.info("solrClient shutdown");

@@ -1,5 +1,6 @@
 package org.reactome.server.tools.search.domain;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -8,7 +9,7 @@ import java.util.TreeSet;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
-
+@SuppressWarnings("unused")
 public class Node implements Comparable<Node> {
 
     private String stId;
@@ -122,7 +123,7 @@ public class Node implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(Node node) {
+    public int compareTo(@Nonnull Node node) {
         // If stId is not present we set it as the dbId
         return this.stId.compareTo(node.stId);
     }

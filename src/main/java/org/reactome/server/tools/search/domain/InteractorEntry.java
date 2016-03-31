@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
+@SuppressWarnings("unused")
 public class InteractorEntry {
 
     private String accession;

@@ -3,7 +3,7 @@ package org.reactome.server.tools.search.domain;
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
+@SuppressWarnings("unused")
 public class InteractorReactomeEntry {
 
     private String reactomeId;

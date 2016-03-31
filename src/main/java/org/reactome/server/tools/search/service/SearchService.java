@@ -6,7 +6,6 @@ import org.reactome.server.tools.interactors.service.InteractionService;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
 import org.reactome.server.tools.search.database.Enricher;
 import org.reactome.server.tools.search.domain.*;
-import org.reactome.server.tools.search.exception.EnricherException;
 import org.reactome.server.tools.search.exception.SolrSearcherException;
 import org.reactome.server.tools.search.solr.SolrConverter;
 import org.slf4j.Logger;
@@ -25,6 +24,7 @@ import java.util.List;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Service
 public class SearchService {
     private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
@@ -37,12 +37,6 @@ public class SearchService {
 
     @Autowired
     private Enricher enricher;
-
-    /**
-     * Constructor for Spring Dependency Injection and loading MavenProperties
-     */
-    public SearchService() {
-    }
 
     /**
      * Gets Faceting information for a specific query + filters.
@@ -115,7 +109,7 @@ public class SearchService {
     /**
      * Method for providing autocomplete suggestions
      *
-     * @param query Term (Snippet) you want to have autocompleted
+     * @param query Term (Snippet) you want to have auto-completed
      * @return List(String) of suggestions if solr is able to provide some
      * @throws SolrSearcherException
      */
@@ -157,7 +151,7 @@ public class SearchService {
      * @param id StId or DbId
      * @return Entry Object
      */
-    public EnrichedEntry getEntryById(String id) throws EnricherException, SolrSearcherException {
+    public EnrichedEntry getEntryById(String id) {
         if (id != null && !id.isEmpty()) {
             EnrichedEntry enrichedEntry = enricher.enrichEntry(id);
 
@@ -178,19 +172,6 @@ public class SearchService {
             return enrichedEntry;
         }
 
-        return null;
-    }
-
-    /**
-     * Returns one specific Entry by DbId
-     *
-     * @param id StId or DbId
-     * @return Entry Object
-     */
-    public EnrichedEntry getEntryById(Integer version, String id) throws EnricherException, SolrSearcherException {
-        if (id != null && !id.isEmpty()) {
-            return enricher.enrichEntry(id);
-        }
         return null;
     }
 

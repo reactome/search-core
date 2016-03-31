@@ -16,7 +16,7 @@ public abstract class InstanceTypeExplanation {
                 break;
             //case EQUIVALENT_EVENT_SET: //DEPRECATED
             case PATHWAY:
-                explanation = "A collection of related Events. These events can be ReactionlikeEvents or Pathways";
+                explanation = "A collection of related Events. These events can be ReactionLikeEvents or Pathways";
                 break;
             case POLYMERISATION:
                 explanation = "Reactions that follow the pattern: Polymer + Unit -> Polymer (there may be a catalyst involved). " +

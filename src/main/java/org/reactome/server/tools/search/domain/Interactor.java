@@ -1,11 +1,12 @@
 package org.reactome.server.tools.search.domain;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
-
+@SuppressWarnings("unused")
 public class Interactor implements Comparable<Interactor> {
 
     private List<InteractorReactomeEntry> interactorReactomeEntries;
@@ -23,6 +24,7 @@ public class Interactor implements Comparable<Interactor> {
         this.interactorReactomeEntries = interactorReactomeEntries;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Double getScore() {
         return score;
     }
@@ -64,7 +66,7 @@ public class Interactor implements Comparable<Interactor> {
     }
 
     @Override
-    public int compareTo(Interactor otherInteraction) {
+    public int compareTo(@Nonnull Interactor otherInteraction) {
         return this.score.compareTo(otherInteraction.getScore());
     }
 }

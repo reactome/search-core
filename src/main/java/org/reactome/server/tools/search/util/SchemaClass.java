@@ -81,25 +81,24 @@ public enum SchemaClass {
     TRANSLATIONAL_MODIFICATION("TranslationalModification"),
     URL("URL");
 
+    @SuppressWarnings("WeakerAccess")
     public final String schemaClass;
     public final String name;
 
-    private SchemaClass(String schemaClass) {
+    SchemaClass(String schemaClass) {
         this(schemaClass, getName(schemaClass));
     }
 
-    private SchemaClass(String schemaClass, String name) {
+    SchemaClass(String schemaClass, String name) {
         this.schemaClass = schemaClass;
         this.name = name;
     }
 
     public static SchemaClass getSchemaClass(String schemaClass) {
         SchemaClass[] arr$ = values();
-        int len$ = arr$.length;
 
-        for(int i$ = 0; i$ < len$; ++i$) {
-            SchemaClass sc = arr$[i$];
-            if(sc.schemaClass.equals(schemaClass)) {
+        for (SchemaClass sc : arr$) {
+            if (sc.schemaClass.equals(schemaClass)) {
                 return sc;
             }
         }

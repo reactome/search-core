@@ -45,7 +45,7 @@ public class DatabaseObjectServiceTest {
     public void test () throws SolrSearcherException, SQLException {
         System.out.println();
         Object x = searchService.getSpellcheckSuggestions("apoptosi");
-        System.out.println();
+        System.out.println(x);
 
     }
 

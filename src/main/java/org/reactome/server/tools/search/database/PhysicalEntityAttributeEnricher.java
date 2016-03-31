@@ -24,7 +24,7 @@ class PhysicalEntityAttributeEnricher {
 
     private static final String ENTITY_ON_OTHER_CELL = "entityOnOtherCell";
 
-    public static void setPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    static void setPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
             try {
 
@@ -50,7 +50,7 @@ class PhysicalEntityAttributeEnricher {
     private static void setGeneralPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
 
-            enrichedEntry.setReferedEntities(getPhysicalEntityReferers(instance)); // Change if Prune tree is in place for everything
+            enrichedEntry.setReferredEntities(getPhysicalEntityReferrers(instance)); // Change if Prune tree is in place for everything
 
             enrichedEntry.setInferredTo(getEntityReferences(instance, ReactomeJavaConstants.inferredTo));
             enrichedEntry.setGoMolecularComponent(getGoTerms(instance, ReactomeJavaConstants.goCellularComponent));
@@ -97,35 +97,35 @@ class PhysicalEntityAttributeEnricher {
         }
     }
 
-    private static Map<String, List<EntityReference>> getPhysicalEntityReferers(GKInstance instance) throws EnricherException {
+    private static Map<String, List<EntityReference>> getPhysicalEntityReferrers(GKInstance instance) throws EnricherException {
         try {
-            Map<String, List<EntityReference>> referers = new HashMap<>();
+            Map<String, List<EntityReference>> referrers = new HashMap<>();
 
-            List<EntityReference> entityReferences = getReferers(instance, ReactomeJavaConstants.hasComponent);
+            List<EntityReference> entityReferences = getReferrers(instance, ReactomeJavaConstants.hasComponent);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.hasComponent, entityReferences);
+                referrers.put(ReactomeJavaConstants.hasComponent, entityReferences);
             }
-            entityReferences = getReferers(instance, ReactomeJavaConstants.repeatedUnit);
+            entityReferences = getReferrers(instance, ReactomeJavaConstants.repeatedUnit);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.repeatedUnit, entityReferences);
+                referrers.put(ReactomeJavaConstants.repeatedUnit, entityReferences);
             }
-            entityReferences = getReferers(instance, ReactomeJavaConstants.hasCandidate);
+            entityReferences = getReferrers(instance, ReactomeJavaConstants.hasCandidate);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.hasCandidate, entityReferences);
+                referrers.put(ReactomeJavaConstants.hasCandidate, entityReferences);
             }
-            entityReferences = getReferers(instance, ReactomeJavaConstants.hasMember);
+            entityReferences = getReferrers(instance, ReactomeJavaConstants.hasMember);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.hasMember, entityReferences);
+                referrers.put(ReactomeJavaConstants.hasMember, entityReferences);
             }
-            entityReferences = getReferers(instance, ReactomeJavaConstants.input);
+            entityReferences = getReferrers(instance, ReactomeJavaConstants.input);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.input, entityReferences);
+                referrers.put(ReactomeJavaConstants.input, entityReferences);
             }
-            entityReferences = getReferers(instance, ReactomeJavaConstants.output);
+            entityReferences = getReferrers(instance, ReactomeJavaConstants.output);
             if (entityReferences != null) {
-                referers.put(ReactomeJavaConstants.output, entityReferences);
+                referrers.put(ReactomeJavaConstants.output, entityReferences);
             }
-            return referers;
+            return referrers;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new EnricherException(e.getMessage(), e);
@@ -206,7 +206,7 @@ class PhysicalEntityAttributeEnricher {
 
     }
 
-    private static List<EntityReference> getReferers(GKInstance instance, String fieldName) throws EnricherException {
+    private static List<EntityReference> getReferrers(GKInstance instance, String fieldName) throws EnricherException {
         if (instance != null && fieldName != null) {
             try {
                 Collection<?> collection = instance.getReferers(fieldName);
