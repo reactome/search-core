@@ -5,6 +5,8 @@ import org.gk.model.ReactomeJavaConstants;
 import org.reactome.server.tools.search.domain.CatalystActivity;
 import org.reactome.server.tools.search.domain.EnrichedEntry;
 import org.reactome.server.tools.search.exception.EnricherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,25 +17,27 @@ import java.util.List;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
-public class EventAttributeEnricher extends Enricher {
+class EventAttributeEnricher {
 
-    public void setEventAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static final Logger logger = LoggerFactory.getLogger(EventAttributeEnricher.class);
+
+    public static void setEventAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         try {
 
             if (instance.getSchemClass().isa(ReactomeJavaConstants.ReactionlikeEvent)) {
                 enrichedEntry.setCatalystActivities(getCatalystActivities(instance));
-                enrichedEntry.setInput(getEntityReferences(instance, ReactomeJavaConstants.input));
-                enrichedEntry.setOutput(getEntityReferences(instance, ReactomeJavaConstants.output));
+                enrichedEntry.setInput(EnricherUtil.getEntityReferences(instance, ReactomeJavaConstants.input));
+                enrichedEntry.setOutput(EnricherUtil.getEntityReferences(instance, ReactomeJavaConstants.output));
                 if (instance.getSchemClass().isa(ReactomeJavaConstants.Reaction)) {
-                    enrichedEntry.setReverseReaction(getEntityReference(instance, ReactomeJavaConstants.reverseReaction));
+                    enrichedEntry.setReverseReaction(EnricherUtil.getEntityReference(instance, ReactomeJavaConstants.reverseReaction));
 
                 }
             }
-            if (hasValue(instance, ReactomeJavaConstants.goBiologicalProcess)){
+            if (EnricherUtil.hasValue(instance, ReactomeJavaConstants.goBiologicalProcess)) {
                 GKInstance goBiologicalProcess = (GKInstance) instance.getAttributeValue(ReactomeJavaConstants.goBiologicalProcess);
-                enrichedEntry.setGoBiologicalProcess(getGoTerm(goBiologicalProcess));
+                enrichedEntry.setGoBiologicalProcess(EnricherUtil.getGoTerm(goBiologicalProcess));
             }
-            enrichedEntry.setRegulatedEvents(getRegulations(instance, ReactomeJavaConstants.regulatedEntity));
+            enrichedEntry.setRegulatedEvents(EnricherUtil.getRegulations(instance, ReactomeJavaConstants.regulatedEntity));
 
         } catch (Exception e) {
             logger.error("Error occurred when trying to set event attributes", e);
@@ -43,24 +47,25 @@ public class EventAttributeEnricher extends Enricher {
 
     /**
      * Returns a list of catalyst activities of a instance
+     *
      * @param instance GkInstance
      * @return List of CatalystActivities
      * @throws EnricherException
      */
-    private List<CatalystActivity> getCatalystActivities(GKInstance instance) throws EnricherException{
-        if (hasValues(instance, ReactomeJavaConstants.catalystActivity)){
+    private static List<CatalystActivity> getCatalystActivities(GKInstance instance) throws EnricherException {
+        if (EnricherUtil.hasValues(instance, ReactomeJavaConstants.catalystActivity)) {
             try {
-                List<CatalystActivity> catalystActivityList = new ArrayList<CatalystActivity>();
+                List<CatalystActivity> catalystActivityList = new ArrayList<>();
                 List<?> catalystActivityInstanceList = instance.getAttributeValuesList(ReactomeJavaConstants.catalystActivity);
 
                 for (Object catalystActivityObject : catalystActivityInstanceList) {
                     GKInstance catalystActivityInstance = (GKInstance) catalystActivityObject;
                     CatalystActivity catalystActivity = new CatalystActivity();
-                    catalystActivity.setPhysicalEntity(getEntityReference(catalystActivityInstance, ReactomeJavaConstants.physicalEntity));
-                    catalystActivity.setActiveUnit(getEntityReferences(catalystActivityInstance, ReactomeJavaConstants.activeUnit));
-                    if (hasValue(catalystActivityInstance, ReactomeJavaConstants.activity)) {
+                    catalystActivity.setPhysicalEntity(EnricherUtil.getEntityReference(catalystActivityInstance, ReactomeJavaConstants.physicalEntity));
+                    catalystActivity.setActiveUnit(EnricherUtil.getEntityReferences(catalystActivityInstance, ReactomeJavaConstants.activeUnit));
+                    if (EnricherUtil.hasValue(catalystActivityInstance, ReactomeJavaConstants.activity)) {
                         GKInstance activityInstance = (GKInstance) catalystActivityInstance.getAttributeValue(ReactomeJavaConstants.activity);
-                        catalystActivity.setActivity(getGoTerm(activityInstance));
+                        catalystActivity.setActivity(EnricherUtil.getGoTerm(activityInstance));
                     }
                     catalystActivityList.add(catalystActivity);
                 }

@@ -4,12 +4,11 @@ import org.reactome.server.tools.interactors.exception.InvalidInteractionResourc
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.service.InteractionService;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
-import org.reactome.server.tools.search.database.IEnricher;
+import org.reactome.server.tools.search.database.Enricher;
 import org.reactome.server.tools.search.domain.*;
 import org.reactome.server.tools.search.exception.EnricherException;
-import org.reactome.server.tools.search.exception.SearchServiceException;
 import org.reactome.server.tools.search.exception.SolrSearcherException;
-import org.reactome.server.tools.search.solr.ISolrConverter;
+import org.reactome.server.tools.search.solr.SolrConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,20 +30,19 @@ public class SearchService {
     private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
     @Autowired
-    private ISolrConverter solrConverter;
+    private SolrConverter solrConverter;
 
     @Autowired
     private InteractionService interactionService;
 
     @Autowired
-    private IEnricher enricher;
+    private Enricher enricher;
 
     /**
      * Constructor for Spring Dependency Injection and loading MavenProperties
-     *
-     * @throws SearchServiceException
      */
-    public SearchService(){}
+    public SearchService() {
+    }
 
     /**
      * Gets Faceting information for a specific query + filters.
@@ -153,7 +151,6 @@ public class SearchService {
         return null;
     }
 
-
     /**
      * Returns one specific Entry by DbId
      *
@@ -165,7 +162,7 @@ public class SearchService {
             EnrichedEntry enrichedEntry = enricher.enrichEntry(id);
 
             ReferenceEntity referenceEntity = enrichedEntry.getReferenceEntity();
-            if(referenceEntity != null) {
+            if (referenceEntity != null) {
                 String acc = referenceEntity.getReferenceIdentifier();
                 if (acc != null) {
                     try {
@@ -213,6 +210,5 @@ public class SearchService {
             return solrConverter.getEntries(queryObject);
         }
     }
-
 
 }

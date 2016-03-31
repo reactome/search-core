@@ -4,8 +4,12 @@ import org.gk.model.GKInstance;
 import org.gk.model.ReactomeJavaConstants;
 import org.reactome.server.tools.search.domain.*;
 import org.reactome.server.tools.search.exception.EnricherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static org.reactome.server.tools.search.database.EnricherUtil.*;
 
 /**
  * Queries the MySql database and converts entry to a local object
@@ -13,11 +17,14 @@ import java.util.*;
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
-public class PhysicalEntityAttributeEnricher extends Enricher{
+class PhysicalEntityAttributeEnricher {
+
+    private static final Logger logger = LoggerFactory.getLogger(PhysicalEntityAttributeEnricher.class);
+
 
     private static final String ENTITY_ON_OTHER_CELL = "entityOnOtherCell";
 
-    public void setPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    public static void setPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
             try {
 
@@ -40,7 +47,7 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
         }
     }
 
-    private void setGeneralPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void setGeneralPhysicalEntityAttributes(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
 
             enrichedEntry.setReferedEntities(getPhysicalEntityReferers(instance)); // Change if Prune tree is in place for everything
@@ -52,60 +59,47 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private void enrichComplex(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void enrichComplex(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
             enrichedEntry.setComponents(getEntityReferences(instance, ReactomeJavaConstants.hasComponent));
             enrichedEntry.setEntityOnOtherCell(getEntityReferences(instance, ENTITY_ON_OTHER_CELL));
         }
     }
 
-    private void enrichPolymer(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void enrichPolymer(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
             enrichedEntry.setRepeatedUnits(getEntityReferences(instance, ReactomeJavaConstants.repeatedUnit));
         }
     }
 
-    private void enrichSimpleEntity(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void enrichSimpleEntity(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
-            enrichedEntry.setReferenceEntity(getReferenceEntity(instance,enrichedEntry));
+            enrichedEntry.setReferenceEntity(getReferenceEntity(instance, enrichedEntry));
         }
     }
 
-    private void enrichEntityWithAccessionSequence(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void enrichEntityWithAccessionSequence(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
-            enrichedEntry.setReferenceEntity(getReferenceEntity(instance,enrichedEntry));
+            enrichedEntry.setReferenceEntity(getReferenceEntity(instance, enrichedEntry));
             enrichedEntry.setModifiedResidues(getModifiedResidue(instance));
         }
     }
 
-    private void enrichEntitySet(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static void enrichEntitySet(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null && enrichedEntry != null) {
 
             enrichedEntry.setMember(getEntityReferences(instance, ReactomeJavaConstants.hasMember));
             if (instance.getSchemClass().isa(ReactomeJavaConstants.CandidateSet)) {
                 enrichedEntry.setCandidates(getEntityReferences(instance, ReactomeJavaConstants.hasCandidate));
             } else if (instance.getSchemClass().isa(ReactomeJavaConstants.OpenSet)) {
-                enrichedEntry.setReferenceEntity(getReferenceEntity(instance,enrichedEntry));
+                enrichedEntry.setReferenceEntity(getReferenceEntity(instance, enrichedEntry));
             }
         }
     }
 
-    private Map<String,List<EntityReference>> getPhysicalEntityReferers( GKInstance instance) throws EnricherException {
+    private static Map<String, List<EntityReference>> getPhysicalEntityReferers(GKInstance instance) throws EnricherException {
         try {
-            Map<String, List<EntityReference>> referers = new HashMap<String, List<EntityReference>>();
+            Map<String, List<EntityReference>> referers = new HashMap<>();
 
             List<EntityReference> entityReferences = getReferers(instance, ReactomeJavaConstants.hasComponent);
             if (entityReferences != null) {
@@ -134,17 +128,17 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
             return referers;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new EnricherException(e.getMessage() , e);
+            throw new EnricherException(e.getMessage(), e);
         }
 
     }
 
-    private ReferenceEntity getReferenceEntity(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
+    private static ReferenceEntity getReferenceEntity(GKInstance instance, EnrichedEntry enrichedEntry) throws EnricherException {
         if (instance != null) {
             if (hasValue(instance, ReactomeJavaConstants.referenceEntity)) {
                 try {
                     GKInstance referenceEntityInstance = (GKInstance) instance.getAttributeValue(ReactomeJavaConstants.referenceEntity);
-                    if (enrichedEntry.getCrossReferences()==null) {
+                    if (enrichedEntry.getCrossReferences() == null) {
                         enrichedEntry.setCrossReferences(getCrossReferences(referenceEntityInstance, ReactomeJavaConstants.crossReference, null));
                     } else {
                         enrichedEntry.setCrossReferences(getCrossReferences(referenceEntityInstance, ReactomeJavaConstants.crossReference, enrichedEntry.getCrossReferences()));
@@ -172,10 +166,9 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
                                 referenceEntity.setChain(getAttributesDisplayNames(referenceEntityInstance, "chain"));
                                 referenceEntity.setReferenceTranscript(getCrossReferences(referenceEntityInstance, ReactomeJavaConstants.referenceTranscript, null));
 
-                                if (instance.getSchemClass().isa(ReactomeJavaConstants.ReferenceIsoform)) {
+//                                if (instance.getSchemClass().isa(ReactomeJavaConstants.ReferenceIsoform)) {
 //                                    referenceEntity.setIsoformParent(getCrossReferences(referenceEntityInstance, ReactomeJavaConstants.isoformParent, null));
-
-                                }
+//                                }
                             }
                         }
 
@@ -183,7 +176,7 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
                     }
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
-                    throw new EnricherException(e.getMessage() , e);
+                    throw new EnricherException(e.getMessage(), e);
                 }
             }
         }
@@ -191,14 +184,13 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
     }
 
 
-
-    private void setGeneralReferenceEntityAttributes(Long dbId, GKInstance instance, ReferenceEntity referenceEntity) throws EnricherException {
+    private static void setGeneralReferenceEntityAttributes(Long dbId, GKInstance instance, ReferenceEntity referenceEntity) throws EnricherException {
 
         List<String> names = getAttributes(instance, ReactomeJavaConstants.name);
-        if (names!= null && !names.isEmpty()) {
+        if (names != null && !names.isEmpty()) {
             if (names.size() >= 1) {
                 referenceEntity.setReferenceName(names.get(0));
-                if (names.size()>1) {
+                if (names.size() > 1) {
                     referenceEntity.setReferenceSynonyms(names.subList(1, names.size() - 1));
                 }
             } else {
@@ -209,21 +201,17 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
         referenceEntity.setOtherIdentifier(getAttributes(instance, ReactomeJavaConstants.otherIdentifier));
 
 
-
         referenceEntity.setDerivedEwas(getReferredEntityReferences(dbId, instance));
         referenceEntity.setDatabase(getDatabase(instance, referenceEntity.getReferenceIdentifier()));
 
     }
 
-
-
-
-    private List<EntityReference> getReferers(GKInstance instance, String fieldName) throws EnricherException {
-        if (instance!=null && fieldName!=null) {
+    private static List<EntityReference> getReferers(GKInstance instance, String fieldName) throws EnricherException {
+        if (instance != null && fieldName != null) {
             try {
                 Collection<?> collection = instance.getReferers(fieldName);
                 if (collection != null && !collection.isEmpty()) {
-                    List<EntityReference> entityReferences = new ArrayList<EntityReference>();
+                    List<EntityReference> entityReferences = new ArrayList<>();
                     for (Object gkInstance : collection) {
                         entityReferences.add(getEntityReferenceHelper((GKInstance) gkInstance));
                     }
@@ -231,17 +219,18 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new EnricherException(e.getMessage() , e);
+                throw new EnricherException(e.getMessage(), e);
             }
 
-        }return null;
+        }
+        return null;
     }
 
-    private List<ModifiedResidue> getModifiedResidue(GKInstance instance) throws EnricherException {
-        if(hasValues(instance, ReactomeJavaConstants.hasModifiedResidue)) {
+    private static List<ModifiedResidue> getModifiedResidue(GKInstance instance) throws EnricherException {
+        if (hasValues(instance, ReactomeJavaConstants.hasModifiedResidue)) {
             try {
                 List<?> modifiedResidueInstanceList = instance.getAttributeValuesList(ReactomeJavaConstants.hasModifiedResidue);
-                List<ModifiedResidue> modifiedResidues = new ArrayList<ModifiedResidue>();
+                List<ModifiedResidue> modifiedResidues = new ArrayList<>();
                 for (Object modifiedResidueObject : modifiedResidueInstanceList) {
                     GKInstance modifiedResidueInstance = (GKInstance) modifiedResidueObject;
                     ModifiedResidue modifiedResidue = new ModifiedResidue();
@@ -254,13 +243,13 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
                 return modifiedResidues;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new EnricherException(e.getMessage() , e);
+                throw new EnricherException(e.getMessage(), e);
             }
         }
         return null;
     }
 
-    private PsiMod getPsiMod(GKInstance instance) throws EnricherException {
+    private static PsiMod getPsiMod(GKInstance instance) throws EnricherException {
         if (hasValue(instance, ReactomeJavaConstants.psiMod)) {
             try {
                 GKInstance psiModInstance = (GKInstance) instance.getAttributeValue(ReactomeJavaConstants.psiMod);
@@ -272,11 +261,9 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
                 return psiMod;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new EnricherException(e.getMessage() , e);
+                throw new EnricherException(e.getMessage(), e);
             }
         }
         return null;
     }
-
-
 }

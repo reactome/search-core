@@ -4,6 +4,8 @@ import org.gk.model.GKInstance;
 import org.gk.model.ReactomeJavaConstants;
 import org.reactome.server.tools.search.domain.Node;
 import org.reactome.server.tools.search.exception.EnricherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -12,16 +14,20 @@ import java.util.regex.Pattern;
 /**
  * Class for Generating Trees containing all possible Links of an Entry to the Pathway Browser
  * 22 October 2015
+ *
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @author Guilherme Viteri  - gviteri@ebi.ac.uk
  * @version 1.1
  */
-public class PathwayBrowserTreeGenerator extends Enricher {
+class PathwayBrowserTreeGenerator {
+
+    private static final Logger logger = LoggerFactory.getLogger(PathwayBrowserTreeGenerator.class);
+
 
     /**
      * Lookup map used for generating the initial Graph
      */
-    private Map<String, Node> nodeMap = new HashMap<>();
+    private final Map<String, Node> nodeMap = new HashMap<>();
 
     private static final String PATHWAY_BROWSER_URL = "/PathwayBrowser/#/";
     private static final String SEL = "&amp;SEL=";
@@ -30,6 +36,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
     /**
      * Main method for generating a Graph representing the different locations of an Entry in the Pathway Browser
      * This Graph will be used to generate multiple Trees where roots represent Top level pathways
+     *
      * @param instance GKInstance
      * @return Set of Trees, each root represents a TopLevelPathway
      * @throws Exception
@@ -43,7 +50,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
          * we are using the Regulator as the entry point for generating the graph.
          * Nevertheless the first step of the recursion will only go to Regulations.
          */
-        if(instance.getSchemClass().isa(ReactomeJavaConstants.Regulation)) {
+        if (instance.getSchemClass().isa(ReactomeJavaConstants.Regulation)) {
             GKInstance regulator = (GKInstance) instance.getAttributeValue(ReactomeJavaConstants.regulator);
             graph = createNodeFromInstance(regulator);
             skipNodes(regulator, graph, ReactomeJavaConstants.regulator);
@@ -52,7 +59,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
             recursion(instance, graph);
         }
 
-        Set<String> topLevelPathways = loadFrontPage();
+        Set<String> topLevelPathways = Enricher.loadFrontPage();
 
         /**
          * At this point the tree is upside down, so the leaves are the top-level pathway
@@ -64,14 +71,14 @@ public class PathwayBrowserTreeGenerator extends Enricher {
         Pattern p = Pattern.compile("([0-9]+)");
 
         /**
-         * Using Iteratior in order to avoid ConcurrentModificationException in the Set.
+         * Using Iterator in order to avoid ConcurrentModificationException in the Set.
          */
         Iterator<Node> it = leaves.iterator();
         while (it.hasNext()) {
             Node top = it.next();
             Matcher m = p.matcher(top.getStId());
             if (m.find()) {
-                if(!topLevelPathways.contains(m.group(1))) {
+                if (!topLevelPathways.contains(m.group(1))) {
                     it.remove();
                 }
             }
@@ -82,8 +89,9 @@ public class PathwayBrowserTreeGenerator extends Enricher {
 
     /**
      * Recursion through all possible referrers of this entry
+     *
      * @param instance GKInstance
-     * @param node current Node
+     * @param node     current Node
      * @throws EnricherException
      */
     private void recursion(GKInstance instance, Node node) throws EnricherException {
@@ -108,9 +116,8 @@ public class PathwayBrowserTreeGenerator extends Enricher {
     }
 
     /**
-     *
-     * @param instance GKInstance
-     * @param node current Node
+     * @param instance  GKInstance
+     * @param node      current Node
      * @param fieldName ReactomeJavaConstant
      * @throws Exception
      */
@@ -128,14 +135,14 @@ public class PathwayBrowserTreeGenerator extends Enricher {
     }
 
     /**
-     *
-     * @param instance GKInstance
-     * @param node current Node
+     * @param instance  GKInstance
+     * @param node      current Node
      * @param fieldName ReactomeJavaConstant
      * @throws Exception
      */
+    @SuppressWarnings("SameParameterValue")
     private void nodeFromAttributes(GKInstance instance, Node node, String fieldName) throws Exception {
-        if (hasValues(instance, fieldName)) {
+        if (EnricherUtil.hasValues(instance, fieldName)) {
             GKInstance regulatedEntityInstance = (GKInstance) instance.getAttributeValue(fieldName);
             if (regulatedEntityInstance != null) {
                 if (regulatedEntityInstance.getSchemClass().isa(ReactomeJavaConstants.CatalystActivity)) { // skip catalyst activity
@@ -153,8 +160,9 @@ public class PathwayBrowserTreeGenerator extends Enricher {
     /**
      * Node will not be added to the Graph, a Entity "Regulation" does not represent a viewable item in the Pathway Browser.
      * Nevertheless Regulations can contain "regulated Entities" (Events) that can be shown in the Pathway Browser
-     * @param instance GKInstance
-     * @param node current Node
+     *
+     * @param instance  GKInstance
+     * @param node      current Node
      * @param fieldName ReactomeJavaConstant
      * @throws Exception
      */
@@ -171,12 +179,13 @@ public class PathwayBrowserTreeGenerator extends Enricher {
     /**
      * If a Node is not already present in the Graph (checked with the NodeMap) it will be Created from the GKInstance
      * Otherwise the old Node will be returned
+     *
      * @param instance GKInstance
      * @return Node
      * @throws Exception
      */
     private Node getOrCreateNode(GKInstance instance) throws Exception {
-        Node node = nodeMap.get(getStableIdentifier(instance));
+        Node node = nodeMap.get(EnricherUtil.getStableIdentifier(instance));
         if (node == null) {
             node = createNodeFromInstance(instance);
             nodeMap.put(node.getStId(), node);
@@ -186,21 +195,21 @@ public class PathwayBrowserTreeGenerator extends Enricher {
 
     private Node createNodeFromInstance(GKInstance instance) throws Exception {
         Node node = new Node();
-        node.setStId(getStableIdentifier(instance));
+        node.setStId(EnricherUtil.getStableIdentifier(instance));
         node.setName(instance.getDisplayName());
         node.setType(instance.getSchemClass().getName());
-        node.setSpecies(getAttributeDisplayName(instance, ReactomeJavaConstants.species));
-        node.setDiagram(hasDiagram(instance.getDBID()));
+        node.setSpecies(EnricherUtil.getAttributeDisplayName(instance, ReactomeJavaConstants.species));
+        node.setDiagram(Enricher.hasDiagram(instance.getDBID()));
         return node;
     }
 
     /**
      * Rotating the graph using the leaves as roots of individual trees
+     *
      * @param leaves of the Graph represent the TopLevelPathways in Reactome
      * @return a Set of Trees, where each Tree Root is a different TopLevelPathway
-     * @throws EnricherException
      */
-    private Set<Node> buildTreesFromLeaves(Set<Node> leaves) throws EnricherException {
+    private Set<Node> buildTreesFromLeaves(Set<Node> leaves) {
         Set<Node> topLvlTrees = new TreeSet<>();
         for (Node leaf : leaves) {
             Node tree = getTreeFromGraphLeaf(leaf, "", "", "", "");
@@ -219,11 +228,12 @@ public class PathwayBrowserTreeGenerator extends Enricher {
      * Url linking to the Pathway browser will be set
      * URL consists of 3 Attributes PATH, SEL, MAIN
      * MAIN = main URL parameter (required)
-     * @param leaf of the Graph represent the TopLevelPathways in Reactome
-     * @param sel URL parameter to select Reactions or Physical Entities (optional)
-     * @param path URL parameter to identify a unique "Path" to this entry
-     * @param shortPath URL parameter to identify a unique "Path" to this entry
-     * @param lastNodeWithDiagram  saves STID of the Last Pathway in the Diagram
+     *
+     * @param leaf                of the Graph represent the TopLevelPathways in Reactome
+     * @param sel                 URL parameter to select Reactions or Physical Entities (optional)
+     * @param path                URL parameter to identify a unique "Path" to this entry
+     * @param shortPath           URL parameter to identify a unique "Path" to this entry
+     * @param lastNodeWithDiagram saves STID of the Last Pathway in the Diagram
      * @return generated Tree
      */
     private Node getTreeFromGraphLeaf(Node leaf, String sel, String path, String shortPath, String lastNodeWithDiagram) {
@@ -239,7 +249,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
 
         /*Setting main Url attributes*/
         String main;
-        if (isPathway){
+        if (isPathway) {
             main = leaf.getStId();
         } else {
             sel = leaf.getStId();
@@ -248,7 +258,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
 
         /*Check if Pathway is a unique pathway*/
         Set<Node> children = leaf.getChildren();
-        if(isPathway) {
+        if (isPathway) {
             if (children == null) {
                 leaf.setUnique(true);
             } else if (children.size() == 1) {
@@ -261,7 +271,7 @@ public class PathwayBrowserTreeGenerator extends Enricher {
         /*Building the Url for the current entry*/
         StringBuilder url = new StringBuilder();
         url.append(PATHWAY_BROWSER_URL);
-        if (leaf.isUnique()){
+        if (leaf.isUnique()) {
             url.append(leaf.getStId());
         } else {
             url.append(main);
@@ -292,9 +302,9 @@ public class PathwayBrowserTreeGenerator extends Enricher {
         if (isPathway) {
             if (hasDiagram) {
                 if (shortPath.isEmpty()) {
-                    shortPath +=  lastNodeWithDiagram;
+                    shortPath += lastNodeWithDiagram;
                 } else {
-                    shortPath+="," + lastNodeWithDiagram;
+                    shortPath += "," + lastNodeWithDiagram;
                 }
             } else {
                 if (path.isEmpty()) {
@@ -304,17 +314,18 @@ public class PathwayBrowserTreeGenerator extends Enricher {
                 }
             }
         }
-        if (hasDiagram){
+        if (hasDiagram) {
             lastNodeWithDiagram = leaf.getStId();
         }
 
         /*Continue in the recursion */
         Set<Node> parents = leaf.getParent();
-        if (parents!=null) {
+        if (parents != null) {
             for (Node node : parents) {
                 tree.addChild(getTreeFromGraphLeaf(node, sel, path, shortPath, lastNodeWithDiagram));
             }
         }
         return tree;
     }
+
 }
