@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.reactome.base</groupId>
             <artifactId>reactome-base</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.4</version>
         </dependency>
 
         <!-- Solr 5.3.1 -->
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>org.reactome.server.tools</groupId>
             <artifactId>interactor-core</artifactId>
-            <version>0.0.10-SNAPSHOT</version>
+            <version>0.0.9-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

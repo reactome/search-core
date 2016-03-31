@@ -210,7 +210,7 @@ public class PhysicalEntityAttributeEnricher extends Enricher{
 
 
 
-        referenceEntity.setDerivedEwas(getReferedEntityReferences(dbId, instance));
+        referenceEntity.setDerivedEwas(getReferredEntityReferences(dbId, instance));
         referenceEntity.setDatabase(getDatabase(instance, referenceEntity.getReferenceIdentifier()));
 
     }

@@ -4,7 +4,6 @@ import org.reactome.server.tools.interactors.exception.InvalidInteractionResourc
 import org.reactome.server.tools.interactors.model.Interaction;
 import org.reactome.server.tools.interactors.service.InteractionService;
 import org.reactome.server.tools.interactors.util.InteractorConstant;
-import org.reactome.server.tools.search.database.Enricher;
 import org.reactome.server.tools.search.database.IEnricher;
 import org.reactome.server.tools.search.domain.*;
 import org.reactome.server.tools.search.exception.EnricherException;
@@ -14,16 +13,12 @@ import org.reactome.server.tools.search.solr.ISolrConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Search Service acts as api between the Controller and Solr / Database
@@ -38,30 +33,11 @@ public class SearchService {
     @Autowired
     private ISolrConverter solrConverter;
 
-    @Value("${database_host}")
-    private  String host;
-    @Value("${database_name}")
-    private  String database;
-    @Value("${database_currentDatabase}")
-    private  String currentDatabase;
-    @Value("${database_user}")
-    private  String user;
-    @Value("${database_password}")
-    private  String password;
-    @Value("${database_port}")
-    private  Integer port;
-
     @Autowired
-//    @Qualifier(value = "interactionService")
     private InteractionService interactionService;
 
-
-//    @Autowired(required = false)
-//    public void setInteractionService(InteractionService interactionService) {
-//        this.interactionService = interactionService;
-//    }
-
-
+    @Autowired
+    private IEnricher enricher;
 
     /**
      * Constructor for Spring Dependency Injection and loading MavenProperties
@@ -186,7 +162,6 @@ public class SearchService {
      */
     public EnrichedEntry getEntryById(String id) throws EnricherException, SolrSearcherException {
         if (id != null && !id.isEmpty()) {
-            IEnricher enricher = new Enricher(host, currentDatabase, user, password, port);
             EnrichedEntry enrichedEntry = enricher.enrichEntry(id);
 
             ReferenceEntity referenceEntity = enrichedEntry.getReferenceEntity();
@@ -217,7 +192,6 @@ public class SearchService {
      */
     public EnrichedEntry getEntryById(Integer version, String id) throws EnricherException, SolrSearcherException {
         if (id != null && !id.isEmpty()) {
-            IEnricher enricher = new Enricher(host, database + version, user, password, port);
             return enricher.enrichEntry(id);
         }
         return null;

@@ -7,6 +7,7 @@ import org.reactome.server.tools.search.domain.*;
 import org.reactome.server.tools.search.exception.EnricherException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -23,17 +24,17 @@ public class Enricher implements IEnricher  {
     private static MySQLAdaptor dba;
     protected static final Logger logger = LoggerFactory.getLogger(Enricher.class);
 
-    /**
-     * Constructor to make this class expandable
-     */
-    public Enricher() {}
 
     /**
      * Constructor that sets up a database connection
      * @param host,database,user,password,port parameters to set up connection
      * @throws EnricherException
      */
-    public Enricher(String host, String database, String user, String password, Integer port) throws EnricherException {
+    public Enricher(@Value("${database_host}")String host,
+                    @Value("${database_name}")String database,
+                    @Value("${database_user}")String user,
+                    @Value("${database_password}")String password,
+                    @Value("${database_port}")Integer port) throws EnricherException {
         try {
             dba = new MySQLAdaptor(host,database, user, password, port);
         } catch (SQLException e) {
@@ -198,7 +199,7 @@ public class Enricher implements IEnricher  {
      * @return list of entityReference
      * @throws EnricherException
      */
-    protected List<EntityReference> getReferedEntityReferences(Long dbID, GKInstance instance) throws EnricherException {
+    protected List<EntityReference> getReferredEntityReferences(Long dbID, GKInstance instance) throws EnricherException {
 
         try {
             Collection<?> derivedInstanceList = instance.getReferers(ReactomeJavaConstants.referenceEntity);
