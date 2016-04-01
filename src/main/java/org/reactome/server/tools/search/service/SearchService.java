@@ -47,6 +47,29 @@ public class SearchService {
     }
 
     /**
+     * This method is a simple aggregation of service methods used in the Content project
+     * @param query QueryObject
+     * @param rowCount number of rows displayed in one page
+     * @param page page number
+     * @param cluster clustered or not clustered result
+     * @return Grouped result
+     * @throws SolrSearcherException
+     */
+    public SearchResult getSearchResult (Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
+        FacetMapping facetMapping = getFacetingInformation(query);
+        if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
+            query = new Query(query.getQuery(),null,null,null,null);
+            facetMapping = getFacetingInformation(query);
+        }
+        if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
+            setPagingParameters(query,facetMapping,rowCount,page,cluster);
+            GroupedResult groupedResult = getEntries(query, cluster);
+            return new SearchResult(facetMapping,groupedResult,getHighestResultCount(groupedResult),query.getRows());
+        }
+        return null;
+    }
+
+    /**
      * Gets Faceting information for a specific query + filters.
      * This Method will query solr once again if the number of selected filters and found facets differ
      * (this will help preventing false faceting information when filter are contradictory to each other)
@@ -202,4 +225,36 @@ public class SearchService {
         }
     }
 
+    private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {
+        Integer typeCount;
+        if (query.getTypes() != null) {
+            typeCount = query.getTypes().size();
+        } else {
+            typeCount =  facetMapping.getTypeFacet().getAvailable().size();
+        }
+        if (typeCount != 0) {
+            Integer rows = rowCount;
+            if (cluster) {
+                rows = rowCount / typeCount;
+            }
+            query.setStart(rows * (page - 1));
+            query.setRows(rows);
+        }
+    }
+
+    /**
+     * Returns the highest result number for the different groups
+     *
+     * @param groupedResult result set
+     * @return double highest result number
+     */
+    private double getHighestResultCount(GroupedResult groupedResult) {
+        double max = 0;
+        for (Result result : groupedResult.getResults()) {
+            if (max < result.getEntriesCount()) {
+                max = result.getEntriesCount();
+            }
+        }
+        return max;
+    }
 }
