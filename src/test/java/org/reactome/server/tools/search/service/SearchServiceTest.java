@@ -50,7 +50,7 @@ public class SearchServiceTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         assumeTrue(searchService.ping());
     }
 

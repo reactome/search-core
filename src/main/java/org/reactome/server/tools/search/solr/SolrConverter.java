@@ -145,26 +145,6 @@ public class SolrConverter {
         return null;
     }
 
-
-//    /**
-//     * Converts single SolrResponseEntry to Object Entry (Model)
-//     *
-//     * @param id can be dbId of stId
-//     * @return Entry Object
-//     * @throws org.reactome.server.tools.search.exception.SolrSearcherException
-//     */
-//    public Entry getEntryById(String id) throws SolrSearcherException {
-//        if (id != null && !id.isEmpty()) {
-//            QueryResponse response = solrCore.searchById(id);
-//            List<SolrDocument> solrDocuments = response.getResults();
-//            if (solrDocuments != null && !solrDocuments.isEmpty() && solrDocuments.get(0) != null) {
-//                return buildEntry(solrDocuments.get(0), null);
-//            }
-//        }
-//        logger.warn("no Entry found for this id" + id);
-//        return null;
-//    }
-
     /**
      * Converts Solr QueryResponse to GroupedResult
      *
@@ -519,12 +499,4 @@ public class SolrConverter {
         }
         return null;
     }
-
-//    public SolrCore getSolrCore() {
-//        return solrCore;
-//    }
-//
-//    public void setSolrCore(SolrCore solrCore) {
-//        this.solrCore = solrCore;
-//    }
 }

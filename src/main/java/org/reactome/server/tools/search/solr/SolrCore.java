@@ -40,7 +40,6 @@ class SolrCore {
     private final SolrClient solrClient;
     private final static Logger logger = Logger.getRootLogger();
 
-    //    private final static String DEFAULT_REQUEST_HANDLER     =  "/select";
     private final static String SEARCH_REQUEST_HANDLER = "/search";
     private final static String CLUSTERED_REQUEST_HANDLER = "/browse";
     private final static String SUGGEST_REQUEST_HANDLER = "/suggest";
@@ -64,9 +63,6 @@ class SolrCore {
     private final static String KEYWORD_TAG = "{!tag=kf}";
     private final static String COMPARTMENT_TAG = "{!tag=cf}";
 
-    //    private final static String DB_ID                       =  "dbId";
-//    private final static String ST_ID                       =  "stId";
-//    private final static String OLD_ST_ID                   =  "oldStId";
     private final static String ALL_FIELDS = "*:*";
 
     /**
@@ -187,21 +183,6 @@ class SolrCore {
         return querysolrClient(parameters);
     }
 
-//    /**
-//     * Queries Solr Server for a single given for given id
-//     * @param id can be dbId of stId
-//     * @return QueryResponse
-//     * @throws org.reactome.server.tools.search.exception.SolrSearcherException
-//     */
-//    public QueryResponse searchById(String id) throws SolrSearcherException {
-//        SolrQuery solrQuery = new SolrQuery();
-//        solrQuery.setRequestHandler(DEFAULT_REQUEST_HANDLER);
-//        solrQuery.setStart(0);
-//        solrQuery.setRows(1);
-//        solrQuery.setQuery(DB_ID + ":" + id + " OR " + ST_ID + ":" + id + " OR " + OLD_ST_ID + ":" + id);
-//        return querysolrClient(solrQuery);
-//    }
-
     /**
      * Method for autocompletion
      * Properties (eg number of suggestions returned are set in the solrconfig.xml)
@@ -314,13 +295,4 @@ class SolrCore {
         }
     }
 
-
-//    /**
-//     * Shutdown only closes the connection to Solr
-//     * never used
-//     */
-//    private void closesolrClient() {
-//        solrClient.shutdown();
-//        logger.info("solrClient shutdown");
-//    }
 }
