@@ -145,10 +145,12 @@ public class SearchService {
     public InteractorEntry getInteractionDetail(String query) throws SolrSearcherException {
         if (query != null && !query.isEmpty()) {
             InteractorEntry entry = solrConverter.getInteractionDetail(query);
-            Collections.sort(entry.getInteractions());
-            Collections.reverse(entry.getInteractions());
+            if (entry != null) {
+                Collections.sort(entry.getInteractions());
+                Collections.reverse(entry.getInteractions());
 
-            return entry;
+                return entry;
+            }
         }
         return null;
     }

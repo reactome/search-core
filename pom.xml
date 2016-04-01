@@ -96,7 +96,7 @@
                 <version>2.16</version>
                 <configuration>
                     <includes>
-                        <include>**/*Tests.java</include>
+                        <include>**/*Test.java</include>
                     </includes>
                 </configuration>
             </plugin>

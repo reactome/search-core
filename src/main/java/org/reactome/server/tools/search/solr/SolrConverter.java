@@ -141,7 +141,7 @@ public class SolrConverter {
             }
         }
 
-        logger.warn("no Entry found for this id" + accession);
+        logger.warn("No Entry found for this id: " + accession);
         return null;
     }
 
