@@ -54,6 +54,15 @@ public class SolrConverter {
     private static final String REGULATOR_ID = "regulatorId";
     private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
 
+
+    /**
+     * Method for testing if a connection to Solr can be established
+     * @return true if status is ok
+     */
+    public boolean ping() {
+        return solrCore.ping();
+    }
+
     /**
      * Method for autocompletion
      *

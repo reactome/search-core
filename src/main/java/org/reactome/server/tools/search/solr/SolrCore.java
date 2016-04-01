@@ -15,6 +15,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.common.util.NamedList;
 import org.reactome.server.tools.search.domain.Query;
 import org.reactome.server.tools.search.exception.SolrSearcherException;
 import org.reactome.server.tools.search.util.PreemptiveAuthInterceptor;
@@ -93,6 +95,22 @@ class SolrCore {
             solrClient = new HttpSolrClient(url);
         }
         logger.info("solrClient initialized");
+    }
+
+    /**
+     * Method for testing if a connection to Solr can be established
+     * @return true if status is ok
+     */
+    boolean ping() {
+        try {
+            SolrPingResponse ping = solrClient.ping();
+            NamedList response = ping.getResponse();
+            String status = (String) response.get("status");
+            if (status.equals("OK")) return true;
+        } catch (SolrServerException|IOException e) {
+            logger.error("Connection to Solr could not be established");
+        }
+        return false;
     }
 
     /**
@@ -257,6 +275,8 @@ class SolrCore {
         return querysolrClient(parameters);
     }
 
+
+
     /**
      * Helper Method to construct the filter that is sent to Solr
      *
@@ -293,6 +313,7 @@ class SolrCore {
             throw new SolrSearcherException("Solr exception occurred with query: " + query, e);
         }
     }
+
 
 //    /**
 //     * Shutdown only closes the connection to Solr

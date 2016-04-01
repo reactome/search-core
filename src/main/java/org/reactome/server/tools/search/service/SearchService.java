@@ -39,6 +39,14 @@ public class SearchService {
     private Enricher enricher;
 
     /**
+     * Method for testing if a connection to Solr can be established
+     * @return true if status is ok
+     */
+    public Boolean ping() {
+        return solrConverter.ping();
+    }
+
+    /**
      * Gets Faceting information for a specific query + filters.
      * This Method will query solr once again if the number of selected filters and found facets differ
      * (this will help preventing false faceting information when filter are contradictory to each other)

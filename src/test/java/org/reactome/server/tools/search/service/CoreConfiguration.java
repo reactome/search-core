@@ -21,9 +21,7 @@ import java.sql.SQLException;
 @Configuration
 @ComponentScan(basePackages = "org.reactome.server.tools")
 @EnableAspectJAutoProxy
-//@AnnotationDrivenConfig
 public class CoreConfiguration {
-
 
     @Bean
     PropertyPlaceholderConfigurer propConfig() {
@@ -31,11 +29,7 @@ public class CoreConfiguration {
         ppc.setLocation(new ClassPathResource("reactome.properties"));
         return ppc;
     }
-//
-//    @Bean
-//    public InteractorsDatabase interactorsDatabase() throws SQLException {
-//        return new InteractorsDatabase("/home/flo/interactors.db");
-//    }
+
     @Bean
     public InteractionService interactionService(@Value("${interactors.static.db}") String db) throws SQLException {
         return new InteractionService(new InteractorsDatabase(db));
