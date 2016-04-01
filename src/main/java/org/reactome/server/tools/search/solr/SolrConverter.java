@@ -273,6 +273,7 @@ public class SolrConverter {
 
         if (queryResponse != null && queryResponse.getFacetFields() != null && !queryResponse.getFacetFields().isEmpty()) {
             FacetMapping facetMapping = new FacetMapping();
+            facetMapping.setTotalNumFount(queryResponse.getResults().getNumFound());
             List<FacetField> facetFields = queryResponse.getFacetFields();
             for (FacetField facetField : facetFields) {
                 List<FacetContainer> available = new ArrayList<>();

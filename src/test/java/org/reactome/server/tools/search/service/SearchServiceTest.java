@@ -13,9 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -34,9 +35,10 @@ public class SearchServiceTest {
     private static final Logger logger = LoggerFactory.getLogger("testLogger");
 
     private static Query query;
-    private static final String detail = "R-HSA-199420";
+    private static final String stId = "R-HSA-199420";
     private static final String accession = "P60484";
     private static final String suggest = "apoptos";
+    private static final String spellcheck = "appoptosis";
 
     @Autowired
     private SearchService searchService;
@@ -67,25 +69,28 @@ public class SearchServiceTest {
     @Test
     public void testGetFacetingInformation() throws SolrSearcherException {
         FacetMapping facetMapping = searchService.getFacetingInformation(query);
-        System.out.println();
+        assertTrue(309 <= facetMapping.getTotalNumFount());
     }
 
     @Test
     public void testGetTotalFacetingInformation() throws SolrSearcherException {
         FacetMapping facetMapping = searchService.getTotalFacetingInformation();
-        System.out.println();
+        assertTrue(471389 <= facetMapping.getTotalNumFount());
     }
 
     @Test
     public void testGetAutocompleteSuggestions() throws SolrSearcherException {
-        List<String> suggestions = searchService.getAutocompleteSuggestions(suggest);
-        System.out.println();
+        List<String> suggestionsList = searchService.getAutocompleteSuggestions(suggest);
+        Set suggestions = new HashSet((Collection) suggestionsList);
+        assertTrue(3 <= suggestions.size());
+        assertTrue(suggestions.contains("apoptosis"));
     }
 
     @Test
     public void testGetSpellcheckSuggestions() throws SolrSearcherException {
-        List<String> suggestions = searchService.getSpellcheckSuggestions(suggest);
-        System.out.println();
+        List<String> suggestionsList = searchService.getSpellcheckSuggestions(spellcheck);
+        Set suggestions = new HashSet((Collection) suggestionsList);
+        assertTrue(suggestions.contains("apoptosis"));
     }
 
     @Test
@@ -96,14 +101,15 @@ public class SearchServiceTest {
 
     @Test
     public void testGetEntryById() {
-        Entry entry = searchService.getEntryById(detail);
-        System.out.println();
+        Entry entry = searchService.getEntryById(stId);
+        assertEquals("PTEN", entry.getName());
     }
 
     @Test
     public void testGetEntries() throws SolrSearcherException {
         GroupedResult groupedResult = searchService.getEntries(query,true);
-        System.out.println();
+        assertEquals(2, groupedResult.getNumberOfGroups());
+        assertTrue(309 <= groupedResult.getNumberOfMatches());
     }
 
 
