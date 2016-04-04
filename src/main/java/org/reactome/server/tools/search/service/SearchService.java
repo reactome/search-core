@@ -187,22 +187,23 @@ public class SearchService {
     public EnrichedEntry getEntryById(String id) {
         if (id != null && !id.isEmpty()) {
             EnrichedEntry enrichedEntry = enricher.enrichEntry(id);
+            if (enrichedEntry != null) {
+                ReferenceEntity referenceEntity = enrichedEntry.getReferenceEntity();
+                if (referenceEntity != null) {
+                    String acc = referenceEntity.getReferenceIdentifier();
+                    if (acc != null) {
+                        try {
+                            List<Interaction> interactionsList = interactionService.getInteractions(acc, InteractorConstant.STATIC);
 
-            ReferenceEntity referenceEntity = enrichedEntry.getReferenceEntity();
-            if (referenceEntity != null) {
-                String acc = referenceEntity.getReferenceIdentifier();
-                if (acc != null) {
-                    try {
-                        List<Interaction> interactionsList = interactionService.getInteractions(acc, InteractorConstant.STATIC);
+                            enrichedEntry.setInteractionList(interactionsList);
 
-                        enrichedEntry.setInteractionList(interactionsList);
-
-                    } catch (InvalidInteractionResourceException | SQLException e) {
-                        logger.error("Error retrieving interactions from Database");
+                        } catch (InvalidInteractionResourceException | SQLException e) {
+                            logger.error("Error retrieving interactions from Database");
+                        }
                     }
                 }
+                return enrichedEntry;
             }
-            return enrichedEntry;
         }
 
         return null;
