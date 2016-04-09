@@ -6,10 +6,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -20,6 +17,8 @@ import org.apache.solr.common.util.NamedList;
 import org.reactome.server.tools.search.domain.Query;
 import org.reactome.server.tools.search.exception.SolrSearcherException;
 import org.reactome.server.tools.search.util.PreemptiveAuthInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,8 +36,9 @@ import java.util.List;
 @Component
 class SolrCore {
 
+    private final static Logger logger = LoggerFactory.getLogger("");
+
     private final SolrClient solrClient;
-    private final static Logger logger = Logger.getRootLogger();
 
     private final static String SEARCH_REQUEST_HANDLER = "/search";
     private final static String CLUSTERED_REQUEST_HANDLER = "/browse";
@@ -76,9 +76,6 @@ class SolrCore {
     public SolrCore(@Value("${solr_url}") String url,
                     @Value("${solr_user}") String user,
                     @Value("${solr_password}") String password) {
-
-        logger.setLevel(Level.INFO);
-        logger.addAppender(new ConsoleAppender(new PatternLayout("%-6r [%p] %c - %m%n")));
 
         if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
             HttpClientBuilder builder = HttpClientBuilder.create().addInterceptorFirst(new PreemptiveAuthInterceptor());

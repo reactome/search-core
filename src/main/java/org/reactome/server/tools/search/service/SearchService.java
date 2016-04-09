@@ -27,7 +27,8 @@ import java.util.List;
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Service
 public class SearchService {
-    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+
+    private final static Logger logger = LoggerFactory.getLogger("");
 
     @Autowired
     private SolrConverter solrConverter;

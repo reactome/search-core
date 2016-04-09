@@ -23,7 +23,7 @@ import java.util.*;
 @Component
 public class SolrConverter {
 
-    private static final Logger logger = LoggerFactory.getLogger(SolrConverter.class);
+    private final static Logger logger = LoggerFactory.getLogger("");
 
     @Autowired
     private SolrCore solrCore;

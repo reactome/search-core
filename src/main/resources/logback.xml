@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress XmlUnboundNsPrefix -->
+<!--Logback official documentation:
+        The syntax of logback configuration files is extremely flexible.
+        As such, it is not possible to specify the allowed syntax with a DTD file or an XML schema.-->
+<!--todo ${log4j.level}-->
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="importFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./target/data-import-logging/data-import-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <maxHistory>-1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">-->
+        <!--<smtpHost>${smtpHost}</smtpHost>-->
+        <!--<to>${to}</to>-->
+        <!--<from>${from}</from>-->
+        <!--<subject>%logger{20} - %m</subject>-->
+        <!--<layout class="ch.qos.logback.classic.html.HTMLLayout"/>-->
+
+        <!--<cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">-->
+            <!--&lt;!&ndash; send just one log entry per email &ndash;&gt;-->
+            <!--<bufferSize>1</bufferSize>-->
+        <!--</cyclicBufferTracker>-->
+    <!--</appender>-->
+
+
+    <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+        <smtpHost>localhost</smtpHost>
+        <smtpPort>9999</smtpPort>
+
+        <to>fkorninger@yahoo.de</to>
+        <!--<from>${from}</from>-->
+        <subject>%logger{20} - %m</subject>
+        <layout class="ch.qos.logback.classic.html.HTMLLayout"/>
+
+        <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+            <!-- send just one log entry per email -->
+            <bufferSize>10</bufferSize>
+        </cyclicBufferTracker>
+    </appender>
+
+
+    <!--<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">-->
+        <!--<smtpHost>ADDRESS-OF-YOUR-SMTP-HOST</smtpHost>-->
+        <!--<to>EMAIL-DESTINATION</to>-->
+        <!--<to>ANOTHER_EMAIL_DESTINATION</to> &lt;!&ndash; additional destinations are possible &ndash;&gt;-->
+        <!--<from>SENDER-EMAIL</from>-->
+        <!--<subject>TESTING: %logger{20} - %m</subject>-->
+        <!--<layout class="ch.qos.logback.classic.PatternLayout">-->
+            <!--<pattern>%date %-5level %logger{35} - %message%n</pattern>-->
+        <!--</layout>-->
+    <!--</appender>-->
+
+
+    <!--<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <!--<file>mylog.txt</file>-->
+    <!--<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+        <!--&lt;!&ndash; rollover daily &ndash;&gt;-->
+        <!--<fileNamePattern>mylog-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>-->
+        <!--&lt;!&ndash; each file should be at most 100MB, keep 60 days worth of history, but at most 20GB &ndash;&gt;-->
+        <!--<maxFileSize>100MB</maxFileSize>-->
+        <!--<maxHistory>60</maxHistory>-->
+        <!--<totalSizeCap>20GB</totalSizeCap>-->
+    <!--</rollingPolicy>-->
+
+
+
+
+    <appender name="testFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./target/test-logging/service-test-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <maxHistory>-1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="importLogger" level="WARN" additivity="false">
+        <appender-ref ref="importFileAppender"/>
+    </logger>
+
+    <logger name="testLogger" level="INFO" additivity="false">
+        <appender-ref ref="testFile"/>
+    </logger>
+
+
+    <logger name="ee" level="INFO" >
+        <appender-ref ref="EMAIL"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.reactome.server.tools.search.domain.*;
 import org.reactome.server.tools.search.exception.SolrSearcherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -30,6 +32,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SearchServiceTest {
 
+    private final static Logger logger = LoggerFactory.getLogger("ee");
+
     private static Query query;
     private static final String stId = "R-HSA-199420";
     private static final String accession = "P41227";
@@ -52,6 +56,15 @@ public class SearchServiceTest {
     @Before
     public void setUp() {
         assumeTrue(searchService.ping());
+    }
+
+    @Test
+    public void test() {
+        System.out.println("");
+        for (int i = 0; i < 100; i++) {
+            System.out.println("xx" + i);
+            logger.warn("some warning " + i);
+        }
     }
 
     @Test
