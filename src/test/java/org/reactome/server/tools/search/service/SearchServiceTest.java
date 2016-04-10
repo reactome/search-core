@@ -63,7 +63,7 @@ public class SearchServiceTest {
         System.out.println("");
         for (int i = 0; i < 100; i++) {
             System.out.println("xx" + i);
-            logger.warn("some warning " + i);
+            logger.error("some warning " + i);
         }
     }
 
