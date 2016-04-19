@@ -227,6 +227,18 @@ public class SearchService {
         }
     }
 
+    /**
+     * This Method is used for providing results for the SearchOnFire feature in the PathwaysOverview
+     *
+     * @param queryObject QueryObject (query, species, types, keywords, compartments, start, rows)
+     *                    start specifies the starting point (offset) and rows the amount of entries returned in total
+     * @return FireworksResult
+     * @throws SolrSearcherException
+     */
+    public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
+        return solrConverter.getFireworksResult(queryObject);
+    }
+
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {
         Integer typeCount;
         if (query.getTypes() != null) {
