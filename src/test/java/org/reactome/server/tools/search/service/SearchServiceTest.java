@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
@@ -32,7 +29,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SearchServiceTest {
 
-    private final static Logger logger = LoggerFactory.getLogger("ee");
+    private final static Logger logger = LoggerFactory.getLogger(SearchServiceTest.class);
 
     private static Query query;
     private static final String stId = "R-HSA-199420";
@@ -56,15 +53,6 @@ public class SearchServiceTest {
     @Before
     public void setUp() {
         assumeTrue(searchService.ping());
-    }
-
-    @Test
-    public void test() {
-        System.out.println("");
-        for (int i = 0; i < 100; i++) {
-            System.out.println("xx" + i);
-            logger.error("some warning " + i);
-        }
     }
 
     @Test
@@ -115,5 +103,11 @@ public class SearchServiceTest {
         assertTrue(309 <= groupedResult.getNumberOfMatches());
     }
 
+    @Test
+    public void testFireworks() throws SolrSearcherException {
+        Query query = new Query("PTEN", Collections.singletonList("Homo sapiens"), Collections.singletonList("Protein"), null, null);
+        FireworksResult fireworksResult = searchService.getFireworks(query);
+        assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
+    }
 
 }
