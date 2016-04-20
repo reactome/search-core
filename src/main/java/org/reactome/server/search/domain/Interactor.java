@@ -1,6 +1,5 @@
 package org.reactome.server.search.domain;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -66,7 +65,7 @@ public class Interactor implements Comparable<Interactor> {
     }
 
     @Override
-    public int compareTo(@Nonnull Interactor otherInteraction) {
+    public int compareTo(Interactor otherInteraction) {
         return this.score.compareTo(otherInteraction.getScore());
     }
 }

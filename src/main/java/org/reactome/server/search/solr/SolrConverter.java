@@ -5,8 +5,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
-import org.reactome.server.tools.interactors.util.InteractorConstant;
-import org.reactome.server.tools.interactors.util.Toolbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -323,7 +321,10 @@ public class SolrConverter {
 
                 String[] interactionsEvidencesArray = ((String) interactionIds.get(i)).split("#");
                 interaction.setInteractionEvidences(Arrays.asList(interactionsEvidencesArray));
-                interaction.setEvidencesURL(Toolbox.getEvidencesURL(interaction.getInteractionEvidences(), InteractorConstant.STATIC));
+
+//                todo !!!!!!!!!!!!!! remove interactors toolbox
+//                interaction.setEvidencesURL(Toolbox.getEvidencesURL(interaction.getInteractionEvidences(), InteractorConstant.STATIC));
+
                 interaction.setScore(Double.parseDouble((String) scores.get(i)));
 
                 String accessionB = (String) accessions.get(i);
@@ -335,7 +336,10 @@ public class SolrConverter {
                     reactomeEntries.add(new InteractorReactomeEntry(reactomeIds[j], reactomeNames[j]));
                 }
                 interaction.setInteractorReactomeEntries(reactomeEntries);
-                interaction.setAccessionURL(Toolbox.getAccessionURL(accessionB, InteractorConstant.STATIC));
+
+//                todo !!!!!!!!!!!!! remove interactors toolbox
+//                interaction.setAccessionURL(Toolbox.getAccessionURL(accessionB, InteractorConstant.STATIC));
+
                 interactionList.add(interaction);
             }
 

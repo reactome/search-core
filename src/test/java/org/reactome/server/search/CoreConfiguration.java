@@ -1,16 +1,11 @@
 package org.reactome.server.search;
 
-import org.reactome.server.tools.interactors.database.InteractorsDatabase;
-import org.reactome.server.tools.interactors.service.InteractionService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.io.ClassPathResource;
-
-import java.sql.SQLException;
 
 /**
  * Created by:
@@ -30,8 +25,4 @@ public class CoreConfiguration {
         return ppc;
     }
 
-    @Bean
-    public InteractionService interactionService(@Value("${interactors.static.db}") String db) throws SQLException {
-        return new InteractionService(new InteractorsDatabase(db));
-    }
 }

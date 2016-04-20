@@ -3,7 +3,6 @@ package org.reactome.server.search.service;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.solr.SolrConverter;
-import org.reactome.server.tools.interactors.service.InteractionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +26,6 @@ public class SearchService {
 
     @Autowired
     private SolrConverter solrConverter;
-
-    @Autowired
-    private InteractionService interactionService;
-
 
     /**
      * Method for testing if a connection to Solr can be established
