@@ -74,7 +74,7 @@ class SolrCore {
      * @param url solr URL
      */
     @Autowired
-    public SolrCore(@Value("${solr.url}") String url,
+    public SolrCore(@Value("${solr.host}") String url,
                     @Value("${solr.user}") String user,
                     @Value("${solr.password}") String password) {
 
