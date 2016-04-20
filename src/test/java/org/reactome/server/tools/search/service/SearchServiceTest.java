@@ -59,15 +59,6 @@ public class SearchServiceTest {
     }
 
     @Test
-    public void test() {
-        System.out.println("");
-        for (int i = 0; i < 100; i++) {
-            System.out.println("xx" + i);
-            logger.error("some warning " + i);
-        }
-    }
-
-    @Test
     public void testGetFacetingInformation() throws SolrSearcherException {
         FacetMapping facetMapping = searchService.getFacetingInformation(query);
         assertTrue(309 <= facetMapping.getTotalNumFount());

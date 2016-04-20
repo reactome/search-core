@@ -38,28 +38,100 @@
     <!--</appender>-->
 
 
-    <appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
-        <smtpHost>localhost</smtpHost>
-        <smtpPort>9999</smtpPort>
-        <!--<username>xxxxx</username>-->
-        <!--<password>xxxxxx</password>-->
-        <to>fkorninger@yahoo.de</to>
-        <!--<from>${from}</from>-->
-
-        <subject>Testing %logger{20} - %m</subject>
-
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </layout>
 
 
-        <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+
+
+
+
+
+    <!--&lt;!&ndash;APPENDER&ndash;&gt;-->
+    <!--<appender name="EMAIL" class="org.reactome.server.tools.search.util.ScheduledSMTPAppender">>-->
+        <!--<smtpHost>localhost</smtpHost>-->
+        <!--<smtpPort>9999</smtpPort>-->
+        <!--<to>fkorninger@yahoo.de</to>-->
+        <!--<from>reactome-indexer@reactome.org</from>-->
+        <!--<subject>Search-Core Warnings and Errors</subject>-->
+
+        <!--<maxMessages>100</maxMessages>-->
+        <!--<timeInterval>2</timeInterval>-->
+
+        <!--<layout class="ch.qos.logback.classic.html.HTMLLayout"/>-->
+        <!--<asynchronousSending>false</asynchronousSending>-->
+    <!--</appender>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--<appender name="EMAIL" class="org.apache.log4j.net.SMTPAppender">-->
+        <!--<param name="BufferSize" value="10" />-->
+        <!--<smtpHost>localhost</smtpHost>-->
+        <!--<smtpPort>9999</smtpPort>-->
+        <!--<to>fkorninger@yahoo.de</to>-->
+        <!--<from>reactome-indexer@reactome.org</from>-->
+
+        <!--<param name="Subject" value="Diagram Generation Report" />-->
+        <!--<param name="SMTPDebug" value="false" />-->
+        <!--<triggeringPolicy  class="org.apache.log4j.rolling.FilterBasedTriggeringPolicy">-->
+            <!--<filter class="org.apache.log4j.varia.DenyAllFilter" />-->
+        <!--</triggeringPolicy>-->
+        <!--<layout class="org.apache.log4j.PatternLayout">-->
+            <!--<param name="ConversionPattern"-->
+                   <!--value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />-->
+        <!--</layout>-->
+        <!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+            <!--<param name="levelMin" value="WARN" />-->
+            <!--<param name="levelMax" value="ERROR" />-->
+        <!--</filter>-->
+        <!--<filter class="org.apache.log4j.varia.StringMatchFilter">-->
+            <!--<param name="StringToMatch" value="[DEV]" />-->
+            <!--<param name="AcceptOnMatch" value="true" />-->
+        <!--</filter>-->
+        <!--<filter class="org.apache.log4j.varia.DenyAllFilter"/>-->
+    <!--</appender>-->
+
+
+
+    <!--<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">-->
+        <!--<smtpHost>localhost</smtpHost>-->
+        <!--<smtpPort>9999</smtpPort>-->
+        <!--&lt;!&ndash;<username>xxxxx</username>&ndash;&gt;-->
+        <!--&lt;!&ndash;<password>xxxxxx</password>&ndash;&gt;-->
+        <!--<to>fkorninger@yahoo.de</to>-->
+        <!--<from>reactome-indexer@reactome.org</from>-->
+        <!--&lt;!&ndash;<from>${from}</from>&ndash;&gt;-->
+        <!--&lt;!&ndash;<maxMessages>10</maxMessages>&ndash;&gt;-->
+        <!--<subject>Testing %logger{20} - %m</subject>-->
+        <!--<layout class="ch.qos.logback.classic.html.HTMLLayout"/>-->
+
+        <!--&lt;!&ndash;<layout class="ch.qos.logback.classic.PatternLayout">&ndash;&gt;-->
+            <!--&lt;!&ndash;<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>&ndash;&gt;-->
+        <!--&lt;!&ndash;</layout>&ndash;&gt;-->
+        <!--&lt;!&ndash;<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">&ndash;&gt;-->
+            <!--&lt;!&ndash;<maxFileSize>1MB</maxFileSize>&ndash;&gt;-->
+        <!--&lt;!&ndash;</triggeringPolicy>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">&ndash;&gt;-->
             <!--&lt;!&ndash; send just one log entry per email &ndash;&gt;-->
-            <bufferSize>10</bufferSize>
-        </cyclicBufferTracker>
+            <!--&lt;!&ndash;<bufferSize>10</bufferSize>&ndash;&gt;-->
+        <!--&lt;!&ndash;</cyclicBufferTracker>&ndash;&gt;-->
+        <!--&lt;!&ndash;<cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">&ndash;&gt;-->
+            <!--&lt;!&ndash;&lt;!&ndash; send just one log entry per email &ndash;&gt;&ndash;&gt;-->
+            <!--&lt;!&ndash;<bufferSize>50</bufferSize>&ndash;&gt;-->
+        <!--&lt;!&ndash;</cyclicBufferTracker>&ndash;&gt;-->
 
-        <asynchronousSending>false</asynchronousSending>
-    </appender>
+        <!--<asynchronousSending>false</asynchronousSending>-->
+    <!--</appender>-->
 
 
     <!--<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">-->
@@ -108,9 +180,9 @@
     </logger>
 
 
-    <logger name="ee" level="INFO" >
-        <appender-ref ref="EMAIL"/>
-    </logger>
+    <!--<logger name="ee" level="INFO"  >-->
+        <!--<appender-ref ref="EMAIL"/>-->
+    <!--</logger>-->
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
