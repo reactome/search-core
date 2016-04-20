@@ -132,6 +132,34 @@ public class SolrConverter {
         return getFacetMap(solrCore.getFacetingInformation(queryObject), queryObject);
     }
 
+    public FireworksResult getFireworksResult(Query queryObject) throws SolrSearcherException {
+        QueryResponse response = solrCore.getFireworksResult(queryObject);
+        if (response != null && queryObject != null) {
+            List<SolrDocument> solrDocuments = response.getResults();
+            List<Entry> entries = new ArrayList<>();
+            for (SolrDocument solrDocument : solrDocuments) {
+                Entry entry = new Entry();
+                if (solrDocument.containsKey(ST_ID)) {
+                    entry.setStId((String) solrDocument.getFieldValue(ST_ID));
+                    entry.setId((String) solrDocument.getFieldValue(ST_ID));
+                } else {
+                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
+                }
+                entry.setName((String) solrDocument.getFieldValue(NAME));
+                entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
+                entries.add(entry);
+            }
+
+            List<FacetContainer> facets = new ArrayList<>();
+            for (FacetField facetField : response.getFacetFields()) {
+                facets.add(new FacetContainer(facetField.getName(), facetField.getValueCount()));
+            }
+
+            return new FireworksResult(entries, facets, response.getResults().getNumFound());
+        }
+        return null;
+    }
+
     public InteractorEntry getInteractionDetail(String accession) throws SolrSearcherException {
         if (accession != null && !accession.isEmpty()) {
             QueryResponse response = solrCore.intactDetail(accession);

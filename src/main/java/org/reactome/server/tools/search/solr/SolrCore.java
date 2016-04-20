@@ -48,6 +48,7 @@ class SolrCore {
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
     private final static String INTACT_REQUEST_HANDLER = "/intactdetail";
+    private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
@@ -253,6 +254,19 @@ class SolrCore {
         return querysolrClient(parameters);
     }
 
+    QueryResponse getFireworksResult(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(FIREWORKS_REQUEST_HANDLER);
+
+        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
+        parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
+
+        parameters.setStart(queryObject.getStart());
+        parameters.setRows(queryObject.getRows());
+        parameters.setQuery(queryObject.getQuery());
+
+        return querysolrClient(parameters);
+    }
 
 
     /**
