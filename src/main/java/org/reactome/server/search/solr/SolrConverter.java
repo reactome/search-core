@@ -139,7 +139,7 @@ public class SolrConverter {
                 Entry entry = new Entry();
                 if (solrDocument.containsKey(ST_ID)) {
                     entry.setStId((String) solrDocument.getFieldValue(ST_ID));
-                    entry.setId((String) solrDocument.getFieldValue(ST_ID));
+                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
                 } else {
                     entry.setId((String) solrDocument.getFieldValue(DB_ID));
                 }
