@@ -74,9 +74,9 @@ class SolrCore {
      * @param url solr URL
      */
     @Autowired
-    public SolrCore(@Value("${solr_url}") String url,
-                    @Value("${solr_user}") String user,
-                    @Value("${solr_password}") String password) {
+    public SolrCore(@Value("${solr.host}") String url,
+                    @Value("${solr.user}") String user,
+                    @Value("${solr.password}") String password) {
 
         if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
             HttpClientBuilder builder = HttpClientBuilder.create().addInterceptorFirst(new PreemptiveAuthInterceptor());
