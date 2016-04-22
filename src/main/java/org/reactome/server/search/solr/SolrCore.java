@@ -283,10 +283,8 @@ class SolrCore {
         if (facet != null) {
             facet.removeAll(Collections.singletonList(""));
             facet.removeAll(Collections.singletonList(null));
-            if(!facet.isEmpty()) {
-                if (fieldName != null && !fieldName.isEmpty()) {
-                    return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
-                }
+            if(!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
+                return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
             }
         }
         return "";
