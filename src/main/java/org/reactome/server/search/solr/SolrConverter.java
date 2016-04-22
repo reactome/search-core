@@ -150,7 +150,11 @@ public class SolrConverter {
 
             List<FacetContainer> facets = new ArrayList<>();
             for (FacetField facetField : response.getFacetFields()) {
-                facets.add(new FacetContainer(facetField.getName(), facetField.getValueCount()));
+                //only the TYPES facets is used in the handler, so no need to check the others
+                if(!facetField.getName().equals(TYPES)) continue;
+                for (FacetField.Count field : facetField.getValues()) {
+                    facets.add(new FacetContainer(field.getName(), field.getCount()));
+                }
             }
 
             return new FireworksResult(entries, facets, response.getResults().getNumFound());
