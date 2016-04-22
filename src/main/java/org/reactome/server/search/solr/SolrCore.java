@@ -282,6 +282,7 @@ class SolrCore {
     private String getFilterString(List<String> facet, String fieldName) {
         if (facet != null) {
             facet.removeAll(Collections.singletonList(""));
+            //noinspection SuspiciousMethodCalls
             facet.removeAll(Collections.singletonList(null));
             if(!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
                 return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
