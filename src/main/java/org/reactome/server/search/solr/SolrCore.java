@@ -1,12 +1,12 @@
 package org.reactome.server.search.solr;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -14,8 +14,8 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.util.NamedList;
-import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.domain.Query;
+import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.util.PreemptiveAuthInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -279,14 +280,13 @@ class SolrCore {
      * @return filterQuery ready to get sent to solr
      */
     private String getFilterString(List<String> facet, String fieldName) {
-        if (facet != null && !facet.isEmpty()) {
-            if (fieldName != null && !fieldName.isEmpty()) {
-                String filter = fieldName + ":(";
-                for (int i = 0; i < facet.size() - 1; i++) {
-                    filter += "\"" + facet.get(i) + "\" OR ";
+        if (facet != null) {
+            facet.removeAll(Collections.singletonList(""));
+            facet.removeAll(Collections.singletonList(null));
+            if(!facet.isEmpty()) {
+                if (fieldName != null && !fieldName.isEmpty()) {
+                    return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
                 }
-                filter += "\"" + facet.get(facet.size() - 1) + "\")";
-                return filter;
             }
         }
         return "";
