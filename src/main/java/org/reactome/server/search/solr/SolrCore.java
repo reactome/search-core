@@ -259,7 +259,9 @@ class SolrCore {
         parameters.setRequestHandler(FIREWORKS_REQUEST_HANDLER);
 
         parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
-        parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
+        if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
+            parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
+        }
 
         parameters.setStart(queryObject.getStart());
         parameters.setRows(queryObject.getRows());
