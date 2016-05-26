@@ -88,7 +88,7 @@ public class SearchServiceTest {
         InteractorEntry interactorEntry = searchService.getInteractionDetail(accession);
         assertNotNull(interactorEntry);
         assertNotNull(interactorEntry.getInteractions());
-        assertTrue(8 <= interactorEntry.getInteractions().size());
+        assertTrue(6 <= interactorEntry.getInteractions().size());
     }
 
     @Test
@@ -96,6 +96,45 @@ public class SearchServiceTest {
         GroupedResult groupedResult = searchService.getEntries(query, true);
         assertEquals(2, groupedResult.getNumberOfGroups());
         assertTrue(309 <= groupedResult.getNumberOfMatches());
+    }
+
+    @Test
+    public void testGetSearchResult() throws SolrSearcherException {
+        String searchTerm = "apoo";
+        boolean cluster = true;
+        int rowCount = 30;
+        int page = 1;
+
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        species.add("Entries without species");
+
+        Query query = new Query(searchTerm, species, null, null, null);
+
+        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, cluster);
+
+        assertNull(searchResult);
+
+        List<String> suggestions = searchService.getSpellcheckSuggestions(searchTerm);
+
+        assertNotNull(suggestions);
+        assertTrue(suggestions.size() > 0);
+    }
+
+    @Test
+    public void testGetEntriesNameGram() throws SolrSearcherException {
+        Query query = new Query("transp", Collections.singletonList("Homo sapiens"), null, null, null);
+        GroupedResult groupedResult = searchService.getEntries(query, true);
+        assertEquals(5, groupedResult.getNumberOfGroups());
+        assertTrue(300 <= groupedResult.getNumberOfMatches());
+    }
+
+    @Test
+    public void testGetEntriesNoResults() throws SolrSearcherException {
+        Query query = new Query("apoo", Collections.singletonList("Homo sapiens"), null, null, null);
+        GroupedResult groupedResult = searchService.getEntries(query, true);
+        assertEquals(0, groupedResult.getNumberOfGroups());
+        assertEquals(0, groupedResult.getNumberOfMatches());
     }
 
     @Test
