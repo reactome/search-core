@@ -33,7 +33,6 @@ public class SearchServiceTest {
     private final static Logger logger = LoggerFactory.getLogger(SearchServiceTest.class);
 
     private static Query query;
-    private static final String stId = "R-HSA-199420";
     private static final String accession = "P41227";
     private static final String suggest = "apoptos";
     private static final String spellcheck = "appoptosis";
@@ -119,6 +118,34 @@ public class SearchServiceTest {
 
         assertNotNull(suggestions);
         assertTrue(suggestions.size() > 0);
+    }
+
+    @Test
+    public void testGetSearchResultFacets() throws SolrSearcherException {
+        String searchTerm = "apoptosis";
+        boolean cluster = true;
+        int rowCount = 30;
+        int page = 1;
+
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        species.add("Entries without species");
+
+        List<String> types = new ArrayList<>();
+        types.add("Pathway");
+
+        List<String> compartment = new ArrayList<>();
+        compartment.add("cytosol");
+
+        List<String> keywords = new ArrayList<>();
+        keywords.add("binds");
+
+        Query query = new Query(searchTerm, species, types, compartment, keywords);
+
+        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, cluster);
+
+        assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 2);
+
     }
 
     @Test
