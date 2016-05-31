@@ -43,7 +43,7 @@
         <logging.version>1.1.7</logging.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <!--<maven.surefire.version>2.12.4</maven.surefire.version>-->
         <maven.site.version>3.4</maven.site.version>
         <jackrabbit.version>2.10</jackrabbit.version>
