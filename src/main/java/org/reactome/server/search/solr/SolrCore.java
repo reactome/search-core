@@ -226,16 +226,16 @@ class SolrCore {
     QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FACET_REQUEST_HANDLER);
-        if (queryObject.getSpecies() != null) {
+        if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(SPECIES_TAG + getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         }
-        if (queryObject.getTypes() != null) {
+        if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
-        if (queryObject.getKeywords() != null) {
+        if (queryObject.getKeywords() != null && !queryObject.getKeywords().isEmpty()) {
             parameters.addFilterQuery(KEYWORD_TAG + getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
         }
-        if (queryObject.getCompartment() != null) {
+        if (queryObject.getCompartment() != null && !queryObject.getCompartment().isEmpty()) {
             parameters.addFilterQuery(COMPARTMENT_TAG + getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
         }
         parameters.setQuery(queryObject.getQuery());
