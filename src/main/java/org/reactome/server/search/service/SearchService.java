@@ -196,7 +196,7 @@ public class SearchService {
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
         List<String> species = queryObject.getSpecies();
         if (species != null) {
-            species.add("Entries Without Species"); //This will force to include the small molecules
+            species.add("Entries without species"); //This will force to include the small molecules
         }
         return solrConverter.getFireworksResult(queryObject);
     }
