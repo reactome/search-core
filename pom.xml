@@ -34,7 +34,7 @@
     <properties>
         <reactome.version>1.2.4</reactome.version>
         <interactors.version>1.0.0-SNAPSHOT</interactors.version>
-        <solr.version>5.5.0</solr.version>
+        <solr.version>6.0.1</solr.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <aspectj.version>1.8.8</aspectj.version>
         <mail.version>1.5.4</mail.version>
