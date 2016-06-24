@@ -19,7 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 public class CoreConfiguration {
 
     @Bean
-    PropertyPlaceholderConfigurer propConfig() {
+    static PropertyPlaceholderConfigurer propConfig() {
         PropertyPlaceholderConfigurer ppc =  new PropertyPlaceholderConfigurer();
         ppc.setLocation(new ClassPathResource("reactome.properties"));
         return ppc;

@@ -44,7 +44,7 @@
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
         <jdk.version>1.8</jdk.version>
-        <!--<maven.surefire.version>2.12.4</maven.surefire.version>-->
+        <maven.jar.version>2.6</maven.jar.version>
         <maven.site.version>3.4</maven.site.version>
         <jackrabbit.version>2.10</jackrabbit.version>
         <maven.javadoc.version>2.10.3</maven.javadoc.version>
@@ -156,6 +156,12 @@
 
     <build>
         <finalName>${project.name}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
@@ -163,6 +169,13 @@
             </testResource>
         </testResources>
         <plugins>
+            <!--Plugin needed to force maven resources to latest version. Default version contains a bug-->
+            <!--adding debug output-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -175,6 +188,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.jar.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>

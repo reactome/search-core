@@ -30,7 +30,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SearchServiceTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(SearchServiceTest.class);
+    private final static Logger logger = LoggerFactory.getLogger("testLogger");
 
     private static Query query;
     private static final String accession = "P41227";
@@ -57,50 +57,85 @@ public class SearchServiceTest {
 
     @Test
     public void testGetFacetingInformation() throws SolrSearcherException {
+        logger.info("Started testing searchService.getFacetingInformation");
+        long start, time;
+        start = System.currentTimeMillis();
         FacetMapping facetMapping = searchService.getFacetingInformation(query);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         assertTrue(309 <= facetMapping.getTotalNumFount());
+        logger.info("Finished");
     }
 
     @Test
     public void testGetTotalFacetingInformation() throws SolrSearcherException {
+        logger.info("Started testing searchService.getTotalFacetingInformation");
+        long start, time;
+        start = System.currentTimeMillis();
         FacetMapping facetMapping = searchService.getTotalFacetingInformation();
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         assertTrue(471389 <= facetMapping.getTotalNumFount());
+        logger.info("Finished");
     }
 
     @Test
     public void testGetAutocompleteSuggestions() throws SolrSearcherException {
+        logger.info("Started testing searchService.getAutocompleteSuggestions");
+        long start, time;
+        start = System.currentTimeMillis();
         List<String> suggestionsList = searchService.getAutocompleteSuggestions(suggest);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         Set<String> suggestions = new HashSet<>(suggestionsList);
         assertTrue(3 <= suggestions.size());
         assertTrue(suggestions.contains("apoptosis"));
+        logger.info("Finished");
     }
 
     @Test
     public void testGetSpellcheckSuggestions() throws SolrSearcherException {
+        logger.info("Started testing searchService.getSpellcheckSuggestions");
+        long start, time;
+        start = System.currentTimeMillis();
         List<String> suggestionsList = searchService.getSpellcheckSuggestions(spellcheck);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         Set<String> suggestions = new HashSet<>(suggestionsList);
         assertTrue(suggestions.contains("apoptosis"));
+        logger.info("Finished");
     }
 
     @Test
     public void testGetInteractionDetail() throws SolrSearcherException {
+        logger.info("Started testing searchService.getInteractionDetail");
+        long start, time;
+        start = System.currentTimeMillis();
         InteractorEntry interactorEntry = searchService.getInteractionDetail(accession);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         assertNotNull(interactorEntry);
         assertNotNull(interactorEntry.getInteractions());
         assertTrue(6 <= interactorEntry.getInteractions().size());
+        logger.info("Finished");
     }
 
     @Test
     public void testGetEntries() throws SolrSearcherException {
+        logger.info("Started testing searchService.getEntries");
+        long start, time;
+        start = System.currentTimeMillis();
         GroupedResult groupedResult = searchService.getEntries(query, true);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
         assertEquals(2, groupedResult.getNumberOfGroups());
         assertTrue(309 <= groupedResult.getNumberOfMatches());
+        logger.info("Finished");
     }
 
     @Test
     public void testGetSearchResult() throws SolrSearcherException {
         String searchTerm = "apoo";
-        boolean cluster = true;
         int rowCount = 30;
         int page = 1;
 
@@ -110,7 +145,7 @@ public class SearchServiceTest {
 
         Query query = new Query(searchTerm, species, null, null, null);
 
-        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, cluster);
+        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
 
         assertNull(searchResult);
 
@@ -123,7 +158,6 @@ public class SearchServiceTest {
     @Test
     public void testGetSearchResultFacets() throws SolrSearcherException {
         String searchTerm = "apoptosis";
-        boolean cluster = true;
         int rowCount = 30;
         int page = 1;
 
@@ -142,7 +176,7 @@ public class SearchServiceTest {
 
         Query query = new Query(searchTerm, species, types, compartment, keywords);
 
-        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, cluster);
+        SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
 
         assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 2);
 
@@ -150,7 +184,10 @@ public class SearchServiceTest {
 
     @Test
     public void testGetEntriesNameGram() throws SolrSearcherException {
-        Query query = new Query("transp", Collections.singletonList("Homo sapiens"), null, null, null);
+        // Do not initialize as singelton list
+        List species = new ArrayList<>();
+        species.add("Homo sapiens");
+        Query query = new Query("transp", species, null, null, null);
         GroupedResult groupedResult = searchService.getEntries(query, true);
         assertEquals(5, groupedResult.getNumberOfGroups());
         assertTrue(300 <= groupedResult.getNumberOfMatches());
@@ -158,7 +195,10 @@ public class SearchServiceTest {
 
     @Test
     public void testGetEntriesNoResults() throws SolrSearcherException {
-        Query query = new Query("apoo", Collections.singletonList("Homo sapiens"), null, null, null);
+        // Do not initialize as singelton list
+        List species = new ArrayList<>();
+        species.add("Homo sapiens");
+        Query query = new Query("apoo", species, null, null, null);
         GroupedResult groupedResult = searchService.getEntries(query, true);
         assertEquals(0, groupedResult.getNumberOfGroups());
         assertEquals(0, groupedResult.getNumberOfMatches());
@@ -166,7 +206,10 @@ public class SearchServiceTest {
 
     @Test
     public void testFireworks() throws SolrSearcherException {
-        Query query = new Query("PTEN", Collections.singletonList("Homo sapiens"), Collections.singletonList("Protein"), null, null);
+        // Do not initialize as singelton list
+        List species = new ArrayList<>();
+        species.add("Homo sapiens");
+        Query query = new Query("PTEN", species, Arrays.asList("Protein"), null, null);
         FireworksResult fireworksResult = searchService.getFireworks(query);
         assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
     }

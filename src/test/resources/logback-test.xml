@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress XmlUnboundNsPrefix -->
+<!--Logback official documentation:
+        The syntax of logback configuration files is extremely flexible.
+        As such, it is not possible to specify the allowed syntax with a DTD file or an XML schema.-->
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="TEST" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logging.dir}/search-core/search-tests-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <maxHistory>-1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d %-5level [%thread] %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="deng" level="DEBUG"/>
+
+    <logger name="testLogger" level="INFO" additivity="false">
+        <appender-ref ref="TEST"/>
+    </logger>
+
+    <root level="WARN">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
