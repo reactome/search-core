@@ -52,6 +52,8 @@ public class SolrConverter {
     private static final String REGULATOR_ID = "regulatorId";
     private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
 
+    private static final String FIREWORKS_SPECIES = "fireworksSpecies";
+
 
     /**
      * Method for testing if a connection to Solr can be established
@@ -145,6 +147,16 @@ public class SolrConverter {
                 }
                 entry.setName((String) solrDocument.getFieldValue(NAME));
                 entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
+
+                if (solrDocument.containsKey(FIREWORKS_SPECIES)) {
+                    Collection<Object> fireworksSpecies = solrDocument.getFieldValues(FIREWORKS_SPECIES);
+                    List<String> list = new ArrayList<>();
+                    for (Object fSpecies : fireworksSpecies) {
+                        list.add(fSpecies.toString());
+                    }
+                    entry.setFireworksSpecies(list);
+                }
+
                 entries.add(entry);
             }
 
@@ -162,9 +174,9 @@ public class SolrConverter {
         return null;
     }
 
-    public InteractorEntry getInteractionDetail(String accession) throws SolrSearcherException {
+    public InteractorEntry getInteractor(String accession) throws SolrSearcherException {
         if (accession != null && !accession.isEmpty()) {
-            QueryResponse response = solrCore.intactDetail(accession);
+            QueryResponse response = solrCore.searchInteractors(accession);
             List<SolrDocument> solrDocuments = response.getResults();
             if (solrDocuments != null && !solrDocuments.isEmpty() && solrDocuments.get(0) != null) {
                 return buildInteractorEntry(solrDocuments.get(0));

@@ -29,6 +29,7 @@ public class SearchService {
 
     /**
      * Method for testing if a connection to Solr can be established
+     *
      * @return true if status is ok
      */
     public Boolean ping() {
@@ -37,23 +38,24 @@ public class SearchService {
 
     /**
      * This method is a simple aggregation of service methods used in the Content project
-     * @param query QueryObject
+     *
+     * @param query    QueryObject
      * @param rowCount number of rows displayed in one page
-     * @param page page number
-     * @param cluster clustered or not clustered result
+     * @param page     page number
+     * @param cluster  clustered or not clustered result
      * @return Grouped result
      * @throws SolrSearcherException
      */
-    public SearchResult getSearchResult (Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
+    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
-            query = new Query(query.getQuery(),null,null,null,null);
+            query = new Query(query.getQuery(), null, null, null, null);
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
-            setPagingParameters(query,facetMapping,rowCount,page,cluster);
+            setPagingParameters(query, facetMapping, rowCount, page, cluster);
             GroupedResult groupedResult = getEntries(query, cluster);
-            return new SearchResult(facetMapping,groupedResult,getHighestResultCount(groupedResult),query.getRows());
+            return new SearchResult(facetMapping, groupedResult, getHighestResultCount(groupedResult), query.getRows());
         }
         return null;
     }
@@ -156,7 +158,7 @@ public class SearchService {
 
     public InteractorEntry getInteractionDetail(String query) throws SolrSearcherException {
         if (query != null && !query.isEmpty()) {
-            InteractorEntry entry = solrConverter.getInteractionDetail(query);
+            InteractorEntry entry = solrConverter.getInteractor(query);
             if (entry != null) {
                 Collections.sort(entry.getInteractions());
                 Collections.reverse(entry.getInteractions());
@@ -166,7 +168,6 @@ public class SearchService {
         }
         return null;
     }
-
 
     /**
      * This Method gets multiple entries for a specific query while considering the filter information
@@ -195,9 +196,6 @@ public class SearchService {
      */
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
         List<String> species = queryObject.getSpecies();
-        if (species != null) {
-            species.add("Entries without species"); //This will force to include the small molecules
-        }
         return solrConverter.getFireworksResult(queryObject);
     }
 
@@ -206,7 +204,7 @@ public class SearchService {
         if (query.getTypes() != null && !query.getTypes().isEmpty()) {
             typeCount = query.getTypes().size();
         } else {
-            typeCount =  facetMapping.getTypeFacet().getAvailable().size();
+            typeCount = facetMapping.getTypeFacet().getAvailable().size();
         }
         if (typeCount != 0) {
             Integer rows = rowCount;

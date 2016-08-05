@@ -29,6 +29,7 @@ public class Entry {
     private String regulatedEntity;
     private String regulatorId;
     private String regulatedEntityId;
+    private List<String> fireworksSpecies;
 
     public String getRegulatorId() {
         return regulatorId;
@@ -180,5 +181,13 @@ public class Entry {
 
     public void setInstanceTypeExplanation(String instanceTypeExplanation) {
         this.instanceTypeExplanation = instanceTypeExplanation;
+    }
+
+    public List<String> getFireworksSpecies() {
+        return fireworksSpecies;
+    }
+
+    public void setFireworksSpecies(List<String> fireworksSpecies) {
+        this.fireworksSpecies = fireworksSpecies;
     }
 }

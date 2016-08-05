@@ -31,12 +31,10 @@ import static org.junit.Assume.assumeTrue;
 public class SearchServiceTest {
 
     private final static Logger logger = LoggerFactory.getLogger("testLogger");
-
-    private static Query query;
     private static final String accession = "P41227";
     private static final String suggest = "apoptos";
     private static final String spellcheck = "appoptosis";
-
+    private static Query query;
     @Autowired
     private SearchService searchService;
 
@@ -108,7 +106,7 @@ public class SearchServiceTest {
 
     @Test
     public void testGetInteractionDetail() throws SolrSearcherException {
-        logger.info("Started testing searchService.getInteractionDetail");
+        logger.info("Started testing searchService.getInteractor");
         long start, time;
         start = System.currentTimeMillis();
         InteractorEntry interactorEntry = searchService.getInteractionDetail(accession);
@@ -135,7 +133,7 @@ public class SearchServiceTest {
 
     @Test
     public void testGetSearchResult() throws SolrSearcherException {
-        String searchTerm = "apoo";
+        String searchTerm = "apoptosys";
         int rowCount = 30;
         int page = 1;
 
@@ -185,7 +183,7 @@ public class SearchServiceTest {
     @Test
     public void testGetEntriesNameGram() throws SolrSearcherException {
         // Do not initialize as singelton list
-        List species = new ArrayList<>();
+        List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         Query query = new Query("transp", species, null, null, null);
         GroupedResult groupedResult = searchService.getEntries(query, true);
@@ -194,24 +192,27 @@ public class SearchServiceTest {
     }
 
     @Test
-    public void testGetEntriesNoResults() throws SolrSearcherException {
-        // Do not initialize as singelton list
-        List species = new ArrayList<>();
-        species.add("Homo sapiens");
-        Query query = new Query("apoo", species, null, null, null);
-        GroupedResult groupedResult = searchService.getEntries(query, true);
-        assertEquals(0, groupedResult.getNumberOfGroups());
-        assertEquals(0, groupedResult.getNumberOfMatches());
-    }
-
-    @Test
     public void testFireworks() throws SolrSearcherException {
         // Do not initialize as singelton list
-        List species = new ArrayList<>();
+        List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        Query query = new Query("PTEN", species, Arrays.asList("Protein"), null, null);
+        Query query = new Query("PTEN", species, Collections.singletonList("Protein"), null, null);
         FireworksResult fireworksResult = searchService.getFireworks(query);
         assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
+    }
+
+
+    @Test
+    public void testFireworksSpecies() throws SolrSearcherException {
+        // Do not initialize as singelton list
+        List<String> species = new ArrayList<>();
+        species.add("Gallus gallus");
+        Query query = new Query("PG", species, null, null, null);
+        FireworksResult fireworksResult = searchService.getFireworks(query);
+
+        assertNotNull(fireworksResult);
+        assertNotNull(fireworksResult.getEntries());
+        assertTrue("14 species or more are expected", 14 <= fireworksResult.getEntries().iterator().next().getFireworksSpecies().size());
     }
 
 }

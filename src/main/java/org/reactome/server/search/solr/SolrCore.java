@@ -48,7 +48,7 @@ class SolrCore {
     private final static String FACET_REQUEST_HANDLER = "/facet";
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
-    private final static String INTACT_REQUEST_HANDLER = "/intactdetail";
+    private final static String INTERACTOR_REQUEST_HANDLER = "/interactor";
     private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
@@ -59,6 +59,7 @@ class SolrCore {
     private final static String TYPE_FACET = "type_facet";
     private final static String KEYWORD_FACET = "keywords_facet";
     private final static String COMPARTMENT_FACET = "compartment_facet";
+    private final static String FIREWORK_SPECIES = "fireworksSpecies";
 
     private final static String SPECIES_TAG = "{!tag=sf}";
     private final static String TYPE_TAG = "{!tag=tf}";
@@ -85,9 +86,9 @@ class SolrCore {
             UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user, password);
             credentialsProvider.setCredentials(AuthScope.ANY, credentials);
             HttpClient client = builder.setDefaultCredentialsProvider(credentialsProvider).build();
-            solrClient = new HttpSolrClient(url, client);
+            solrClient = new HttpSolrClient.Builder(url).withHttpClient(client).build();
         } else {
-            solrClient = new HttpSolrClient(url);
+            solrClient = new HttpSolrClient.Builder(url).build();
         }
         logger.info("solrClient initialized");
     }
@@ -124,10 +125,10 @@ class SolrCore {
         return queryResponse.getResults().getNumFound() > 0;
     }
 
-    QueryResponse intactDetail(String query) throws SolrSearcherException {
+    QueryResponse searchInteractors(String query) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
 
-        parameters.setRequestHandler(INTACT_REQUEST_HANDLER);
+        parameters.setRequestHandler(INTERACTOR_REQUEST_HANDLER);
         parameters.setQuery(query);
         return querysolrClient(parameters);
     }
@@ -259,7 +260,7 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FIREWORKS_REQUEST_HANDLER);
 
-        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORK_SPECIES));
         if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
