@@ -17,11 +17,12 @@ public class Entry {
     private String type; // translated type from SchemaClass enum
     private String instanceTypeExplanation;
     private String exactType;
-    private String species;
+    private List<String> species;
     private String summation;
     private String referenceName;
     private String referenceIdentifier;
     private List<String> compartmentNames;
+    private List<String> compartmentAccession;
     private Boolean isDisease;
     private String databaseName;
     private String referenceURL;
@@ -111,6 +112,14 @@ public class Entry {
         this.compartmentNames = compartmentNames;
     }
 
+    public List<String> getCompartmentAccession() {
+        return compartmentAccession;
+    }
+
+    public void setCompartmentAccession(List<String> compartmentAccession) {
+        this.compartmentAccession = compartmentAccession;
+    }
+
     public String getDbId() {
         return dbId;
     }
@@ -135,11 +144,11 @@ public class Entry {
         this.name = name;
     }
 
-    public String getSpecies() {
+    public List<String> getSpecies() {
         return species;
     }
 
-    public void setSpecies(String species) {
+    public void setSpecies(List<String> species) {
         this.species = species;
     }
 

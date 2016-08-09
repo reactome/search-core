@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Converts a Solr QueryResponse into Objects provided by Project Models
@@ -34,7 +35,7 @@ public class SolrConverter {
     private static final String SPECIES_FACET = "species_facet";
     private static final String TYPES = "type_facet";
     private static final String KEYWORDS = "keywords_facet";
-    private static final String COMPARTMENTS = "compartment_facet";
+    private static final String COMPARTMENT_FACET = "compartment_facet";
 
     private static final String SUMMATION = "summation";
     private static final String INFERRED_SUMMATION = "inferredSummation";
@@ -51,6 +52,9 @@ public class SolrConverter {
     private static final String REGULATED_ENTITY = "regulatedEntity";
     private static final String REGULATOR_ID = "regulatorId";
     private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
+
+    private static final String COMPARTMENT_NAME = "compartmentName";
+    private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
 
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
 
@@ -150,11 +154,7 @@ public class SolrConverter {
 
                 if (solrDocument.containsKey(FIREWORKS_SPECIES)) {
                     Collection<Object> fireworksSpecies = solrDocument.getFieldValues(FIREWORKS_SPECIES);
-                    List<String> list = new ArrayList<>();
-                    for (Object fSpecies : fireworksSpecies) {
-                        list.add(fSpecies.toString());
-                    }
-                    entry.setFireworksSpecies(list);
+                    entry.setFireworksSpecies(fireworksSpecies.stream().map(Object::toString).collect(Collectors.toList()));
                 }
 
                 entries.add(entry);
@@ -164,9 +164,7 @@ public class SolrConverter {
             for (FacetField facetField : response.getFacetFields()) {
                 //only the TYPES facets is used in the handler, so no need to check the others
                 if(!facetField.getName().equals(TYPES)) continue;
-                for (FacetField.Count field : facetField.getValues()) {
-                    facets.add(new FacetContainer(field.getName(), field.getCount()));
-                }
+                facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
             }
 
             return new FireworksResult(entries, facets, response.getResults().getNumFound());
@@ -256,7 +254,7 @@ public class SolrConverter {
             facetMapping.setSpeciesFacet(getFacets(response.getFacetField(SPECIES_FACET), queryObject.getSpecies()));
             facetMapping.setTypeFacet(getFacets(response.getFacetField(TYPES), queryObject.getTypes()));
             facetMapping.setKeywordFacet(getFacets(response.getFacetField(KEYWORDS), queryObject.getKeywords()));
-            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENTS), queryObject.getCompartment()));
+            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENT_FACET), queryObject.getCompartment()));
             return facetMapping;
         }
         return null;
@@ -300,16 +298,14 @@ public class SolrConverter {
             for (FacetField facetField : facetFields) {
                 List<FacetContainer> available = new ArrayList<>();
                 List<FacetField.Count> fields = facetField.getValues();
-                for (FacetField.Count field : fields) {
-                    available.add(new FacetContainer(field.getName(), field.getCount()));
-                }
+                available.addAll(fields.stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
                 if (facetField.getName().equals(SPECIES_FACET)) {
                     facetMapping.setSpeciesFacet(new FacetList(available));
                 } else if (facetField.getName().equals(TYPES)) {
                     facetMapping.setTypeFacet(new FacetList(available));
                 } else if (facetField.getName().equals(KEYWORDS)) {
                     facetMapping.setKeywordFacet(new FacetList(available));
-                } else if (facetField.getName().equals(COMPARTMENTS)) {
+                } else if (facetField.getName().equals(COMPARTMENT_FACET)) {
                     facetMapping.setCompartmentFacet(new FacetList(available));
                 }
             }
@@ -343,7 +339,6 @@ public class SolrConverter {
 
                 interaction.setScore(Double.parseDouble((String) scores.get(i)));
 
-                String accessionB = (String) accessions.get(i);
                 interaction.setAccession((String) accessions.get(i));
                 String[] reactomeNames = ((String) reactomeInteractorNames.get(i)).split("#");
                 String[] reactomeIds = ((String) reactomeInteractorIds.get(i)).split("#");
@@ -389,21 +384,26 @@ public class SolrConverter {
             entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
             entry.setIsDisease((Boolean) solrDocument.getFieldValue(IS_DISEASE));
             //Only the first species is taken into account
-            Collection species = solrDocument.getFieldValues(SPECIES);
+            Collection<Object> species = solrDocument.getFieldValues(SPECIES);
             if (species != null) {
-                entry.setSpecies((String) species.toArray()[0]);
+                entry.setSpecies(species.stream().map(Object::toString).collect(Collectors.toList()));
             }
             entry.setDatabaseName((String) solrDocument.getFieldValue(DATABASE_NAME));
             entry.setReferenceURL((String) solrDocument.getFieldValue(REFERENCE_URL));
             entry.setRegulatorId((String) solrDocument.getFieldValue(REGULATOR_ID));
             entry.setRegulatedEntityId((String) solrDocument.getFieldValue(REGULATED_ENTITY_ID));
-            if (solrDocument.containsKey(COMPARTMENTS)) {
-                Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENTS);
-                List<String> list = new ArrayList<>();
-                for (Object compartment : compartments) {
-                    list.add(compartment.toString());
+            if (solrDocument.containsKey(COMPARTMENT_NAME)) {
+                Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENT_NAME);
+                if (compartments != null && !compartments.isEmpty()) {
+                    entry.setCompartmentNames(compartments.stream().map(Object::toString).collect(Collectors.toList()));
                 }
-                entry.setCompartmentNames(list);
+            }
+
+            if (solrDocument.containsKey(COMPARTMENT_ACCESSION)) {
+                Collection<Object> compartmentsAccessions = solrDocument.getFieldValues(COMPARTMENT_ACCESSION);
+                if (compartmentsAccessions != null && !compartmentsAccessions.isEmpty()) {
+                    entry.setCompartmentAccession(compartmentsAccessions.stream().map(Object::toString).collect(Collectors.toList()));
+                }
             }
 
             if (highlighting != null && highlighting.containsKey(solrDocument.getFieldValue(DB_ID))) {
@@ -517,8 +517,11 @@ public class SolrConverter {
                                 Entry entry = buildEntry(solrDocument, highlighting);
                                 entries.add(entry);
                             }
-                            resultList.add(new Result(entries, group.getGroupValue(), solrDocumentList.getNumFound(), entries.size()));
-                            rowCounter += entries.size();
+                            if(!entries.isEmpty()) {
+                                // An empty list was added to the GroupedResult then the web results become odd with blank blocks
+                                resultList.add(new Result(entries, group.getGroupValue(), solrDocumentList.getNumFound(), entries.size()));
+                                rowCounter += entries.size();
+                            }
                         }
                         return new GroupedResult(resultList, rowCounter, groupCommand.getNGroups(), groupCommand.getMatches());
                     }
@@ -539,9 +542,7 @@ public class SolrConverter {
             List<String> list = new ArrayList<>();
             List<SpellCheckResponse.Collation> suggestions = response.getSpellCheckResponse().getCollatedResults();
             if (suggestions != null && !suggestions.isEmpty()) {
-                for (SpellCheckResponse.Collation suggestion : suggestions) {
-                    list.add(suggestion.getCollationQueryString());
-                }
+                list.addAll(suggestions.stream().map(SpellCheckResponse.Collation::getCollationQueryString).collect(Collectors.toList()));
                 return list;
             }
         }
