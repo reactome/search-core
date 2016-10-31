@@ -5,7 +5,7 @@
     <artifactId>search-core</artifactId>
 
     <packaging>jar</packaging>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>search-core</name>
 
     <description>
