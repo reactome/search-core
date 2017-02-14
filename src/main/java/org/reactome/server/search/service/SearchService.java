@@ -179,6 +179,7 @@ public class SearchService {
      * @throws SolrSearcherException
      */
     public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
+        cluster = cluster == null ? true : cluster;
         if (cluster) {
             return solrConverter.getClusteredEntries(queryObject);
         } else {
