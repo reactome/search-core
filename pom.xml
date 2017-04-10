@@ -33,7 +33,7 @@
 
     <properties>
         <reactome.version>1.2.4</reactome.version>
-        <interactors.version>1.0.6</interactors.version>
+        <interactors.version>1.0.7</interactors.version>
         <solr.version>6.1.0</solr.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <aspectj.version>1.8.8</aspectj.version>
