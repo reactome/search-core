@@ -5,8 +5,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +19,6 @@ import java.util.stream.Collectors;
  */
 @Component
 public class SolrConverter {
-
-    private final static Logger logger = LoggerFactory.getLogger("");
 
     @Autowired
     private SolrCore solrCore;
@@ -72,7 +68,6 @@ public class SolrConverter {
      *
      * @param query String of the query parameter given
      * @return List(String) of Suggestions
-     * @throws SolrSearcherException
      */
     public List<String> getAutocompleteSuggestions(String query) throws SolrSearcherException {
         List<String> aux = new LinkedList<>();
@@ -96,7 +91,6 @@ public class SolrConverter {
      *
      * @param query String of the query parameter given
      * @return List(String) of Suggestions
-     * @throws SolrSearcherException
      */
     public List<String> getSpellcheckSuggestions(String query) throws SolrSearcherException {
         List<String> aux = new LinkedList<>();
@@ -119,7 +113,6 @@ public class SolrConverter {
      * Method gets all faceting information for the fields: species, types, compartments, keywords
      *
      * @return FacetMapping
-     * @throws SolrSearcherException
      */
     public FacetMapping getFacetingInformation() throws SolrSearcherException {
         return getFacetMap(solrCore.getFacetingInformation());
@@ -130,7 +123,6 @@ public class SolrConverter {
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments)
      * @return FacetMapping
-     * @throws SolrSearcherException
      */
     public FacetMapping getFacetingInformation(Query queryObject) throws SolrSearcherException {
         return getFacetMap(solrCore.getFacetingInformation(queryObject), queryObject);
@@ -172,25 +164,11 @@ public class SolrConverter {
         return null;
     }
 
-    public InteractorEntry getInteractor(String accession) throws SolrSearcherException {
-        if (accession != null && !accession.isEmpty()) {
-            QueryResponse response = solrCore.searchInteractors(accession);
-            List<SolrDocument> solrDocuments = response.getResults();
-            if (solrDocuments != null && !solrDocuments.isEmpty() && solrDocuments.get(0) != null) {
-                return buildInteractorEntry(solrDocuments.get(0));
-            }
-        }
-
-        logger.warn("No Entry found for this id: " + accession);
-        return null;
-    }
-
     /**
      * Converts Solr QueryResponse to GroupedResult
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return GroupedResponse
-     * @throws SolrSearcherException
      */
     public GroupedResult getClusteredEntries(Query queryObject) throws SolrSearcherException {
 
@@ -208,7 +186,6 @@ public class SolrConverter {
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return GroupedResponse
-     * @throws SolrSearcherException
      */
     public GroupedResult getEntries(Query queryObject) throws SolrSearcherException {
 
@@ -296,69 +273,25 @@ public class SolrConverter {
             facetMapping.setTotalNumFount(queryResponse.getResults().getNumFound());
             List<FacetField> facetFields = queryResponse.getFacetFields();
             for (FacetField facetField : facetFields) {
-                List<FacetContainer> available = new ArrayList<>();
                 List<FacetField.Count> fields = facetField.getValues();
-                available.addAll(fields.stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
-                if (facetField.getName().equals(SPECIES_FACET)) {
-                    facetMapping.setSpeciesFacet(new FacetList(available));
-                } else if (facetField.getName().equals(TYPES)) {
-                    facetMapping.setTypeFacet(new FacetList(available));
-                } else if (facetField.getName().equals(KEYWORDS)) {
-                    facetMapping.setKeywordFacet(new FacetList(available));
-                } else if (facetField.getName().equals(COMPARTMENT_FACET)) {
-                    facetMapping.setCompartmentFacet(new FacetList(available));
+                List<FacetContainer> available = fields.stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList());
+                switch (facetField.getName()) {
+                    case SPECIES_FACET:
+                        facetMapping.setSpeciesFacet(new FacetList(available));
+                        break;
+                    case TYPES:
+                        facetMapping.setTypeFacet(new FacetList(available));
+                        break;
+                    case KEYWORDS:
+                        facetMapping.setKeywordFacet(new FacetList(available));
+                        break;
+                    case COMPARTMENT_FACET:
+                        facetMapping.setCompartmentFacet(new FacetList(available));
+                        break;
                 }
             }
             return facetMapping;
         }
-        return null;
-    }
-
-    private InteractorEntry buildInteractorEntry(SolrDocument solrDocument) {
-        if (solrDocument != null && !solrDocument.isEmpty()) {
-            InteractorEntry interactorEntry = new InteractorEntry();
-            String accession = (String) solrDocument.getFieldValue(DB_ID);
-            interactorEntry.setAccession(accession);
-            interactorEntry.setName((String) solrDocument.getFieldValue(NAME));
-            interactorEntry.setUrl((String) solrDocument.getFieldValue(REFERENCE_URL));
-            List<Object> reactomeInteractorIds = (List<Object>) solrDocument.getFieldValues("reactomeInteractorIds");
-            List<Object> reactomeInteractorNames = (List<Object>) solrDocument.getFieldValues("reactomeInteractorNames");
-            List<Object> scores = (List<Object>) solrDocument.getFieldValues("scores");
-            List<Object> interactionIds = (List<Object>) solrDocument.getFieldValues("interactionsIds");
-            List<Object> accessions = (List<Object>) solrDocument.getFieldValues("interactorAccessions");
-
-            List<Interactor> interactionList = new ArrayList<>(interactionIds.size());
-            for (int i = 0; i < interactionIds.size(); i++) {
-                Interactor interaction = new Interactor();
-
-                String[] interactionsEvidencesArray = ((String) interactionIds.get(i)).split("#");
-                interaction.setInteractionEvidences(Arrays.asList(interactionsEvidencesArray));
-
-//                todo !!!!!!!!!!!!!! remove interactors toolbox
-//                interaction.setEvidencesURL(Toolbox.getEvidencesURL(interaction.getInteractionEvidences(), InteractorConstant.STATIC));
-
-                interaction.setScore(Double.parseDouble((String) scores.get(i)));
-
-                interaction.setAccession((String) accessions.get(i));
-                String[] reactomeNames = ((String) reactomeInteractorNames.get(i)).split("#");
-                String[] reactomeIds = ((String) reactomeInteractorIds.get(i)).split("#");
-                List<InteractorReactomeEntry> reactomeEntries = new ArrayList<>();
-                for (int j = 0; j < reactomeIds.length; j++) {
-                    reactomeEntries.add(new InteractorReactomeEntry(reactomeIds[j], reactomeNames[j]));
-                }
-                interaction.setInteractorReactomeEntries(reactomeEntries);
-
-//                todo !!!!!!!!!!!!! remove interactors toolbox
-//                interaction.setAccessionURL(Toolbox.getAccessionURL(accessionB, InteractorConstant.STATIC));
-
-                interactionList.add(interaction);
-            }
-
-            interactorEntry.setInteractions(interactionList);
-
-            return interactorEntry;
-        }
-
         return null;
     }
 
@@ -539,11 +472,9 @@ public class SolrConverter {
      */
     private List<String> suggestionHelper(QueryResponse response) {
         if (response != null && response.getSpellCheckResponse() != null) {
-            List<String> list = new ArrayList<>();
             List<SpellCheckResponse.Collation> suggestions = response.getSpellCheckResponse().getCollatedResults();
             if (suggestions != null && !suggestions.isEmpty()) {
-                list.addAll(suggestions.stream().map(SpellCheckResponse.Collation::getCollationQueryString).collect(Collectors.toList()));
-                return list;
+                return suggestions.stream().map(SpellCheckResponse.Collation::getCollationQueryString).collect(Collectors.toList());
             }
         }
         return null;

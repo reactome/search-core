@@ -5,13 +5,12 @@
     <artifactId>search-core</artifactId>
 
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>search-core</name>
 
     <description>
-        The Indexer Project is used to import Reactome and Interactor data into Solr and optionally create a reduced version of this data as xml.
+        The Indexer Project is used to import Reactome data into Solr and optionally create a reduced version of this data as xml.
     </description>
-    <!--todo <url>//</url>-->
     <organization>
         <name>The European Bioinformatics Institute</name>
         <url>http://www.ebi.ac.uk/</url>
@@ -33,7 +32,6 @@
 
     <properties>
         <reactome.version>1.2.4</reactome.version>
-        <interactors.version>1.0.8-SNAPSHOT</interactors.version>
         <solr.version>6.1.0</solr.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <aspectj.version>1.8.8</aspectj.version>
@@ -61,7 +59,7 @@
             <artifactId>reactome-base</artifactId>
             <version>${reactome.version}</version>
         </dependency>
-        <!-- Solr 5.3.1 -->
+        <!-- Solr -->
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
@@ -114,7 +112,7 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--Logging: will trasitively add logback core and slf4j-api-->
+        <!--Logging: will transitively add logback core and slf4j-api-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

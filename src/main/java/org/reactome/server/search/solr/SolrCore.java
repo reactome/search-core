@@ -48,7 +48,6 @@ class SolrCore {
     private final static String FACET_REQUEST_HANDLER = "/facet";
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
-    private final static String INTERACTOR_REQUEST_HANDLER = "/interactor";
     private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
@@ -114,7 +113,6 @@ class SolrCore {
      *
      * @param query String of the query parameter given
      * @return true if there are results
-     * @throws SolrSearcherException
      */
     boolean existsQuery(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
@@ -125,21 +123,12 @@ class SolrCore {
         return queryResponse.getResults().getNumFound() > 0;
     }
 
-    QueryResponse searchInteractors(String query) throws SolrSearcherException {
-        SolrQuery parameters = new SolrQuery();
-
-        parameters.setRequestHandler(INTERACTOR_REQUEST_HANDLER);
-        parameters.setQuery(query);
-        return querysolrClient(parameters);
-    }
-
     /**
      * Converts all parameters of the given queryObject to Solr parameters and queries Solr Server
      * With this search handler the result will be clustered
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse searchCluster(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
@@ -164,7 +153,6 @@ class SolrCore {
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse search(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
@@ -189,7 +177,6 @@ class SolrCore {
      *
      * @param query String of the query parameter given
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse getAutocompleteSuggestions(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
@@ -204,7 +191,6 @@ class SolrCore {
      *
      * @param query String of the query parameter given
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse getSpellcheckSuggestions(String query) throws SolrSearcherException {
         SolrQuery solrQuery = new SolrQuery();
@@ -222,7 +208,6 @@ class SolrCore {
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments)
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
@@ -247,7 +232,6 @@ class SolrCore {
      * Method gets all faceting information for the fields: species, types, compartments, keywords
      *
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     QueryResponse getFacetingInformation() throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
@@ -271,7 +255,6 @@ class SolrCore {
 
         return querysolrClient(parameters);
     }
-
 
     /**
      * Helper Method to construct the filter that is sent to Solr
@@ -297,7 +280,6 @@ class SolrCore {
      *
      * @param query SolrQuery Object
      * @return QueryResponse
-     * @throws SolrSearcherException
      */
     private QueryResponse querysolrClient(SolrQuery query) throws SolrSearcherException {
         try {

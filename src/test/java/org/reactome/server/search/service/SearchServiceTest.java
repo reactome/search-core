@@ -31,7 +31,6 @@ import static org.junit.Assume.assumeTrue;
 public class SearchServiceTest {
 
     private final static Logger logger = LoggerFactory.getLogger("testLogger");
-    private static final String accession = "P41227";
     private static final String suggest = "apoptos";
     private static final String spellcheck = "appoptosis";
     private static Query query;
@@ -101,20 +100,6 @@ public class SearchServiceTest {
         logger.info("GraphDb execution time: " + time + "ms");
         Set<String> suggestions = new HashSet<>(suggestionsList);
         assertTrue(suggestions.contains("apoptosis"));
-        logger.info("Finished");
-    }
-
-    @Test
-    public void testGetInteractionDetail() throws SolrSearcherException {
-        logger.info("Started testing searchService.getInteractor");
-        long start, time;
-        start = System.currentTimeMillis();
-        InteractorEntry interactorEntry = searchService.getInteractionDetail(accession);
-        time = System.currentTimeMillis() - start;
-        logger.info("GraphDb execution time: " + time + "ms");
-        assertNotNull(interactorEntry);
-        assertNotNull(interactorEntry.getInteractions());
-        assertTrue(6 <= interactorEntry.getInteractions().size());
         logger.info("Finished");
     }
 

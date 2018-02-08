@@ -13,8 +13,6 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 
-import java.io.IOException;
-
 /**
  * Authentication Interceptor is used for providing credentials to Solr
  *
@@ -23,7 +21,7 @@ import java.io.IOException;
 public class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
 
     @Override
-    public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+    public void process(final HttpRequest request, final HttpContext context) throws HttpException {
         AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
 
         if (authState.getAuthScheme() == null) {

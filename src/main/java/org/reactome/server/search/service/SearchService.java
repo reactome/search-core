@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +43,6 @@ public class SearchService {
      * @param page     page number
      * @param cluster  clustered or not clustered result
      * @return Grouped result
-     * @throws SolrSearcherException
      */
     public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
@@ -67,7 +65,6 @@ public class SearchService {
      *
      * @param queryObject query and filter (species types keywords compartments)
      * @return FacetMapping
-     * @throws SolrSearcherException
      */
     public FacetMapping getFacetingInformation(Query queryObject) throws SolrSearcherException {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
@@ -122,7 +119,6 @@ public class SearchService {
      * Method for providing Faceting information for Species,Types,Keywords and Compartments
      *
      * @return FacetMapping
-     * @throws SolrSearcherException
      */
     public FacetMapping getTotalFacetingInformation() throws SolrSearcherException {
         return solrConverter.getFacetingInformation();
@@ -133,7 +129,6 @@ public class SearchService {
      *
      * @param query Term (Snippet) you want to have auto-completed
      * @return List(String) of suggestions if solr is able to provide some
-     * @throws SolrSearcherException
      */
     public List<String> getAutocompleteSuggestions(String query) throws SolrSearcherException {
         if (query != null && !query.isEmpty()) {
@@ -147,24 +142,10 @@ public class SearchService {
      *
      * @param query Term you searched for
      * @return List(String) of suggestions if solr is able to provide some
-     * @throws SolrSearcherException
      */
     public List<String> getSpellcheckSuggestions(String query) throws SolrSearcherException {
         if (query != null && !query.isEmpty()) {
             return solrConverter.getSpellcheckSuggestions(query);
-        }
-        return null;
-    }
-
-    public InteractorEntry getInteractionDetail(String query) throws SolrSearcherException {
-        if (query != null && !query.isEmpty()) {
-            InteractorEntry entry = solrConverter.getInteractor(query);
-            if (entry != null) {
-                Collections.sort(entry.getInteractions());
-                Collections.reverse(entry.getInteractions());
-
-                return entry;
-            }
         }
         return null;
     }
@@ -176,7 +157,6 @@ public class SearchService {
      * @param queryObject QueryObject (query, species, types, keywords, compartments, start, rows)
      *                    start specifies the starting point (offset) and rows the amount of entries returned in total
      * @return GroupedResult
-     * @throws SolrSearcherException
      */
     public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
         cluster = cluster == null ? true : cluster;
@@ -193,7 +173,6 @@ public class SearchService {
      * @param queryObject QueryObject (query, species, types, keywords, compartments, start, rows)
      *                    start specifies the starting point (offset) and rows the amount of entries returned in total
      * @return FireworksResult
-     * @throws SolrSearcherException
      */
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
         List<String> species = queryObject.getSpecies();

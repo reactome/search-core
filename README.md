@@ -9,7 +9,7 @@ Reactome Search is a project that optimizes the queries in Reactome Website. Bas
 * Search: Spring MVC Application which queries SolR documents in order to optimize the searching for Reactome Pathway Browser.
 
 #### Search Core
-The Search Core project provides access to the data in SolR based on the search term, faceting, clustered, etc. It also takes into account interactors.
+The Search Core project provides access to the data in SolR based on the search term, faceting, clustered, etc.
 
 #### Key Classes
 
