@@ -175,8 +175,29 @@ public class SearchService {
      * @return FireworksResult
      */
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
-        List<String> species = queryObject.getSpecies();
         return solrConverter.getFireworksResult(queryObject);
+    }
+
+    /**
+     * Getting diagram occurrences, diagrams and subpathways multivalue fields have been added to the document.
+     * Diagrams hold where the entity is present.
+     * Occurrences hold a "isInDiagram:occurrences"
+     *
+     * This is a two steps search:
+     * - Submit term and diagram and retrieve a list of documents (getDiagramResult)
+     * - Retrieve list of occurrences (getDiagramOccurrencesResults)
+     */
+    public DiagramResult getDiagrams(Query queryObject) throws SolrSearcherException {
+        return solrConverter.getDiagrams(queryObject);
+    }
+
+    /**
+     * This is stored in the occurrences multivalue field having diagram:isInDiagram:[list of subpathways occurrences]
+     *
+     * @param queryObject - has the stId of the element we are search and the diagram to filter
+     */
+    public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
+        return solrConverter.getDiagramOccurrencesResult(queryObject);
     }
 
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {

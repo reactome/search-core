@@ -49,6 +49,8 @@ class SolrCore {
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
     private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
+    private final static String DIAGRAM_REQUEST_HANDLER = "/diagrams";
+    private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagramOccurrences";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
@@ -59,6 +61,8 @@ class SolrCore {
     private final static String KEYWORD_FACET = "keywords_facet";
     private final static String COMPARTMENT_FACET = "compartment_facet";
     private final static String FIREWORK_SPECIES = "fireworksSpecies";
+    private final static String DIAGRAMS = "diagrams";
+    private final static String DIAGRAMOCCURRENCES = "occurrences";
 
     private final static String SPECIES_TAG = "{!tag=sf}";
     private final static String TYPE_TAG = "{!tag=tf}";
@@ -253,6 +257,35 @@ class SolrCore {
         parameters.setRows(queryObject.getRows());
         parameters.setQuery(queryObject.getQuery());
 
+        return querysolrClient(parameters);
+    }
+
+    /**
+     * Getting all documents of a given term filtering by the Diagram stId where the user is
+     * @return QueryResponse
+     */
+    QueryResponse getDiagrams(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(DIAGRAM_REQUEST_HANDLER);
+        if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
+            parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
+        }
+        parameters.addFilterQuery(DIAGRAMS + ":" +queryObject.getFilter());
+        parameters.setStart(queryObject.getStart());
+        parameters.setRows(queryObject.getRows());
+        parameters.setQuery(queryObject.getQuery());
+        return querysolrClient(parameters);
+    }
+
+    /**
+     * Getting document based on the given stId (entry selected by the user).
+     * Only subpathways field is returned.
+     */
+    QueryResponse getDiagramOccurrences(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(DIAGRAM_OCCURRENCES_REQUEST_HANDLER);
+        parameters.setQuery(queryObject.getQuery());
+        parameters.setFields(DIAGRAMOCCURRENCES); // solr response will contain only DIAGRAMOCCURRENCES.
         return querysolrClient(parameters);
     }
 

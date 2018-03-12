@@ -11,6 +11,7 @@ import java.util.List;
 public class Query {
 
     private String query;
+    private String filter; //fq
     private List<String> species;
     private List<String> types;
     private List<String> keywords;
@@ -20,6 +21,23 @@ public class Query {
 
     public Query() {
 
+    }
+
+    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
+        this.query = query;
+        this.species = species;
+        this.types = types;
+        this.keywords = keywords;
+        this.compartment = compartment;
+    }
+
+    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
+        this.query = query;
+        this.filter = filter;
+        this.species = species;
+        this.types = types;
+        this.keywords = keywords;
+        this.compartment = compartment;
     }
 
     public Query(String query, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
@@ -32,15 +50,16 @@ public class Query {
         this.rows = rows;
     }
 
-    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
+    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
         this.query = query;
+        this.filter = filter;
         this.species = species;
         this.types = types;
         this.keywords = keywords;
         this.compartment = compartment;
+        this.start = start;
+        this.rows = rows;
     }
-
-
 
     public String getQuery() {
         return query;
@@ -48,6 +67,14 @@ public class Query {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 
     public List<String> getSpecies() {

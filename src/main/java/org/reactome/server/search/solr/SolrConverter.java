@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Converts a Solr QueryResponse into Objects provided by Project Models
@@ -53,6 +54,8 @@ public class SolrConverter {
     private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
 
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
+
+    private static final String OCCURRENCES = "occurrences";
 
 
     /**
@@ -165,13 +168,79 @@ public class SolrConverter {
     }
 
     /**
+     * Getting diagram occurrences, diagrams and subpathways multivalue fields have been added to the document.
+     * Diagrams hold where the entity is present.
+     * Subpathways hold a "isInDiagram:subpathways"
+     *
+     * This is a two steps search:
+     *   - Submit term and diagram and retrieve a list of documents (getDiagramResult)
+     *   - Retrieve list of subpathways (getDiagramEncapsulatedResult)
+     */
+    public DiagramResult getDiagrams(Query queryObject) throws SolrSearcherException {
+        QueryResponse response = solrCore.getDiagrams(queryObject);
+        if (response != null && queryObject != null) {
+            List<SolrDocument> solrDocuments = response.getResults();
+            List<Entry> entries = new ArrayList<>();
+            for (SolrDocument solrDocument : solrDocuments) {
+                Entry entry = new Entry();
+                if (solrDocument.containsKey(ST_ID)) {
+                    entry.setStId((String) solrDocument.getFieldValue(ST_ID));
+                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
+                } else {
+                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
+                }
+                entry.setName((String) solrDocument.getFieldValue(NAME));
+                entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
+
+                if (solrDocument.containsKey(COMPARTMENT_NAME)) {
+                    Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENT_NAME);
+                    if (compartments != null && !compartments.isEmpty()) {
+                        entry.setCompartmentNames(compartments.stream().map(Object::toString).collect(Collectors.toList()));
+                    }
+                }
+
+                entries.add(entry);
+            }
+            return new DiagramResult(entries, response.getResults().getNumFound());
+        }
+        return null;
+    }
+
+    /**
+     * This is stored in the subpathways multivalue field having diagram:isInDiagram:[list of subpathways]
+     * @param queryObject - has the stId of the element we are search and the diagram to filter
+     */
+    public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
+        DiagramOccurrencesResult ret = null;
+        QueryResponse response = solrCore.getDiagramOccurrences(queryObject);
+        if (response != null && queryObject != null) {
+            String searching = queryObject.getFilter();
+            List<SolrDocument> solrDocuments = response.getResults();
+            for (SolrDocument solrDocument : solrDocuments) {
+                if (solrDocument.containsKey(OCCURRENCES)) {
+                    List<String> subpathways = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                    for (String subpathway : subpathways) {
+                        if(subpathway.startsWith(searching)){
+                            // Pathway:Bool(IsInDiagram):CSV of subpathways
+                            String[] line = subpathway.split(":");
+                            List<String> sb = null;
+                            if(!line[2].equals("null")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
+                            ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), sb);
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
+    /**
      * Converts Solr QueryResponse to GroupedResult
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return GroupedResponse
      */
     public GroupedResult getClusteredEntries(Query queryObject) throws SolrSearcherException {
-
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
             QueryResponse queryResponse = solrCore.searchCluster(queryObject);
             if (queryResponse != null) {
@@ -188,7 +257,6 @@ public class SolrConverter {
      * @return GroupedResponse
      */
     public GroupedResult getEntries(Query queryObject) throws SolrSearcherException {
-
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
             QueryResponse queryResponse = solrCore.search(queryObject);
             if (queryResponse != null) {
@@ -224,7 +292,6 @@ public class SolrConverter {
      * @return FacetMapping
      */
     private FacetMapping getFacetMap(QueryResponse response, Query queryObject) {
-
         if (response != null && queryObject != null) {
             FacetMapping facetMapping = new FacetMapping();
             facetMapping.setTotalNumFount(response.getResults().getNumFound());
@@ -267,7 +334,6 @@ public class SolrConverter {
      * @return FacetMapping
      */
     private FacetMapping getFacetMap(QueryResponse queryResponse) {
-
         if (queryResponse != null && queryResponse.getFacetFields() != null && !queryResponse.getFacetFields().isEmpty()) {
             FacetMapping facetMapping = new FacetMapping();
             facetMapping.setTotalNumFount(queryResponse.getResults().getNumFound());
@@ -382,7 +448,6 @@ public class SolrConverter {
      * @param snippets     Map containing the Highlighted Strings
      */
     private void setHighlighting(Entry entry, SolrDocument solrDocument, Map<String, List<String>> snippets) {
-
         if (snippets.containsKey(NAME) && snippets.get(NAME) != null && !snippets.get(NAME).isEmpty()) {
             entry.setName(snippets.get(NAME).get(0));
         } else {

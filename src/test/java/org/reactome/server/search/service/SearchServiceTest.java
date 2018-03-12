@@ -158,16 +158,13 @@ public class SearchServiceTest {
         keywords.add("binds");
 
         Query query = new Query(searchTerm, species, types, compartment, keywords);
-
         SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
-
         assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 2);
-
     }
 
     @Test
     public void testGetEntriesNameGram() throws SolrSearcherException {
-        // Do not initialize as singelton list
+        // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         Query query = new Query("transp", species, null, null, null);
@@ -178,7 +175,7 @@ public class SearchServiceTest {
 
     @Test
     public void testFireworks() throws SolrSearcherException {
-        // Do not initialize as singelton list
+        // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         Query query = new Query("PTEN", species, Collections.singletonList("Protein"), null, null);
@@ -186,10 +183,9 @@ public class SearchServiceTest {
         assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
     }
 
-
     @Test
     public void testFireworksSpecies() throws SolrSearcherException {
-        // Do not initialize as singelton list
+        // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Gallus gallus");
         Query query = new Query("PG", species, null, null, null);
@@ -200,4 +196,34 @@ public class SearchServiceTest {
         assertTrue("14 species or more are expected", 14 <= fireworksResult.getEntries().iterator().next().getFireworksSpecies().size());
     }
 
+    @Test
+    public void testDiagram() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        String term = "MAD1";
+        String diagram = "R-HSA-9006927";
+        Query query = new Query(term, diagram, species, null, null, null);
+        DiagramResult diagramResults = searchService.getDiagrams(query);
+
+        assertNotNull(diagramResults);
+        assertNotNull(diagramResults.getEntries());
+        assertTrue("5 or more entries are expected", 5 <= diagramResults.getFound());
+    }
+
+    @Test
+    public void testOccurrences() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        String termStId = "R-HSA-879382";
+        String diagram = "R-HSA-168164";
+        Query query = new Query(termStId, diagram,  species, null, null, null);
+        DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
+
+        assertNotNull(diagramOccurrencesResult);
+        assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+        assertNotNull(diagramOccurrencesResult.getOccurrences());
+        assertTrue("2 or more occurrences are expected", 2 <= diagramOccurrencesResult.getOccurrences().size());
+    }
 }
