@@ -201,14 +201,14 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        String term = "MAD1";
+        String term = "MAD";
         String diagram = "R-HSA-9006927";
         Query query = new Query(term, diagram, species, null, null, null);
         DiagramResult diagramResults = searchService.getDiagrams(query);
 
         assertNotNull(diagramResults);
         assertNotNull(diagramResults.getEntries());
-        assertTrue("5 or more entries are expected", 5 <= diagramResults.getFound());
+        assertTrue("2 or more entries are expected", 2 <= diagramResults.getFound());
     }
 
     @Test
@@ -224,7 +224,7 @@ public class SearchServiceTest {
         assertNotNull(diagramOccurrencesResult);
         assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
         assertNotNull(diagramOccurrencesResult.getOccurrences());
-        assertTrue("2 or more occurrences are expected", 6 <= diagramOccurrencesResult.getOccurrences().size());
+        assertTrue("1 occurrence is expected", 1 == diagramOccurrencesResult.getOccurrences().size());
     }
 
     @Test
