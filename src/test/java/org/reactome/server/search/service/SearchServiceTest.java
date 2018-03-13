@@ -224,6 +224,21 @@ public class SearchServiceTest {
         assertNotNull(diagramOccurrencesResult);
         assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
         assertNotNull(diagramOccurrencesResult.getOccurrences());
-        assertTrue("2 or more occurrences are expected", 2 <= diagramOccurrencesResult.getOccurrences().size());
+        assertTrue("2 or more occurrences are expected", 6 <= diagramOccurrencesResult.getOccurrences().size());
+    }
+
+    @Test
+    public void testNoOccurrences() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        String termStId = "R-HSA-879382";
+        String diagram = "R-HSA-6798695"; // 168164
+        Query query = new Query(termStId, diagram,  species, null, null, null);
+        DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
+
+        assertNotNull(diagramOccurrencesResult);
+        assertTrue("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+        assertNull(diagramOccurrencesResult.getOccurrences());
     }
 }
