@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -198,6 +199,13 @@ public class SearchService {
      */
     public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
         return solrConverter.getDiagramOccurrencesResult(queryObject);
+    }
+
+    /**
+     * Return a list of StableIds to be flagged in the Fireworks
+     */
+    public Collection<String> fireworksFlagging(Query queryObject) throws SolrSearcherException {
+        return solrConverter.fireworksFlagging(queryObject);
     }
 
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {

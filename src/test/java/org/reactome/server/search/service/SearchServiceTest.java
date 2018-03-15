@@ -202,7 +202,7 @@ public class SearchServiceTest {
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         String term = "MAD";
-        String diagram = "R-HSA-9006927";
+        String diagram = "R-HSA-8848021";
         Query query = new Query(term, diagram, species, null, null, null);
         DiagramResult diagramResults = searchService.getDiagrams(query);
 
@@ -240,5 +240,18 @@ public class SearchServiceTest {
         assertNotNull(diagramOccurrencesResult);
         assertTrue("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
         assertNull(diagramOccurrencesResult.getOccurrences());
+    }
+
+    @Test
+    public void testFireworksFlagging() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        String term = "PTEN";
+        Query query = new Query(term, species, null, null, null,0, 100);
+        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+
+        assertNotNull(fireworksFlaggingSet);
+        assertTrue("12 or more fireworks flagging stid are expected", 12 <= fireworksFlaggingSet.size());
     }
 }

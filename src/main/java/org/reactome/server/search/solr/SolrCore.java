@@ -49,6 +49,7 @@ class SolrCore {
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
     private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
+    private final static String FIREWORKS_FLAGGING_REQUEST_HANDLER = "/fireworksFlagging";
     private final static String DIAGRAM_REQUEST_HANDLER = "/diagrams";
     private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagramOccurrences";
 
@@ -63,6 +64,7 @@ class SolrCore {
     private final static String FIREWORK_SPECIES = "fireworksSpecies";
     private final static String DIAGRAMS = "diagrams";
     private final static String DIAGRAMOCCURRENCES = "occurrences";
+    private final static String LLPS = "llps";
 
     private final static String SPECIES_TAG = "{!tag=sf}";
     private final static String TYPE_TAG = "{!tag=tf}";
@@ -200,9 +202,6 @@ class SolrCore {
         SolrQuery solrQuery = new SolrQuery();
         solrQuery.setRequestHandler(SPELLCHECK_REQUEST_HANDLER);
         solrQuery.set(SOLR_SPELLCHECK_QUERY, query);
-//        if (query.toLowerCase().matches("^uniprot:[a-z0-9]+$") || query.toLowerCase().matches("^[a-z]+:[0-9]+$") ){
-//            solrQuery.set("spellcheck.collate", false);
-//        }
         return querysolrClient(solrQuery);
     }
 
@@ -286,6 +285,18 @@ class SolrCore {
         parameters.setRequestHandler(DIAGRAM_OCCURRENCES_REQUEST_HANDLER);
         parameters.setQuery(queryObject.getQuery());
         parameters.setFields(DIAGRAMOCCURRENCES); // solr response will contain only DIAGRAMOCCURRENCES.
+        return querysolrClient(parameters);
+    }
+
+    QueryResponse fireworksFlagging(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(FIREWORKS_FLAGGING_REQUEST_HANDLER);
+        parameters.setFields(LLPS);
+        parameters.setQuery(queryObject.getQuery());
+        if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
+            parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
+        }
+        parameters.setRows(queryObject.getRows());
         return querysolrClient(parameters);
     }
 

@@ -56,6 +56,7 @@ public class SolrConverter {
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
 
     private static final String OCCURRENCES = "occurrences";
+    private static final String LLPS = "llps";
 
 
     /**
@@ -224,7 +225,7 @@ public class SolrConverter {
                             // Pathway:Bool(IsInDiagram):CSV of subpathways
                             String[] line = subpathway.split(":");
                             List<String> sb = null;
-                            if(!line[2].equals("null")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
+                            if(!line[2].equals("#")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
                             ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), sb);
                         }
                     }
@@ -543,5 +544,19 @@ public class SolrConverter {
             }
         }
         return null;
+    }
+
+    public Set<String> fireworksFlagging(Query queryObject) throws SolrSearcherException {
+        Set<String> ret = new HashSet<>();
+        QueryResponse response = solrCore.fireworksFlagging(queryObject);
+        if (response != null && queryObject != null) {
+            List<SolrDocument> solrDocuments = response.getResults();
+            for (SolrDocument solrDocument : solrDocuments) {
+                if (solrDocument.containsKey(LLPS)) {
+                    ret.addAll(solrDocument.getFieldValues(LLPS).stream().map(Object::toString).collect(Collectors.toList()));
+                }
+            }
+        }
+        return ret;
     }
 }
