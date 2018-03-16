@@ -296,7 +296,8 @@ class SolrCore {
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         }
-        parameters.setRows(queryObject.getRows());
+        //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
+        parameters.setRows(100);
         return querysolrClient(parameters);
     }
 
