@@ -244,14 +244,36 @@ public class SearchServiceTest {
 
     @Test
     public void testFireworksFlagging() throws SolrSearcherException {
-        // Do not initialize as Collections.singletonList
-        List<String> species = new ArrayList<>();
-        species.add("Homo sapiens");
+        // By default filter query by Human and Entries without species
         String term = "PTEN";
-        Query query = new Query(term, species, null, null, null,0, 100);
+        Query query = new Query(term, null, null, null, null);
         Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
-        assertNotNull(fireworksFlaggingSet);
+        assertFalse(fireworksFlaggingSet.isEmpty());
         assertTrue("12 or more fireworks flagging stid are expected", 12 <= fireworksFlaggingSet.size());
+    }
+
+    @Test
+    public void testFireworksFlaggingAnotherSpecies() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Bos taurus");
+
+        String term = "NTN1";
+        Query query = new Query(term, species, null, null, null);
+        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+
+        assertFalse(fireworksFlaggingSet.isEmpty());
+    }
+
+    @Test
+    public void testFireworksFlaggingSmallMolecule() throws SolrSearcherException {
+        // By default filter query by Human and Entries without species
+        String term = "CHEBI:15377";
+        Query query = new Query(term, null, null, null, null);
+        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+
+        assertFalse(fireworksFlaggingSet.isEmpty());
+        assertTrue("4000 or more fireworks flagging stid are expected", 4000 <= fireworksFlaggingSet.size());
     }
 }
