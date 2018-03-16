@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -293,6 +294,11 @@ class SolrCore {
         parameters.setRequestHandler(FIREWORKS_FLAGGING_REQUEST_HANDLER);
         parameters.setFields(LLPS);
         parameters.setQuery(queryObject.getQuery());
+
+        if (queryObject.getSpecies() == null) queryObject.setSpecies(new ArrayList<>());
+        if (queryObject.getSpecies().isEmpty()) queryObject.getSpecies().add("Homo sapiens");
+        if (!queryObject.getSpecies().contains("Entries without species")) queryObject.getSpecies().add("Entries without species");
+
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         }
