@@ -21,46 +21,45 @@ import java.util.stream.Stream;
 @Component
 public class SolrConverter {
 
-    @Autowired
-    private SolrCore solrCore;
-
+    // REACTOME
     private static final String DB_ID = "dbId";
     private static final String ST_ID = "stId";
     private static final String NAME = "name";
-
     private static final String SPECIES = "species";
     private static final String SPECIES_FACET = "species_facet";
     private static final String TYPES = "type_facet";
     private static final String KEYWORDS = "keywords_facet";
     private static final String COMPARTMENT_FACET = "compartment_facet";
-
     private static final String SUMMATION = "summation";
     private static final String INFERRED_SUMMATION = "inferredSummation";
     private static final String REFERENCE_NAME = "referenceName";
     private static final String REFERENCE_IDENTIFIERS = "referenceIdentifiers";
-
     private static final String IS_DISEASE = "isDisease";
     private static final String EXACT_TYPE = "exactType";
-
     private static final String DATABASE_NAME = "databaseName";
     private static final String REFERENCE_URL = "referenceURL";
-
     private static final String REGULATOR = "regulator";
     private static final String REGULATED_ENTITY = "regulatedEntity";
     private static final String REGULATOR_ID = "regulatorId";
     private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
-
     private static final String COMPARTMENT_NAME = "compartmentName";
     private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
-
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
-
     private static final String OCCURRENCES = "occurrences";
     private static final String LLPS = "llps";
 
+    // TARGET
+    private static final String TARGET_IDENTIFIER = "identifier";
+    private static final String TARGET_ACCESSIONS = "accessions";
+    private static final String TARGET_GENENAMES = "geneNames";
+    private static final String TARGET_SYNONYMS = "synonyms";
+
+    @Autowired
+    private SolrCore solrCore;
 
     /**
      * Method for testing if a connection to Solr can be established
+     *
      * @return true if status is ok
      */
     public boolean ping() {
@@ -159,7 +158,7 @@ public class SolrConverter {
             List<FacetContainer> facets = new ArrayList<>();
             for (FacetField facetField : response.getFacetFields()) {
                 //only the TYPES facets is used in the handler, so no need to check the others
-                if(!facetField.getName().equals(TYPES)) continue;
+                if (!facetField.getName().equals(TYPES)) continue;
                 facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
             }
 
@@ -172,10 +171,10 @@ public class SolrConverter {
      * Getting diagram occurrences, diagrams and subpathways multivalue fields have been added to the document.
      * Diagrams hold where the entity is present.
      * Subpathways hold a "isInDiagram:subpathways"
-     *
+     * <p>
      * This is a two steps search:
-     *   - Submit term and diagram and retrieve a list of documents (getDiagramResult)
-     *   - Retrieve list of subpathways (getDiagramEncapsulatedResult)
+     * - Submit term and diagram and retrieve a list of documents (getDiagramResult)
+     * - Retrieve list of subpathways (getDiagramEncapsulatedResult)
      */
     public DiagramResult getDiagrams(Query queryObject) throws SolrSearcherException {
         QueryResponse response = solrCore.getDiagrams(queryObject);
@@ -209,6 +208,7 @@ public class SolrConverter {
 
     /**
      * This is stored in the subpathways multivalue field having diagram:isInDiagram:[list of subpathways]
+     *
      * @param queryObject - has the stId of the element we are search and the diagram to filter
      */
     public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
@@ -221,11 +221,11 @@ public class SolrConverter {
                 if (solrDocument.containsKey(OCCURRENCES)) {
                     List<String> subpathways = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
                     for (String subpathway : subpathways) {
-                        if(subpathway.startsWith(searching)){
+                        if (subpathway.startsWith(searching)) {
                             // Pathway:Bool(IsInDiagram):CSV of subpathways
                             String[] line = subpathway.split(":");
                             List<String> sb = null;
-                            if(!line[2].equals("#")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
+                            if (!line[2].equals("#")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
                             ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), sb);
                         }
                     }
@@ -516,7 +516,7 @@ public class SolrConverter {
                                 Entry entry = buildEntry(solrDocument, highlighting);
                                 entries.add(entry);
                             }
-                            if(!entries.isEmpty()) {
+                            if (!entries.isEmpty()) {
                                 // An empty list was added to the GroupedResult then the web results become odd with blank blocks
                                 resultList.add(new Result(entries, group.getGroupValue(), solrDocumentList.getNumFound(), entries.size()));
                                 rowCounter += entries.size();
@@ -559,4 +559,24 @@ public class SolrConverter {
         }
         return ret;
     }
+
+    public List<TargetEntry> getTargets(Query queryObject) {
+        List<TargetEntry> ret = new ArrayList<>();
+        QueryResponse response = solrCore.getTargets(queryObject);
+        List<SolrDocument> solrDocuments = response.getResults();
+        for (SolrDocument solrDocument : solrDocuments) {
+            TargetEntry targetEntry = new TargetEntry();
+            targetEntry.setIdentifier((String) solrDocument.getFieldValue(TARGET_IDENTIFIER));
+            targetEntry.setAccessions(solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList()));
+            if (solrDocument.containsKey(TARGET_GENENAMES)) {
+                targetEntry.setGeneNames(solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList()));
+            }
+            if (solrDocument.containsKey(TARGET_SYNONYMS)) {
+                targetEntry.setSynonyms(solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList()));
+            }
+            ret.add(targetEntry);
+        }
+        return ret;
+    }
+
 }

@@ -208,6 +208,13 @@ public class SearchService {
         return solrConverter.fireworksFlagging(queryObject);
     }
 
+    /**
+     * Return a list of Proteins that are in our scope for curation
+     */
+    public List<TargetEntry> getTargets(Query queryObject) {
+        return solrConverter.getTargets(queryObject);
+    }
+
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {
         Integer typeCount;
         if (query.getTypes() != null && !query.getTypes().isEmpty()) {

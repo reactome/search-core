@@ -276,4 +276,33 @@ public class SearchServiceTest {
         assertFalse(fireworksFlaggingSet.isEmpty());
         assertTrue("4000 or more fireworks flagging stid are expected", 4000 <= fireworksFlaggingSet.size());
     }
+
+    @Test
+    public void testTargetForReactome() throws SolrSearcherException {
+        // By default filter query by Human and Entries without species
+        String q = "E9PRG8AA A6NCF5 E9PRG8 A";
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        species.add("Entries without species");
+        Query query = new Query(q, species, null, null, null);
+        GroupedResult searchResult = searchService.getEntries(query, true);
+        assertTrue(searchResult.getRowCount() == 0);
+
+        List<TargetEntry> targets = searchService.getTargets(query);
+
+        Set<String> targetTerms = new HashSet<>();
+        for (TargetEntry targetEntry : targets) {
+            String[] terms = q.split("\\s+");
+            for (String singleTerm : terms) {
+                if (targetEntry.getIdentifier().equalsIgnoreCase(singleTerm) ||
+                        targetEntry.getAccessions().stream().anyMatch(singleTerm::equalsIgnoreCase) ||
+                        (targetEntry.getGeneNames() != null && targetEntry.getGeneNames().stream().anyMatch(singleTerm::equalsIgnoreCase)) ||
+                        (targetEntry.getSynonyms() != null && targetEntry.getSynonyms().stream().anyMatch(singleTerm::equalsIgnoreCase))) {
+                    targetTerms.add(singleTerm);
+                }
+            }
+        }
+
+        assertTrue(targetTerms.size() == 2);
+    }
 }

@@ -11,9 +11,9 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
-import org.apache.solr.common.util.NamedList;
 import org.reactome.server.search.domain.Query;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.util.PreemptiveAuthInterceptor;
@@ -41,6 +41,7 @@ class SolrCore {
     private final static Logger logger = LoggerFactory.getLogger("");
 
     private final SolrClient solrClient;
+    private final String solrCore;
 
     private final static String SEARCH_REQUEST_HANDLER = "/search";
     private final static String CLUSTERED_REQUEST_HANDLER = "/browse";
@@ -74,6 +75,8 @@ class SolrCore {
 
     private final static String ALL_FIELDS = "*:*";
 
+    private final static String TARGET_CORE = "target";
+
     /**
      * Constructor for Dependency Injection
      * InitializeSolrClient
@@ -83,9 +86,10 @@ class SolrCore {
      */
     @Autowired
     public SolrCore(@Value("${solr.host}") String url,
+                    @Value("${solr.core}") String solrCore,
                     @Value("${solr.user}") String user,
                     @Value("${solr.password}") String password) {
-
+        this.solrCore = solrCore;
         if (user != null && !user.isEmpty() && password != null && !password.isEmpty()) {
             HttpClientBuilder builder = HttpClientBuilder.create().addInterceptorFirst(new PreemptiveAuthInterceptor());
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -105,10 +109,10 @@ class SolrCore {
      */
     boolean ping() {
         try {
-            SolrPingResponse ping = solrClient.ping();
-            NamedList response = ping.getResponse();
-            String status = (String) response.get("status");
-            if (status.equals("OK")) return true;
+            SolrPing ping = new SolrPing();
+            SolrPingResponse rsp = ping.process(solrClient, solrCore);
+            int status = rsp.getStatus();
+            if (status == 0) return true;
         } catch (Exception e) {
             logger.error("Connection to Solr could not be established");
         }
@@ -308,6 +312,22 @@ class SolrCore {
     }
 
     /**
+     * Getting document based on the given stId (entry selected by the user).
+     * Only subpathways field is returned.
+     */
+    QueryResponse getTargets(Query queryObject) {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler("/search");
+        parameters.setQuery(queryObject.getQuery());
+        try {
+            return solrClient.query(TARGET_CORE, parameters);
+        } catch (IOException | SolrServerException e) {
+            // nothing here
+        }
+        return null;
+    }
+
+    /**
      * Helper Method to construct the filter that is sent to Solr
      *
      * @param facet     list of selected faceting parameters
@@ -334,11 +354,10 @@ class SolrCore {
      */
     private QueryResponse querysolrClient(SolrQuery query) throws SolrSearcherException {
         try {
-            return solrClient.query(query);
+            return solrClient.query(solrCore, query);
         } catch (IOException | SolrServerException e) {
             logger.error("Solr exception occurred with query: " + query, e);
             throw new SolrSearcherException("Solr exception occurred with query: " + query, e);
         }
     }
-
 }
