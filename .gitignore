@@ -3,7 +3,7 @@
 .idea
 logs
 
-*target*
+*target/*
 
 #*.jar
 *.war
