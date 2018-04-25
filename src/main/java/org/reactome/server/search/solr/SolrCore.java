@@ -14,6 +14,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.common.SolrException;
 import org.reactome.server.search.domain.Query;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.util.PreemptiveAuthInterceptor;
@@ -321,7 +322,7 @@ class SolrCore {
         parameters.setQuery(queryObject.getQuery());
         try {
             return solrClient.query(TARGET_CORE, parameters);
-        } catch (IOException | SolrServerException e) {
+        } catch (IOException | SolrServerException | SolrException e) {
             // nothing here
         }
         return null;
