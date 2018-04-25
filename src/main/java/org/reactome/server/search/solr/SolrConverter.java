@@ -563,18 +563,20 @@ public class SolrConverter {
     public List<TargetEntry> getTargets(Query queryObject) {
         List<TargetEntry> ret = new ArrayList<>();
         QueryResponse response = solrCore.getTargets(queryObject);
-        List<SolrDocument> solrDocuments = response.getResults();
-        for (SolrDocument solrDocument : solrDocuments) {
-            TargetEntry targetEntry = new TargetEntry();
-            targetEntry.setIdentifier((String) solrDocument.getFieldValue(TARGET_IDENTIFIER));
-            targetEntry.setAccessions(solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList()));
-            if (solrDocument.containsKey(TARGET_GENENAMES)) {
-                targetEntry.setGeneNames(solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList()));
+        if (response != null) {
+            List<SolrDocument> solrDocuments = response.getResults();
+            for (SolrDocument solrDocument : solrDocuments) {
+                TargetEntry targetEntry = new TargetEntry();
+                targetEntry.setIdentifier((String) solrDocument.getFieldValue(TARGET_IDENTIFIER));
+                targetEntry.setAccessions(solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList()));
+                if (solrDocument.containsKey(TARGET_GENENAMES)) {
+                    targetEntry.setGeneNames(solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList()));
+                }
+                if (solrDocument.containsKey(TARGET_SYNONYMS)) {
+                    targetEntry.setSynonyms(solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList()));
+                }
+                ret.add(targetEntry);
             }
-            if (solrDocument.containsKey(TARGET_SYNONYMS)) {
-                targetEntry.setSynonyms(solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList()));
-            }
-            ret.add(targetEntry);
         }
         return ret;
     }
