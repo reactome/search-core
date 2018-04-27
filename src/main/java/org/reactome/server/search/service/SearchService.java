@@ -1,5 +1,14 @@
 package org.reactome.server.search.service;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.solr.SolrConverter;
@@ -8,9 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.reactome.server.search.util.ReportInformationEnum.*;
 
 /**
  * Search Service acts as api between the Controller and Solr / Database
@@ -48,7 +61,7 @@ public class SearchService {
     public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
-            query = new Query(query.getQuery(), null, null, null, null);
+            query = new Query(query.getQuery(), null, null, null, null, query.getReportInfo());
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
@@ -56,7 +69,42 @@ public class SearchService {
             GroupedResult groupedResult = getEntries(query, cluster);
             return new SearchResult(facetMapping, groupedResult, getHighestResultCount(groupedResult), query.getRows());
         }
+
+        // No results found, check for targets and incorporate them in the SearchResult if present.
+        Set<TargetResult> targets = getTargets(query);
+        if (!targets.isEmpty()) {
+            doAsyncReport(query.getReportInfo(), targets);
+            return new SearchResult(targets);
+        }
+
         return null;
+    }
+
+    /**
+     * This Method gets multiple entries for a specific query while considering the filter information
+     * the entries will be returned grouped into types and sorted by relevance (depending on the chosen solr properties)
+     *
+     * @param queryObject QueryObject (query, species, types, keywords, compartments, start, rows)
+     *                    start specifies the starting point (offset) and rows the amount of entries returned in total
+     * @return GroupedResult
+     */
+    public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
+        GroupedResult ret;
+        cluster = cluster == null ? true : cluster;
+        if (cluster) {
+            ret = solrConverter.getClusteredEntries(queryObject);
+        } else {
+            ret = solrConverter.getEntries(queryObject);
+        }
+
+        if (ret != null && ret.getRowCount() == 0) {
+            Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
+            if (!targetResults.isEmpty()) {
+                doAsyncReport(queryObject.getReportInfo(), targetResults);
+                ret.setTargetResults(targetResults);
+            }
+        }
+        return ret;
     }
 
     /**
@@ -151,20 +199,32 @@ public class SearchService {
         return null;
     }
 
-    /**
-     * This Method gets multiple entries for a specific query while considering the filter information
-     * the entries will be returned grouped into types and sorted by relevance (depending on the chosen solr properties)
-     *
-     * @param queryObject QueryObject (query, species, types, keywords, compartments, start, rows)
-     *                    start specifies the starting point (offset) and rows the amount of entries returned in total
-     * @return GroupedResult
-     */
-    public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
-        cluster = cluster == null ? true : cluster;
-        if (cluster) {
-            return solrConverter.getClusteredEntries(queryObject);
-        } else {
-            return solrConverter.getEntries(queryObject);
+    private void doAsyncReport(Map<String, String> requestInfo, Set<TargetResult> targetResults){
+        new Thread(() -> report(requestInfo, targetResults), "ReportThread").start();
+    }
+
+    private void report(Map<String, String> reportInfo, Set<TargetResult> targetResults) {
+        try {
+            CloseableHttpClient client = HttpClients.createDefault();
+            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/targets");
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("releaseNumber", reportInfo.get(RELEASEVERSION.getDesc())));
+            params.add(new BasicNameValuePair("ip", reportInfo.get(IPADDRESS.getDesc())));
+            params.add(new BasicNameValuePair("agent", reportInfo.get(USERAGENT.getDesc())));
+            uriBuilder.addParameters(params);
+            HttpPost httpPost = new HttpPost(uriBuilder.toString());
+            StringEntity entity = new StringEntity(StringUtils.join(targetResults.stream().filter(TargetResult::isTarget).map(TargetResult::getTerm).collect(Collectors.toList()), ","));
+            httpPost.setEntity(entity);
+            CloseableHttpResponse response = client.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                logger.error("[REP001] The url {} returned the code {} and the report hasn't been created.", uriBuilder.toString(), statusCode);
+            }
+            client.close();
+        } catch (ConnectException e) {
+            logger.error("[REP002] Report service is unavailable");
+        } catch (IOException | URISyntaxException e) {
+            logger.error("[REP003] An unexpected error has occurred when saving a report");
         }
     }
 
@@ -176,14 +236,22 @@ public class SearchService {
      * @return FireworksResult
      */
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
-        return solrConverter.getFireworksResult(queryObject);
+        FireworksResult ret = solrConverter.getFireworksResult(queryObject);
+        if (ret != null && ret.getFound() == 0) {
+            Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
+            if (!targetResults.isEmpty()) {
+                doAsyncReport(queryObject.getReportInfo(), targetResults);
+                ret.setTargetResults(targetResults);
+            }
+        }
+        return ret;
     }
 
     /**
      * Getting diagram occurrences, diagrams and subpathways multivalue fields have been added to the document.
      * Diagrams hold where the entity is present.
      * Occurrences hold a "isInDiagram:occurrences"
-     *
+     * <p>
      * This is a two steps search:
      * - Submit term and diagram and retrieve a list of documents (getDiagramResult)
      * - Retrieve list of occurrences (getDiagramOccurrencesResults)
@@ -209,9 +277,22 @@ public class SearchService {
     }
 
     /**
+     * Retrieve a summary of results in the given Diagram (in query) and in other diagrams.
+     * Facets are provided too.
+     */
+    public DiagramSearchSummary getDiagramSearchSummary(Query queryObject) throws SolrSearcherException {
+        // Don't get any entry. We only need to count.
+        queryObject.setStart(0);
+        queryObject.setRows(0);
+        DiagramResult diagrams = solrConverter.getDiagrams(queryObject);
+        FireworksResult fireworks = solrConverter.getFireworksResult(queryObject);
+        return new DiagramSearchSummary(diagrams, fireworks);
+    }
+
+    /**
      * Return a list of Proteins that are in our scope for curation
      */
-    public List<TargetEntry> getTargets(Query queryObject) {
+    public Set<TargetResult> getTargets(Query queryObject) {
         return solrConverter.getTargets(queryObject);
     }
 
