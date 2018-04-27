@@ -184,6 +184,34 @@ public class SearchServiceTest {
     }
 
     @Test
+    public void testFireworksWithInteractors() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        Query query = new Query("IKZF3", species, Collections.singletonList("Protein"), null, null);
+        FireworksResult fireworksResult = searchService.getFireworks(query);
+        assertTrue("1 or more results are expected", 1 >= fireworksResult.getFound());
+    }
+
+    @Test
+    public void testDiagramSearchSummary() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        String term = "KIF";
+        String diagram = "R-HSA-8848021";
+        Query query = new Query(term, diagram, species, null, null, null);
+        DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
+
+        assertTrue("8 or more results diagram results are expected", 8 >= dss.getDiagramResult().getFound());
+        assertTrue("7 or more results other diagrams results are expected", 7 >= dss.getDiagramResult().getFacets().stream().findFirst().get().getCount());
+        assertEquals("Protein is expected", "Protein", dss.getDiagramResult().getFacets().stream().findFirst().get().getName());
+        assertTrue("94 or more results other diagrams results are expected", 94 >= dss.getFireworksResult().getFound());
+        assertEquals("Protein is expected", "Protein", dss.getFireworksResult().getFacets().stream().findFirst().get().getName());
+        assertTrue("60 or more results other diagrams results are expected", 60 >= dss.getFireworksResult().getFacets().stream().findFirst().get().getCount());
+    }
+
+    @Test
     public void testFireworksSpecies() throws SolrSearcherException {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
@@ -218,7 +246,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String termStId = "R-HSA-879382";
         String diagram = "R-HSA-168164";
-        Query query = new Query(termStId, diagram,  species, null, null, null);
+        Query query = new Query(termStId, diagram, species, null, null, null);
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
@@ -234,7 +262,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String termStId = "R-HSA-879382";
         String diagram = "R-HSA-6798695"; // 168164
-        Query query = new Query(termStId, diagram,  species, null, null, null);
+        Query query = new Query(termStId, diagram, species, null, null, null);
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
@@ -278,31 +306,19 @@ public class SearchServiceTest {
     }
 
     @Test
-    public void testTargetForReactome() throws SolrSearcherException {
+    public void testTargetForReactome() {
         // By default filter query by Human and Entries without species
-        String q = "E9PRG8AA A6NCF5 E9PRG8 A";
+        String q = "A6NCF5 NOTTARGET";
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
         Query query = new Query(q, species, null, null, null);
-        GroupedResult searchResult = searchService.getEntries(query, true);
-        assertTrue(searchResult.getRowCount() == 0);
-
-        List<TargetEntry> targets = searchService.getTargets(query);
-
-        Set<String> targetTerms = new HashSet<>();
-        for (TargetEntry targetEntry : targets) {
-            String[] terms = q.split("\\s+");
-            for (String singleTerm : terms) {
-                if (targetEntry.getIdentifier().equalsIgnoreCase(singleTerm) ||
-                        targetEntry.getAccessions().stream().anyMatch(singleTerm::equalsIgnoreCase) ||
-                        (targetEntry.getGeneNames() != null && targetEntry.getGeneNames().stream().anyMatch(singleTerm::equalsIgnoreCase)) ||
-                        (targetEntry.getSynonyms() != null && targetEntry.getSynonyms().stream().anyMatch(singleTerm::equalsIgnoreCase))) {
-                    targetTerms.add(singleTerm);
-                }
-            }
-        }
-
-        assertTrue(targetTerms.size() == 2);
+        // The reporting is done the report project. Just check if the solr core is available.
+        Set<TargetResult> targets = searchService.getTargets(query);
+        assertNotNull(targets);
+        assertFalse(targets.isEmpty());
+        assertTrue(targets.size() == 2);
+        assertTrue(targets.stream().filter(TargetResult::isTarget).count() == 1);
+        assertTrue(targets.stream().filter(t -> !t.isTarget()).count() == 1);
     }
 }

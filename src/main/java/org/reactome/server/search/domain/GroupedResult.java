@@ -1,6 +1,7 @@
 package org.reactome.server.search.domain;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Internal Model for Reactome Entries
@@ -14,6 +15,7 @@ public class GroupedResult {
     private int rowCount;
     private int numberOfGroups;
     private int numberOfMatches;
+    private Set<TargetResult> targetResults;
 
 
     public GroupedResult(List<Result> results, int rowCount, Integer numberOfGroups, int numberOfMatches) {
@@ -53,5 +55,13 @@ public class GroupedResult {
 
     public void setResults(List<Result> results) {
         this.results = results;
+    }
+
+    public Set<TargetResult> getTargetResults() {
+        return targetResults;
+    }
+
+    public void setTargetResults(Set<TargetResult> targetResults) {
+        this.targetResults = targetResults;
     }
 }

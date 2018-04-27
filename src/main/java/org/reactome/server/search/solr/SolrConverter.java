@@ -137,16 +137,7 @@ public class SolrConverter {
             List<SolrDocument> solrDocuments = response.getResults();
             List<Entry> entries = new ArrayList<>();
             for (SolrDocument solrDocument : solrDocuments) {
-                Entry entry = new Entry();
-                if (solrDocument.containsKey(ST_ID)) {
-                    entry.setStId((String) solrDocument.getFieldValue(ST_ID));
-                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
-                } else {
-                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
-                }
-                entry.setName((String) solrDocument.getFieldValue(NAME));
-                entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
-
+                Entry entry = buildEntry(solrDocument, null);
                 if (solrDocument.containsKey(FIREWORKS_SPECIES)) {
                     Collection<Object> fireworksSpecies = solrDocument.getFieldValues(FIREWORKS_SPECIES);
                     entry.setFireworksSpecies(fireworksSpecies.stream().map(Object::toString).collect(Collectors.toList()));
@@ -182,26 +173,16 @@ public class SolrConverter {
             List<SolrDocument> solrDocuments = response.getResults();
             List<Entry> entries = new ArrayList<>();
             for (SolrDocument solrDocument : solrDocuments) {
-                Entry entry = new Entry();
-                if (solrDocument.containsKey(ST_ID)) {
-                    entry.setStId((String) solrDocument.getFieldValue(ST_ID));
-                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
-                } else {
-                    entry.setId((String) solrDocument.getFieldValue(DB_ID));
-                }
-                entry.setName((String) solrDocument.getFieldValue(NAME));
-                entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
-
-                if (solrDocument.containsKey(COMPARTMENT_NAME)) {
-                    Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENT_NAME);
-                    if (compartments != null && !compartments.isEmpty()) {
-                        entry.setCompartmentNames(compartments.stream().map(Object::toString).collect(Collectors.toList()));
-                    }
-                }
-
-                entries.add(entry);
+                entries.add(buildEntry(solrDocument, null));
             }
-            return new DiagramResult(entries, response.getResults().getNumFound());
+
+            List<FacetContainer> facets = new ArrayList<>();
+            for (FacetField facetField : response.getFacetFields()) {
+                if (facetField.getName().equals(TYPES)) {
+                    facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
+                }
+            }
+            return new DiagramResult(entries, facets, response.getResults().getNumFound());
         }
         return null;
     }
@@ -560,22 +541,39 @@ public class SolrConverter {
         return ret;
     }
 
-    public List<TargetEntry> getTargets(Query queryObject) {
-        List<TargetEntry> ret = new ArrayList<>();
+    /**
+     * Query "Target" Solr Core for potential targets in our scope of annotation
+     *
+     * @return TargetResult - term:isTarget
+     */
+    public Set<TargetResult> getTargets(Query queryObject) {
+        Set<TargetResult> ret = new HashSet<>();
         QueryResponse response = solrCore.getTargets(queryObject);
         if (response != null) {
             List<SolrDocument> solrDocuments = response.getResults();
-            for (SolrDocument solrDocument : solrDocuments) {
-                TargetEntry targetEntry = new TargetEntry();
-                targetEntry.setIdentifier((String) solrDocument.getFieldValue(TARGET_IDENTIFIER));
-                targetEntry.setAccessions(solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList()));
-                if (solrDocument.containsKey(TARGET_GENENAMES)) {
-                    targetEntry.setGeneNames(solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList()));
+            if (solrDocuments != null && !solrDocuments.isEmpty()) {
+                String[] terms = queryObject.getQuery().split("\\s+");
+                for (String singleTerm : terms) {
+                    boolean isTarget = false;
+                    for (SolrDocument solrDocument : solrDocuments) {
+                        String identifier = (String) solrDocument.getFieldValue(TARGET_IDENTIFIER);
+                        List<String> accessions = solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList());
+                        List<String> geneNames = null;
+                        if (solrDocument.containsKey(TARGET_GENENAMES))
+                            geneNames = solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList());
+                        List<String> synonyms = null;
+                        if (solrDocument.containsKey(TARGET_SYNONYMS))
+                            synonyms = solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList());
+
+                        if (identifier.equalsIgnoreCase(singleTerm) ||
+                                accessions.stream().anyMatch(singleTerm::equalsIgnoreCase) ||
+                                (geneNames != null && geneNames.stream().anyMatch(singleTerm::equalsIgnoreCase)) ||
+                                (synonyms != null && synonyms.stream().anyMatch(singleTerm::equalsIgnoreCase))) {
+                            isTarget = true;
+                        }
+                    }
+                    ret.add(new TargetResult(singleTerm, isTarget));
                 }
-                if (solrDocument.containsKey(TARGET_SYNONYMS)) {
-                    targetEntry.setSynonyms(solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList()));
-                }
-                ret.add(targetEntry);
             }
         }
         return ret;

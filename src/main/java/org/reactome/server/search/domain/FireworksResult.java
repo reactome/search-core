@@ -1,18 +1,16 @@
 package org.reactome.server.search.domain;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class FireworksResult {
-
     List<Entry> entries;
-
     List<FacetContainer> facets;
-
     Long found;
-
+    Set<TargetResult> targetResults;
 
     public FireworksResult(List<Entry> entries, List<FacetContainer> facets, Long found) {
         this.entries = entries;
@@ -32,4 +30,11 @@ public class FireworksResult {
         return found;
     }
 
+    public Set<TargetResult> getTargetResults() {
+        return targetResults;
+    }
+
+    public void setTargetResults(Set<TargetResult> targetResults) {
+        this.targetResults = targetResults;
+    }
 }

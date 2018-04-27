@@ -1,6 +1,7 @@
 package org.reactome.server.search.domain;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Internal Model for Reactome Entries
@@ -18,6 +19,7 @@ public class Query {
     private List<String> compartment;
     private Integer start;
     private Integer rows;
+    private Map<String, String> reportInfo; // extra information for report, useragent, ip, etc
 
     public Query() {
 
@@ -31,6 +33,15 @@ public class Query {
         this.compartment = compartment;
     }
 
+    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
+        this.query = query;
+        this.species = species;
+        this.types = types;
+        this.keywords = keywords;
+        this.compartment = compartment;
+        this.reportInfo = reportInfo;
+    }
+
     public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
         this.query = query;
         this.filter = filter;
@@ -38,6 +49,16 @@ public class Query {
         this.types = types;
         this.keywords = keywords;
         this.compartment = compartment;
+    }
+
+    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
+        this.query = query;
+        this.filter = filter;
+        this.species = species;
+        this.types = types;
+        this.keywords = keywords;
+        this.compartment = compartment;
+        this.reportInfo = reportInfo;
     }
 
     public Query(String query, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
@@ -59,6 +80,18 @@ public class Query {
         this.compartment = compartment;
         this.start = start;
         this.rows = rows;
+    }
+
+    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows, Map<String, String> reportInfo) {
+        this.query = query;
+        this.filter = filter;
+        this.species = species;
+        this.types = types;
+        this.keywords = keywords;
+        this.compartment = compartment;
+        this.start = start;
+        this.rows = rows;
+        this.reportInfo = reportInfo;
     }
 
     public String getQuery() {
@@ -123,5 +156,13 @@ public class Query {
 
     public void setRows(Integer rows) {
         this.rows = rows;
+    }
+
+    public Map<String, String> getReportInfo() {
+        return reportInfo;
+    }
+
+    public void setReportInfo(Map<String, String> reportInfo) {
+        this.reportInfo = reportInfo;
     }
 }

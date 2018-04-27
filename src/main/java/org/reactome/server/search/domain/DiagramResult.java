@@ -8,10 +8,12 @@ import java.util.List;
 public class DiagramResult {
 
     private List<Entry> entries;
+    private List<FacetContainer> facets;
     private Long found;
 
-    public DiagramResult(List<Entry> entries, Long found) {
+    public DiagramResult(List<Entry> entries, List<FacetContainer> facets, Long found) {
         this.entries = entries;
+        this.facets = facets;
         this.found = found;
     }
 
@@ -21,6 +23,14 @@ public class DiagramResult {
 
     public void setEntries(List<Entry> entries) {
         this.entries = entries;
+    }
+
+    public List<FacetContainer> getFacets() {
+        return facets;
+    }
+
+    public void setFacets(List<FacetContainer> facets) {
+        this.facets = facets;
     }
 
     public Long getFound() {

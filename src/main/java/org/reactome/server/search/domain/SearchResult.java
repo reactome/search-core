@@ -1,5 +1,7 @@
 package org.reactome.server.search.domain;
 
+import java.util.Set;
+
 /**
  * Created by:
  *
@@ -13,12 +15,17 @@ public class SearchResult {
     private GroupedResult groupedResult;
     private double resultCount;
     private int rows;
+    private Set<TargetResult> targetResults;
 
     public SearchResult(FacetMapping facetMapping, GroupedResult groupedResult, double resultCount, int rows) {
         this.facetMapping = facetMapping;
         this.groupedResult = groupedResult;
         this.resultCount = resultCount;
         this.rows = rows;
+    }
+
+    public SearchResult(Set<TargetResult> targetResults) {
+        this.targetResults = targetResults;
     }
 
     public FacetMapping getFacetMapping() {
@@ -51,5 +58,13 @@ public class SearchResult {
 
     public void setRows(int rows) {
         this.rows = rows;
+    }
+
+    public Set<TargetResult> getTargetResults() {
+        return targetResults;
+    }
+
+    public void setTargetResults(Set<TargetResult> targetResults) {
+        this.targetResults = targetResults;
     }
 }
