@@ -206,7 +206,7 @@ public class SearchService {
     private void report(Map<String, String> reportInfo, Set<TargetResult> targetResults) {
         try {
             CloseableHttpClient client = HttpClients.createDefault();
-            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/targets");
+            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/targets");
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("releaseNumber", reportInfo.get(RELEASEVERSION.getDesc())));
             params.add(new BasicNameValuePair("ip", reportInfo.get(IPADDRESS.getDesc())));
