@@ -177,9 +177,11 @@ public class SolrConverter {
             }
 
             List<FacetContainer> facets = new ArrayList<>();
-            for (FacetField facetField : response.getFacetFields()) {
-                if (facetField.getName().equals(TYPES)) {
-                    facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
+            if(response.getFacetFields() != null) {
+                for (FacetField facetField : response.getFacetFields()) {
+                    if (facetField.getName().equals(TYPES)) {
+                        facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
+                    }
                 }
             }
             return new DiagramResult(entries, facets, response.getResults().getNumFound());
