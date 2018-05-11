@@ -275,6 +275,9 @@ class SolrCore {
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         }
+        if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
+            parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
+        }
         parameters.addFilterQuery(DIAGRAMS + ":" +queryObject.getFilter());
         parameters.setStart(queryObject.getStart());
         parameters.setRows(queryObject.getRows());
