@@ -284,6 +284,9 @@ public class SearchService {
         // Don't get any entry. We only need to count.
         queryObject.setStart(0);
         queryObject.setRows(0);
+        if (queryObject.getSpecies() != null) {
+            queryObject.getSpecies().add("Entries without species");
+        }
         DiagramResult diagrams = solrConverter.getDiagrams(queryObject);
         FireworksResult fireworks = solrConverter.getFireworksResult(queryObject);
         return new DiagramSearchSummary(diagrams, fireworks);

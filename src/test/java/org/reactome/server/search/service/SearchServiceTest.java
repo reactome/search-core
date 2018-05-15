@@ -212,6 +212,20 @@ public class SearchServiceTest {
     }
 
     @Test
+    public void testDiagramSearchSummarySmallMolecules() throws SolrSearcherException {
+        // Do not initialize as Collections.singletonList
+        List<String> species = new ArrayList<>();
+        species.add("Entries without species");
+        String term = "ATP";
+        String diagram = "R-HSA-69620";
+        Query query = new Query(term, diagram, species, null, null, null);
+        DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
+
+        assertTrue("8 or more results diagram results are expected", 2 >= dss.getDiagramResult().getFound());
+        assertTrue("94 or more results other diagrams results are expected", 690 >= dss.getFireworksResult().getFound());
+    }
+
+    @Test
     public void testFireworksSpecies() throws SolrSearcherException {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
