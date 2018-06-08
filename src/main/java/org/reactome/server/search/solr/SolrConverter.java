@@ -53,6 +53,7 @@ public class SolrConverter {
     private static final String TARGET_ACCESSIONS = "accessions";
     private static final String TARGET_GENENAMES = "geneNames";
     private static final String TARGET_SYNONYMS = "synonyms";
+    private static final String TARGET_RESOURCE = "resource";
 
     @Autowired
     private SolrCore solrCore;
@@ -557,8 +558,10 @@ public class SolrConverter {
                 String[] terms = queryObject.getQuery().split("\\s+");
                 for (String singleTerm : terms) {
                     boolean isTarget = false;
+                    String resource = null;
                     for (SolrDocument solrDocument : solrDocuments) {
                         String identifier = (String) solrDocument.getFieldValue(TARGET_IDENTIFIER);
+                        resource = (String) solrDocument.getFieldValue(TARGET_RESOURCE);
                         List<String> accessions = solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList());
                         List<String> geneNames = null;
                         if (solrDocument.containsKey(TARGET_GENENAMES))
@@ -574,7 +577,7 @@ public class SolrConverter {
                             isTarget = true;
                         }
                     }
-                    ret.add(new TargetResult(singleTerm, isTarget));
+                    ret.add(new TargetResult(singleTerm, resource, isTarget));
                 }
             }
         }

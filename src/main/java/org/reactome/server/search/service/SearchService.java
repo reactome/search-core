@@ -1,6 +1,6 @@
 package org.reactome.server.search.service;
 
-import org.apache.commons.lang.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -12,15 +12,20 @@ import org.apache.http.message.BasicNameValuePair;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.solr.SolrConverter;
+import org.reactome.server.search.util.ReportEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.reactome.server.search.util.ReportInformationEnum.*;
@@ -72,12 +77,9 @@ public class SearchService {
 
         // No results found, check for targets and incorporate them in the SearchResult if present.
         Set<TargetResult> targets = getTargets(query);
-        if (!targets.isEmpty()) {
-            doAsyncReport(query.getReportInfo(), targets);
-            return new SearchResult(targets);
-        }
+        doAsyncReport(query, targets);
 
-        return null;
+        return targets.isEmpty() ? null : new SearchResult(targets);
     }
 
     /**
@@ -100,9 +102,9 @@ public class SearchService {
         if (ret != null && ret.getRowCount() == 0) {
             Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
             if (!targetResults.isEmpty()) {
-                doAsyncReport(queryObject.getReportInfo(), targetResults);
                 ret.setTargetResults(targetResults);
             }
+            doAsyncReport(queryObject, targetResults);
         }
         return ret;
     }
@@ -199,35 +201,6 @@ public class SearchService {
         return null;
     }
 
-    private void doAsyncReport(Map<String, String> requestInfo, Set<TargetResult> targetResults){
-        new Thread(() -> report(requestInfo, targetResults), "ReportThread").start();
-    }
-
-    private void report(Map<String, String> reportInfo, Set<TargetResult> targetResults) {
-        try {
-            CloseableHttpClient client = HttpClients.createDefault();
-            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/targets");
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("releaseNumber", reportInfo.get(RELEASEVERSION.getDesc())));
-            params.add(new BasicNameValuePair("ip", reportInfo.get(IPADDRESS.getDesc())));
-            params.add(new BasicNameValuePair("agent", reportInfo.get(USERAGENT.getDesc())));
-            uriBuilder.addParameters(params);
-            HttpPost httpPost = new HttpPost(uriBuilder.toString());
-            StringEntity entity = new StringEntity(StringUtils.join(targetResults.stream().filter(TargetResult::isTarget).map(TargetResult::getTerm).collect(Collectors.toList()), ","));
-            httpPost.setEntity(entity);
-            CloseableHttpResponse response = client.execute(httpPost);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != 200) {
-                logger.error("[REP001] The url {} returned the code {} and the report hasn't been created.", uriBuilder.toString(), statusCode);
-            }
-            client.close();
-        } catch (ConnectException e) {
-            logger.error("[REP002] Report service is unavailable");
-        } catch (IOException | URISyntaxException e) {
-            logger.error("[REP003] An unexpected error has occurred when saving a report");
-        }
-    }
-
     /**
      * This Method is used for providing results for the SearchOnFire feature in the PathwaysOverview
      *
@@ -239,9 +212,11 @@ public class SearchService {
         FireworksResult ret = solrConverter.getFireworksResult(queryObject);
         if (ret != null && ret.getFound() == 0) {
             Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
-            if (!targetResults.isEmpty()) {
-                doAsyncReport(queryObject.getReportInfo(), targetResults);
+            if (targetResults != null && !targetResults.isEmpty()) {
+                doAsyncTargetReport(queryObject, targetResults);
                 ret.setTargetResults(targetResults);
+            } else {
+                doAsyncSearchReport(queryObject);
             }
         }
         return ret;
@@ -330,5 +305,73 @@ public class SearchService {
             }
         }
         return max;
+    }
+
+    private void doAsyncReport(Query queryObject, Set<TargetResult> targetResults) {
+        if (!targetResults.isEmpty()) {
+            doAsyncTargetReport(queryObject, targetResults);
+        } else {
+            doAsyncSearchReport(queryObject);
+        }
+    }
+
+    /**
+     * It covers two use cases:
+     *   1- Not Found and Target
+     *   2- Not Found and not a Target
+     */
+    private void doAsyncTargetReport(Query queryObject, Set<TargetResult> targetResults) {
+        Set<TargetResult> targetsOnly = targetResults.stream().filter(TargetResult::isTarget).collect(Collectors.toSet());
+        new Thread(() -> report("targets", queryObject, targetsOnly), "ReportTargetThread").start();
+
+        Set<TargetResult> targetsNotFound = targetResults.stream().filter(t -> !t.isTarget()).collect(Collectors.toSet());
+        new Thread(() -> report("notfound", queryObject, targetsNotFound), "ReportNotFoundTargetThread").start();
+    }
+
+    private void doAsyncSearchReport(Query queryObject) {
+        new Thread(() -> report("notfound", queryObject, null), "ReportNotFoundThread").start();
+    }
+
+    private void report(String requestMapping, Query queryObject, Set<TargetResult> targetResults) {
+        if (queryObject == null || queryObject.getReportInfo() == null) return;
+
+        try {
+            CloseableHttpClient client = HttpClients.createDefault();
+            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/" + requestMapping);
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("releaseNumber", queryObject.getReportInfo().get(RELEASEVERSION.getDesc())));
+            params.add(new BasicNameValuePair("ip", queryObject.getReportInfo().get(IPADDRESS.getDesc())));
+            params.add(new BasicNameValuePair("agent", queryObject.getReportInfo().get(USERAGENT.getDesc())));
+            uriBuilder.addParameters(params);
+
+            HttpPost httpPost = new HttpPost(uriBuilder.toString());
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (targetResults != null && !targetResults.isEmpty()) {
+                List<ReportEntity> res = targetResults.stream().map(tr -> new ReportEntity(tr.getTerm(), tr.getResource())).collect(Collectors.toList());
+                StringWriter json = new StringWriter();
+                objectMapper.writeValue(json, res);
+
+                StringEntity entity = new StringEntity(json.toString());
+                httpPost.setEntity(entity);
+            } else {
+                String json = objectMapper.writeValueAsString(new ReportEntity(queryObject.getQuery(), ""));
+                StringEntity entity = new StringEntity(json);
+                httpPost.setEntity(entity);
+            }
+
+            CloseableHttpResponse response = client.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                logger.error("[REP001] The url {} returned the code {} and the report hasn't been created.", uriBuilder.toString(), statusCode);
+            }
+            client.close();
+        } catch (ConnectException e) {
+            logger.error("[REP002] Report service is unavailable");
+        } catch (IOException | URISyntaxException e) {
+            logger.error("[REP003] An unexpected error has occurred when saving a report");
+        }
     }
 }

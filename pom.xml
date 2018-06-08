@@ -39,6 +39,7 @@
         <activation.version>1.1.1</activation.version>
         <junit.version>4.12</junit.version>
         <logging.version>1.1.7</logging.version>
+        <jackson.databind.version>2.9.5</jackson.databind.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
         <jdk.version>1.8</jdk.version>
@@ -104,6 +105,12 @@
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
             <version>${activation.version}</version>
+        </dependency>
+        <!-- Jackson JSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.databind.version}</version>
         </dependency>
         <!--Junit Tests-->
         <dependency>

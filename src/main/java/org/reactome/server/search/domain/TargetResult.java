@@ -8,10 +8,12 @@ import java.util.Objects;
  */
 public class TargetResult {
     private String term;
+    private String resource;
     private boolean isTarget;
 
-    public TargetResult(String term, boolean isTarget) {
+    public TargetResult(String term, String resource, boolean isTarget) {
         this.term = term;
+        this.resource = resource;
         this.isTarget = isTarget;
     }
 
@@ -29,6 +31,14 @@ public class TargetResult {
 
     public void setTarget(boolean target) {
         isTarget = target;
+    }
+
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     @Override
