@@ -324,8 +324,13 @@ public class SearchService {
         Set<TargetResult> targetsOnly = targetResults.stream().filter(TargetResult::isTarget).collect(Collectors.toSet());
         new Thread(() -> report("targets", queryObject, targetsOnly), "ReportTargetThread").start();
 
-        Set<TargetResult> targetsNotFound = targetResults.stream().filter(t -> !t.isTarget()).collect(Collectors.toSet());
-        new Thread(() -> report("notfound", queryObject, targetsNotFound), "ReportNotFoundTargetThread").start();
+        // In the same search we might have one target and term(s) not found. Targets are done in the line above
+        // and the others will be the new QueryObject just to be able to reuse the report method.
+        Set<String> targetsNotFound = targetResults.stream().filter(t -> !t.isTarget()).map(TargetResult::getTerm).collect(Collectors.toSet());
+        if (targetsNotFound != null && !targetsNotFound.isEmpty()) {
+            queryObject.setQuery(String.join(" ", targetsNotFound));
+            new Thread(() -> report("notfound", queryObject, null), "ReportNotFoundTargetThread").start();
+        }
     }
 
     private void doAsyncSearchReport(Query queryObject) {
