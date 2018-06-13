@@ -5,7 +5,7 @@
     <artifactId>search-core</artifactId>
 
     <packaging>jar</packaging>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>search-core</name>
 
     <description>
@@ -31,7 +31,7 @@
     </developers>
 
     <properties>
-        <reactome.version>1.2.4</reactome.version>
+        <reactome.version>1.2.13</reactome.version>
         <solr.version>6.1.0</solr.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <aspectj.version>1.8.8</aspectj.version>
