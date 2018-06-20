@@ -188,9 +188,9 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        Query query = new Query("IKZF3", species, Collections.singletonList("Protein"), null, null);
+        Query query = new Query("IKZF3", species, Collections.singletonList("Interactor"), null, null);
         FireworksResult fireworksResult = searchService.getFireworks(query);
-        assertTrue("1 or more results are expected", 1 >= fireworksResult.getFound());
+        assertTrue("1 or more results are expected", 1 <= fireworksResult.getFound());
     }
 
     @Test
@@ -203,26 +203,27 @@ public class SearchServiceTest {
         Query query = new Query(term, diagram, species, null, null, null);
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
-        assertTrue("8 or more results diagram results are expected", 8 >= dss.getDiagramResult().getFound());
-        assertTrue("7 or more results other diagrams results are expected", 7 >= dss.getDiagramResult().getFacets().stream().findFirst().get().getCount());
+        assertTrue("8 or more results diagram results are expected", 8 <= dss.getDiagramResult().getFound());
+        assertTrue("7 or more results other diagrams results are expected", 7 <= dss.getDiagramResult().getFacets().stream().findFirst().get().getCount());
         assertEquals("Protein is expected", "Protein", dss.getDiagramResult().getFacets().stream().findFirst().get().getName());
-        assertTrue("94 or more results other diagrams results are expected", 94 >= dss.getFireworksResult().getFound());
+        assertTrue("94 or more results other diagrams results are expected", 94 <= dss.getFireworksResult().getFound());
         assertEquals("Protein is expected", "Protein", dss.getFireworksResult().getFacets().stream().findFirst().get().getName());
-        assertTrue("60 or more results other diagrams results are expected", 60 >= dss.getFireworksResult().getFacets().stream().findFirst().get().getCount());
+        assertTrue("60 or more results other diagrams results are expected", 60 <= dss.getFireworksResult().getFacets().stream().findFirst().get().getCount());
     }
 
     @Test
     public void testDiagramSearchSummarySmallMolecules() throws SolrSearcherException {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
         species.add("Entries without species");
         String term = "ATP";
         String diagram = "R-HSA-69620";
         Query query = new Query(term, diagram, species, null, null, null);
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
-        assertTrue("8 or more results diagram results are expected", 2 >= dss.getDiagramResult().getFound());
-        assertTrue("94 or more results other diagrams results are expected", 690 >= dss.getFireworksResult().getFound());
+        assertTrue("2 or more results diagram results are expected", 2 <= dss.getDiagramResult().getFound());
+        assertTrue("690 or more results other diagrams results are expected", 690 <= dss.getFireworksResult().getFound());
     }
 
     @Test
@@ -335,4 +336,48 @@ public class SearchServiceTest {
         assertTrue(targets.stream().filter(TargetResult::isTarget).count() == 1);
         assertTrue(targets.stream().filter(t -> !t.isTarget()).count() == 1);
     }
+
+    @Test
+    public void testPersonSearchByName() throws SolrSearcherException {
+        String q = "John";
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        species.add("Entries without species");
+        Query query = new Query(q, species, null, null, null);
+        SearchResult searchResult = searchService.getSearchResult(query, 30, 1, true);
+        assertNotNull(searchResult);
+        assertNotNull(searchResult.getGroupedResult());
+        List<Result> results = searchResult.getGroupedResult().getResults();
+        assertNotNull(results);
+        for (Result result : results) {
+            if (result.getTypeName().equals("Person")) {
+                List<Entry> entries = result.getEntries();
+                assertNotNull(entries);
+                assertTrue("4 or more people are expected", 4 <= entries.size());
+            }
+        }
+    }
+
+    @Test
+    public void testPersonSearchByOrcidId() throws SolrSearcherException {
+        String q = "0000-0002-5494-626X";
+        List<String> species = new ArrayList<>();
+        species.add("Homo sapiens");
+        species.add("Entries without species");
+        Query query = new Query(q, species, null, null, null);
+        SearchResult searchResult = searchService.getSearchResult(query, 30, 1, true);
+        assertNotNull(searchResult);
+        assertNotNull(searchResult.getGroupedResult());
+        List<Result> results = searchResult.getGroupedResult().getResults();
+        assertNotNull(results);
+        for (Result result : results) {
+            if (result.getTypeName().equals("Person")) {
+                List<Entry> entries = result.getEntries();
+                assertNotNull(entries);
+                assertTrue("1 or more people are expected", 1 <= entries.size());
+
+            }
+        }
+    }
+
 }

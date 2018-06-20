@@ -30,6 +30,9 @@ public class Entry {
     private String regulatedEntity;
     private String regulatorId;
     private String regulatedEntityId;
+    private String authored;
+    private String reviewed;
+    private String orcidId;
     private List<String> fireworksSpecies;
 
     public String getRegulatorId() {
@@ -190,6 +193,30 @@ public class Entry {
 
     public void setInstanceTypeExplanation(String instanceTypeExplanation) {
         this.instanceTypeExplanation = instanceTypeExplanation;
+    }
+
+    public String getAuthored() {
+        return authored;
+    }
+
+    public void setAuthored(String authored) {
+        this.authored = authored;
+    }
+
+    public String getReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(String reviewed) {
+        this.reviewed = reviewed;
+    }
+
+    public String getOrcidId() {
+        return orcidId;
+    }
+
+    public void setOrcidId(String orcidId) {
+        this.orcidId = orcidId;
     }
 
     public List<String> getFireworksSpecies() {

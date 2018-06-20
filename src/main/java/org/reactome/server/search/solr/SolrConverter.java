@@ -47,6 +47,9 @@ public class SolrConverter {
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
     private static final String OCCURRENCES = "occurrences";
     private static final String LLPS = "llps";
+    private static final String AUTHORED = "authored";
+    private static final String REVIEWED = "reviewed";
+    private static final String ORCIDID = "orcidId";
 
     // TARGET
     private static final String TARGET_IDENTIFIER = "identifier";
@@ -402,6 +405,15 @@ public class SolrConverter {
             }
             if (solrDocument.containsKey(INFERRED_SUMMATION)) {
                 entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
+            }
+            if (solrDocument.containsKey(AUTHORED)) {
+                entry.setAuthored((String) solrDocument.getFieldValue(AUTHORED));
+            }
+            if (solrDocument.containsKey(REVIEWED)) {
+                entry.setReviewed((String) solrDocument.getFieldValue(REVIEWED));
+            }
+            if (solrDocument.containsKey(ORCIDID)) {
+                entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
             }
 
             return entry;
