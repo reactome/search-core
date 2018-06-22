@@ -2,10 +2,14 @@ package org.reactome.server.search.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -16,6 +20,7 @@ import org.reactome.server.search.util.ReportEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -45,6 +50,11 @@ public class SearchService {
     @Autowired
     private SolrConverter solrConverter;
 
+    @Value("${report.user:default}")
+    private String reportUser;
+
+    @Value("${report.password:default}")
+    private String reportPassword;
     /**
      * Method for testing if a connection to Solr can be established
      *
@@ -341,7 +351,10 @@ public class SearchService {
         if (queryObject == null || queryObject.getReportInfo() == null) return;
 
         try {
-            CloseableHttpClient client = HttpClients.createDefault();
+            CredentialsProvider provider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(reportUser, reportPassword);
+            provider.setCredentials(AuthScope.ANY, credentials);
+            CloseableHttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
             URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/" + requestMapping);
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("releaseNumber", queryObject.getReportInfo().get(RELEASEVERSION.getDesc())));
