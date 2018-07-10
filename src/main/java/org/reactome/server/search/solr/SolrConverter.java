@@ -47,8 +47,10 @@ public class SolrConverter {
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
     private static final String OCCURRENCES = "occurrences";
     private static final String LLPS = "llps";
-    private static final String AUTHORED = "authored";
-    private static final String REVIEWED = "reviewed";
+    private static final String AUTHORED_PATHWAYS = "authoredPathways";
+    private static final String AUTHORED_REACTIONS = "authoredReactions";
+    private static final String REVIEWED_PATHWAYS = "reviewedPathways";
+    private static final String REVIEWED_REACTIONS = "reviewedReactions";
     private static final String ORCIDID = "orcidId";
 
     // TARGET
@@ -406,11 +408,17 @@ public class SolrConverter {
             if (solrDocument.containsKey(INFERRED_SUMMATION)) {
                 entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
             }
-            if (solrDocument.containsKey(AUTHORED)) {
-                entry.setAuthored((String) solrDocument.getFieldValue(AUTHORED));
+            if (solrDocument.containsKey(AUTHORED_PATHWAYS)) {
+                entry.setAuthoredPathways((String) solrDocument.getFieldValue(AUTHORED_PATHWAYS));
             }
-            if (solrDocument.containsKey(REVIEWED)) {
-                entry.setReviewed((String) solrDocument.getFieldValue(REVIEWED));
+            if (solrDocument.containsKey(AUTHORED_REACTIONS)) {
+                entry.setAuthoredReactions((String) solrDocument.getFieldValue(AUTHORED_REACTIONS));
+            }
+            if (solrDocument.containsKey(REVIEWED_PATHWAYS)) {
+                entry.setReviewedPathways((String) solrDocument.getFieldValue(REVIEWED_PATHWAYS));
+            }
+            if (solrDocument.containsKey(REVIEWED_REACTIONS)) {
+                entry.setReviewedReactions((String) solrDocument.getFieldValue(REVIEWED_REACTIONS));
             }
             if (solrDocument.containsKey(ORCIDID)) {
                 entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
