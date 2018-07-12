@@ -30,8 +30,10 @@ public class Entry {
     private String regulatedEntity;
     private String regulatorId;
     private String regulatedEntityId;
-    private String authored;
-    private String reviewed;
+    private String authoredPathways;
+    private String authoredReactions;
+    private String reviewedPathways;
+    private String reviewedReactions;
     private String orcidId;
     private List<String> fireworksSpecies;
 
@@ -209,20 +211,36 @@ public class Entry {
         this.instanceTypeExplanation = instanceTypeExplanation;
     }
 
-    public String getAuthored() {
-        return authored;
+    public String getAuthoredPathways() {
+        return authoredPathways;
     }
 
-    public void setAuthored(String authored) {
-        this.authored = authored;
+    public void setAuthoredPathways(String authoredPathways) {
+        this.authoredPathways = authoredPathways;
     }
 
-    public String getReviewed() {
-        return reviewed;
+    public String getAuthoredReactions() {
+        return authoredReactions;
     }
 
-    public void setReviewed(String reviewed) {
-        this.reviewed = reviewed;
+    public void setAuthoredReactions(String authoredReactions) {
+        this.authoredReactions = authoredReactions;
+    }
+
+    public String getReviewedPathways() {
+        return reviewedPathways;
+    }
+
+    public void setReviewedPathways(String reviewedPathways) {
+        this.reviewedPathways = reviewedPathways;
+    }
+
+    public String getReviewedReactions() {
+        return reviewedReactions;
+    }
+
+    public void setReviewedReactions(String reviewedReactions) {
+        this.reviewedReactions = reviewedReactions;
     }
 
     public String getOrcidId() {
