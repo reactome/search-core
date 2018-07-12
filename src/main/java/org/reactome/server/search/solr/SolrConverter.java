@@ -30,6 +30,7 @@ public class SolrConverter {
     private static final String TYPES = "type_facet";
     private static final String KEYWORDS = "keywords_facet";
     private static final String COMPARTMENT_FACET = "compartment_facet";
+    private static final String ICON_GROUP_FACET = "iconGroup_facet";
     private static final String SUMMATION = "summation";
     private static final String INFERRED_SUMMATION = "inferredSummation";
     private static final String REFERENCE_NAME = "referenceName";
@@ -181,7 +182,7 @@ public class SolrConverter {
             }
 
             List<FacetContainer> facets = new ArrayList<>();
-            if(response.getFacetFields() != null) {
+            if (response.getFacetFields() != null) {
                 for (FacetField facetField : response.getFacetFields()) {
                     if (facetField.getName().equals(TYPES)) {
                         facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
@@ -342,6 +343,9 @@ public class SolrConverter {
                     case COMPARTMENT_FACET:
                         facetMapping.setCompartmentFacet(new FacetList(available));
                         break;
+                    case ICON_GROUP_FACET:
+                        facetMapping.setIconGroupFacet(new FacetList(available));
+                        break;
                 }
             }
             return facetMapping;
@@ -393,8 +397,8 @@ public class SolrConverter {
                 }
             }
 
-            if (highlighting != null && highlighting.containsKey(solrDocument.getFieldValue(DB_ID))) {
-                setHighlighting(entry, solrDocument, highlighting.get(solrDocument.getFieldValue(DB_ID)));
+            if (highlighting != null && highlighting.containsKey(entry.getDbId())) {
+                setHighlighting(entry, solrDocument, highlighting.get(entry.getDbId()));
             } else {
                 entry.setName((String) solrDocument.getFieldValue(NAME));
                 entry.setSummation((String) solrDocument.getFieldValue(SUMMATION));
@@ -416,9 +420,62 @@ public class SolrConverter {
                 entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
             }
 
+            buildIconEntry(solrDocument, entry);
+
             return entry;
         }
         return null;
+    }
+
+    private void buildIconEntry(SolrDocument solrDocument, Entry entry) {
+        if (solrDocument.containsKey("iconGroup")) {
+            entry.setIconGroup((String) solrDocument.getFieldValue("iconGroup"));
+        }
+
+        if (solrDocument.containsKey("iconCuratorName")) {
+            entry.setIconCuratorName((String) solrDocument.getFieldValue("iconCuratorName"));
+        }
+        if (solrDocument.containsKey("iconCuratorOrcidId")) {
+            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue("iconCuratorOrcidId"));
+        }
+        if (solrDocument.containsKey("iconCuratorOrcidId")) {
+            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue("iconCuratorOrcidId"));
+        }
+
+        if (solrDocument.containsKey("iconDesignerName")) {
+            entry.setIconDesignerName((String) solrDocument.getFieldValue("iconDesignerName"));
+        }
+        if (solrDocument.containsKey("iconDesignerUrl")) {
+            entry.setIconDesignerUrl((String) solrDocument.getFieldValue("iconDesignerUrl"));
+        }
+        if (solrDocument.containsKey("iconDesignerUrl")) {
+            entry.setIconDesignerUrl((String) solrDocument.getFieldValue("iconDesignerUrl"));
+        }
+
+        if (solrDocument.containsKey("iconCVTerms")) {
+            Collection<Object> iconCVTerms = solrDocument.getFieldValues("iconCVTerms");
+            if (iconCVTerms != null && !iconCVTerms.isEmpty()) {
+                entry.setIconCVTerms(iconCVTerms.stream().map(Object::toString).collect(Collectors.toList()));
+            }
+        }
+        if (solrDocument.containsKey("iconXRefs")) {
+            Collection<Object> iconXRefs = solrDocument.getFieldValues("iconXRefs");
+            if (iconXRefs != null && !iconXRefs.isEmpty()) {
+                entry.setIconXRefs(iconXRefs.stream().map(Object::toString).collect(Collectors.toList()));
+            }
+        }
+        if (solrDocument.containsKey("iconStIds")) {
+            Collection<Object> iconStIds = solrDocument.getFieldValues("iconStIds");
+            if (iconStIds != null && !iconStIds.isEmpty()) {
+                entry.setIconStIds(iconStIds.stream().map(Object::toString).collect(Collectors.toList()));
+            }
+        }
+        if (solrDocument.containsKey("iconEhlds")) {
+            Collection<Object> iconEhlds = solrDocument.getFieldValues("iconEhlds");
+            if (iconEhlds != null && !iconEhlds.isEmpty()) {
+                entry.setIconEhlds(iconEhlds.stream().map(Object::toString).collect(Collectors.toList()));
+            }
+        }
     }
 
     private String selectRightReferenceIdentifier(SolrDocument solrDocument) {
@@ -596,4 +653,29 @@ public class SolrConverter {
         return ret;
     }
 
+    public FacetMapping getIconFacetingInformation() throws SolrSearcherException {
+        return getFacetMap(solrCore.getIconFacetingInformation());
+    }
+
+    public Result getIconsResult(Query queryObject) throws SolrSearcherException {
+        if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
+            QueryResponse queryResponse = solrCore.getIconsResult(queryObject);
+            if (queryResponse != null) {
+                return parseResponse(queryResponse).getResults().get(0);
+            }
+        }
+        return null;
+    }
+
+    public Entry getIcon(Query queryObject) throws SolrSearcherException {
+        if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
+            QueryResponse queryResponse = solrCore.getIcon(queryObject);
+            if (queryResponse != null) {
+                if (queryResponse.getResults().getNumFound() > 0L) {
+                    return parseResponse(queryResponse).getResults().get(0).getEntries().get(0);
+                }
+            }
+        }
+        return null;
+    }
 }

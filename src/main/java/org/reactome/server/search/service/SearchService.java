@@ -278,6 +278,23 @@ public class SearchService {
     }
 
     /**
+     * @return FacetMapping
+     */
+    public FacetMapping getIconFacetingInformation() throws SolrSearcherException {
+        return solrConverter.getIconFacetingInformation();
+    }
+
+    public Result getIconsResult(Query query, int rows, int page) throws SolrSearcherException {
+        query.setStart(rows * (page - 1));
+        query.setRows(rows);
+        return solrConverter.getIconsResult(query);
+    }
+
+    public Entry getIcon(Query query) throws SolrSearcherException {
+        return solrConverter.getIcon(query);
+    }
+
+    /**
      * Return a list of Proteins that are in our scope for curation
      */
     public Set<TargetResult> getTargets(Query queryObject) {

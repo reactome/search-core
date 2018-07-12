@@ -331,6 +331,36 @@ class SolrCore {
         return null;
     }
 
+    QueryResponse getIconFacetingInformation() throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler("/iconFacet");
+        parameters.setQuery("{!term f=type}icon");
+        return querysolrClient(parameters);
+    }
+
+    QueryResponse getIconsResult(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
+        parameters.setSort("name_exact", SolrQuery.ORDER.asc);
+        if (queryObject.getStart() != null && queryObject.getRows() != null) {
+            parameters.setStart(queryObject.getStart());
+            parameters.setRows(queryObject.getRows());
+        }
+
+        parameters.setQuery(queryObject.getQuery());
+        return querysolrClient(parameters);
+    }
+
+    QueryResponse getIcon(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
+        parameters.setQuery("name_exact:" + queryObject.getQuery());
+        parameters.setFilterQueries("{!term f=type}icon");
+        parameters.set("mm", "100%"); // exact match
+//        parameters.setFilterQueries("{!term f=type}icon");
+        return querysolrClient(parameters);
+    }
+
     /**
      * Helper Method to construct the filter that is sent to Solr
      *

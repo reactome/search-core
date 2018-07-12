@@ -35,6 +35,20 @@ public class Entry {
     private String orcidId;
     private List<String> fireworksSpecies;
 
+    // Icons
+    private String iconGroup;
+    private String iconCuratorName;
+    private String iconCuratorOrcidId;
+    private String iconCuratorUrl;
+    private String iconDesignerName;
+    private String iconDesignerOrcidId;
+    private String iconDesignerUrl;
+    private List<String> iconCVTerms;
+    private List<String> iconXRefs;
+    private List<String> iconStIds;
+    private List<String> iconEhlds;
+
+
     public String getRegulatorId() {
         return regulatorId;
     }
@@ -225,5 +239,93 @@ public class Entry {
 
     public void setFireworksSpecies(List<String> fireworksSpecies) {
         this.fireworksSpecies = fireworksSpecies;
+    }
+
+    public String getIconGroup() {
+        return iconGroup;
+    }
+
+    public void setIconGroup(String iconGroup) {
+        this.iconGroup = iconGroup;
+    }
+
+    public String getIconCuratorName() {
+        return iconCuratorName;
+    }
+
+    public void setIconCuratorName(String iconCuratorName) {
+        this.iconCuratorName = iconCuratorName;
+    }
+
+    public String getIconCuratorOrcidId() {
+        return iconCuratorOrcidId;
+    }
+
+    public void setIconCuratorOrcidId(String iconCuratorOrcidId) {
+        this.iconCuratorOrcidId = iconCuratorOrcidId;
+    }
+
+    public String getIconCuratorUrl() {
+        return iconCuratorUrl;
+    }
+
+    public void setIconCuratorUrl(String iconCuratorUrl) {
+        this.iconCuratorUrl = iconCuratorUrl;
+    }
+
+    public String getIconDesignerName() {
+        return iconDesignerName;
+    }
+
+    public void setIconDesignerName(String iconDesignerName) {
+        this.iconDesignerName = iconDesignerName;
+    }
+
+    public String getIconDesignerOrcidId() {
+        return iconDesignerOrcidId;
+    }
+
+    public void setIconDesignerOrcidId(String iconDesignerOrcidId) {
+        this.iconDesignerOrcidId = iconDesignerOrcidId;
+    }
+
+    public String getIconDesignerUrl() {
+        return iconDesignerUrl;
+    }
+
+    public void setIconDesignerUrl(String iconDesignerUrl) {
+        this.iconDesignerUrl = iconDesignerUrl;
+    }
+
+    public List<String> getIconCVTerms() {
+        return iconCVTerms;
+    }
+
+    public void setIconCVTerms(List<String> iconCVTerms) {
+        this.iconCVTerms = iconCVTerms;
+    }
+
+    public List<String> getIconXRefs() {
+        return iconXRefs;
+    }
+
+    public void setIconXRefs(List<String> iconXRefs) {
+        this.iconXRefs = iconXRefs;
+    }
+
+    public List<String> getIconStIds() {
+        return iconStIds;
+    }
+
+    public void setIconStIds(List<String> iconStIds) {
+        this.iconStIds = iconStIds;
+    }
+
+    public List<String> getIconEhlds() {
+        return iconEhlds;
+    }
+
+    public void setIconEhlds(List<String> iconEhlds) {
+        this.iconEhlds = iconEhlds;
     }
 }

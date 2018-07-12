@@ -142,7 +142,7 @@ public class SearchServiceTest {
     public void testGetSearchResultFacets() throws SolrSearcherException {
         String searchTerm = "apoptosis";
         int rowCount = 30;
-        int page = 1;
+        int page = 2;
 
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
@@ -267,7 +267,7 @@ public class SearchServiceTest {
         assertNotNull(diagramOccurrencesResult);
         assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
         assertNotNull(diagramOccurrencesResult.getOccurrences());
-        assertTrue("1 occurrence is expected", 1 == diagramOccurrencesResult.getOccurrences().size());
+        assertEquals("1 occurrence is expected", 1, diagramOccurrencesResult.getOccurrences().size());
     }
 
     @Test
@@ -332,9 +332,9 @@ public class SearchServiceTest {
         Set<TargetResult> targets = searchService.getTargets(query);
         assertNotNull(targets);
         assertFalse(targets.isEmpty());
-        assertTrue(targets.size() == 2);
-        assertTrue(targets.stream().filter(TargetResult::isTarget).count() == 1);
-        assertTrue(targets.stream().filter(t -> !t.isTarget()).count() == 1);
+        assertEquals(2, targets.size());
+        assertEquals(1, targets.stream().filter(TargetResult::isTarget).count());
+        assertEquals(1, targets.stream().filter(t -> !t.isTarget()).count());
     }
 
     @Test
@@ -380,4 +380,28 @@ public class SearchServiceTest {
         }
     }
 
+    @Test
+    public void getIconFacetingInformation() throws SolrSearcherException {
+        logger.info("Started testing searchService.getIconFacetingInformation()");
+        FacetMapping facetMapping = searchService.getIconFacetingInformation();
+        List<FacetContainer> cc = facetMapping.getIconGroupFacet().getAvailable();
+        assertTrue("Icon faceting didn't match", cc.size() >= 8);
+    }
+
+    @Test
+    public void testIconsResult() throws SolrSearcherException {
+        logger.info("Started testing searchService.getIconFacetingInformation()");
+        Query query = new Query("{!term f=iconGroup}proteins", null, null, null, null);
+        Result icons = searchService.getIconsResult(query, 30, 1);
+        System.out.println(icons);
+    }
+
+    @Test
+    public void testGetIcon() throws SolrSearcherException {
+        logger.info("Started testing ");
+        String name = "ATM";
+        Query query = new Query(name, null, null, null, null);
+        Entry icon = searchService.getIcon(query);
+        System.out.println(icon);
+    }
 }
