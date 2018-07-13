@@ -436,6 +436,11 @@ public class SolrConverter {
     }
 
     private void buildIconEntry(SolrDocument solrDocument, Entry entry) {
+        if (solrDocument.containsKey(NAME)) {
+            // Icon Name stores the plain name. After search the name itself might have the highlighting.
+            entry.setIconName((String) solrDocument.getFieldValue(NAME));
+        }
+
         if (solrDocument.containsKey("iconGroup")) {
             entry.setIconGroup((String) solrDocument.getFieldValue("iconGroup"));
         }

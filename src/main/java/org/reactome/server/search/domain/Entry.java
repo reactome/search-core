@@ -38,6 +38,7 @@ public class Entry {
     private List<String> fireworksSpecies;
 
     // Icons
+    private String iconName;
     private String iconGroup;
     private String iconCuratorName;
     private String iconCuratorOrcidId;
@@ -257,6 +258,14 @@ public class Entry {
 
     public void setFireworksSpecies(List<String> fireworksSpecies) {
         this.fireworksSpecies = fireworksSpecies;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
     }
 
     public String getIconGroup() {
