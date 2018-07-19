@@ -38,7 +38,7 @@ public class Entry {
     private List<String> fireworksSpecies;
 
     // Icons
-    private String iconName;
+    private String iconName; // human readable name, without underscore to separate words
     private String iconGroup;
     private String iconCuratorName;
     private String iconCuratorOrcidId;
