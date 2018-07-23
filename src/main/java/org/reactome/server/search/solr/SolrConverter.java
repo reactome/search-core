@@ -61,6 +61,20 @@ public class SolrConverter {
     private static final String TARGET_SYNONYMS = "synonyms";
     private static final String TARGET_RESOURCE = "resource";
 
+    // ICONS
+    private static final String ICON_NAME = "iconName";
+    private static final String ICON_GROUP = "iconGroup";
+    private static final String ICON_CURATOR_NAME = "iconCuratorName";
+    private static final String ICON_CURATOR_ORCIDID = "iconCuratorOrcidId";
+    private static final String ICON_CURATOR_URL = "iconCuratorUrl";
+    private static final String ICON_DESIGNER_NAME = "iconDesignerName";
+    private static final String ICON_DESIGNER_URL = "iconDesignerUrl";
+    private static final String ICON_DESIGNER_ORCIDID = "iconDesignerOrcidId";
+    private static final String ICON_CVTERMS = "iconCVTerms";
+    private static final String ICON_XREFS = "iconXRefs";
+    private static final String ICON_STIDS = "iconStIds";
+    private static final String ICON_EHLDS = "iconEhlds";
+
     @Autowired
     private SolrCore solrCore;
 
@@ -436,55 +450,54 @@ public class SolrConverter {
     }
 
     private void buildIconEntry(SolrDocument solrDocument, Entry entry) {
-        if (solrDocument.containsKey("iconName")) {
+        if (solrDocument.containsKey(ICON_NAME)) {
             // Icon Name stores the plain name. After search the name itself might have the highlighting.
-            entry.setIconName((String) solrDocument.getFieldValue("iconName"));
+            entry.setIconName((String) solrDocument.getFieldValue(ICON_NAME));
+        }
+        if (solrDocument.containsKey(ICON_GROUP)) {
+            entry.setIconGroup((String) solrDocument.getFieldValue(ICON_GROUP));
         }
 
-        if (solrDocument.containsKey("iconGroup")) {
-            entry.setIconGroup((String) solrDocument.getFieldValue("iconGroup"));
+        if (solrDocument.containsKey(ICON_CURATOR_NAME)) {
+            entry.setIconCuratorName((String) solrDocument.getFieldValue(ICON_CURATOR_NAME));
+        }
+        if (solrDocument.containsKey(ICON_CURATOR_ORCIDID)) {
+            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue(ICON_CURATOR_ORCIDID));
+        }
+        if (solrDocument.containsKey(ICON_CURATOR_URL)) {
+            entry.setIconCuratorUrl((String) solrDocument.getFieldValue(ICON_CURATOR_URL));
         }
 
-        if (solrDocument.containsKey("iconCuratorName")) {
-            entry.setIconCuratorName((String) solrDocument.getFieldValue("iconCuratorName"));
+        if (solrDocument.containsKey(ICON_DESIGNER_NAME)) {
+            entry.setIconDesignerName((String) solrDocument.getFieldValue(ICON_DESIGNER_NAME));
         }
-        if (solrDocument.containsKey("iconCuratorOrcidId")) {
-            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue("iconCuratorOrcidId"));
+        if (solrDocument.containsKey(ICON_DESIGNER_URL)) {
+            entry.setIconDesignerUrl((String) solrDocument.getFieldValue(ICON_DESIGNER_URL));
         }
-        if (solrDocument.containsKey("iconCuratorOrcidId")) {
-            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue("iconCuratorOrcidId"));
-        }
-
-        if (solrDocument.containsKey("iconDesignerName")) {
-            entry.setIconDesignerName((String) solrDocument.getFieldValue("iconDesignerName"));
-        }
-        if (solrDocument.containsKey("iconDesignerUrl")) {
-            entry.setIconDesignerUrl((String) solrDocument.getFieldValue("iconDesignerUrl"));
-        }
-        if (solrDocument.containsKey("iconDesignerUrl")) {
-            entry.setIconDesignerUrl((String) solrDocument.getFieldValue("iconDesignerUrl"));
+        if (solrDocument.containsKey(ICON_DESIGNER_ORCIDID)) {
+            entry.setIconDesignerOrcidId((String) solrDocument.getFieldValue(ICON_DESIGNER_ORCIDID));
         }
 
-        if (solrDocument.containsKey("iconCVTerms")) {
-            Collection<Object> iconCVTerms = solrDocument.getFieldValues("iconCVTerms");
+        if (solrDocument.containsKey(ICON_CVTERMS)) {
+            Collection<Object> iconCVTerms = solrDocument.getFieldValues(ICON_CVTERMS);
             if (iconCVTerms != null && !iconCVTerms.isEmpty()) {
                 entry.setIconCVTerms(iconCVTerms.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
-        if (solrDocument.containsKey("iconXRefs")) {
-            Collection<Object> iconXRefs = solrDocument.getFieldValues("iconXRefs");
+        if (solrDocument.containsKey(ICON_XREFS)) {
+            Collection<Object> iconXRefs = solrDocument.getFieldValues(ICON_XREFS);
             if (iconXRefs != null && !iconXRefs.isEmpty()) {
                 entry.setIconXRefs(iconXRefs.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
-        if (solrDocument.containsKey("iconStIds")) {
-            Collection<Object> iconStIds = solrDocument.getFieldValues("iconStIds");
+        if (solrDocument.containsKey(ICON_STIDS)) {
+            Collection<Object> iconStIds = solrDocument.getFieldValues(ICON_STIDS);
             if (iconStIds != null && !iconStIds.isEmpty()) {
                 entry.setIconStIds(iconStIds.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
-        if (solrDocument.containsKey("iconEhlds")) {
-            Collection<Object> iconEhlds = solrDocument.getFieldValues("iconEhlds");
+        if (solrDocument.containsKey(ICON_EHLDS)) {
+            Collection<Object> iconEhlds = solrDocument.getFieldValues(ICON_EHLDS);
             if (iconEhlds != null && !iconEhlds.isEmpty()) {
                 entry.setIconEhlds(iconEhlds.stream().map(Object::toString).collect(Collectors.toList()));
             }

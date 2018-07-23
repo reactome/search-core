@@ -55,6 +55,7 @@ class SolrCore {
     private final static String FIREWORKS_FLAGGING_REQUEST_HANDLER = "/fireworksFlagging";
     private final static String DIAGRAM_REQUEST_HANDLER = "/diagrams";
     private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagramOccurrences";
+    private final static String ICON_FACET_HANDLER = "/iconFacet";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
@@ -73,6 +74,7 @@ class SolrCore {
     private final static String TYPE_TAG = "{!tag=tf}";
     private final static String KEYWORD_TAG = "{!tag=kf}";
     private final static String COMPARTMENT_TAG = "{!tag=cf}";
+    private final static String ICON_TYPE_QUERY = "{!term f=type}icon";
 
     private final static String ALL_FIELDS = "*:*";
 
@@ -321,7 +323,7 @@ class SolrCore {
      */
     QueryResponse getTargets(Query queryObject) {
         SolrQuery parameters = new SolrQuery();
-        parameters.setRequestHandler("/search");
+        parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery(queryObject.getQuery());
         try {
             return solrClient.query(TARGET_CORE, parameters);
@@ -333,8 +335,8 @@ class SolrCore {
 
     QueryResponse getIconFacetingInformation() throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
-        parameters.setRequestHandler("/iconFacet");
-        parameters.setQuery("{!term f=type}icon");
+        parameters.setRequestHandler(ICON_FACET_HANDLER);
+        parameters.setQuery(ICON_TYPE_QUERY);
         return querysolrClient(parameters);
     }
 
@@ -355,9 +357,8 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery("name_exact:" + queryObject.getQuery());
-        parameters.setFilterQueries("{!term f=type}icon");
+        parameters.setFilterQueries(ICON_TYPE_QUERY);
         parameters.set("mm", "100%"); // exact match
-//        parameters.setFilterQueries("{!term f=type}icon");
         return querysolrClient(parameters);
     }
 
