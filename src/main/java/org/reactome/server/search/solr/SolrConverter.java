@@ -219,18 +219,18 @@ public class SolrConverter {
         DiagramOccurrencesResult ret = null;
         QueryResponse response = solrCore.getDiagramOccurrences(queryObject);
         if (response != null && queryObject != null) {
-            String searching = queryObject.getFilter();
+            String searchingFilter = queryObject.getFilter();
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
                 if (solrDocument.containsKey(OCCURRENCES)) {
-                    List<String> subpathways = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
-                    for (String subpathway : subpathways) {
-                        if (subpathway.startsWith(searching)) {
-                            // Pathway:Bool(IsInDiagram):CSV of subpathways
-                            String[] line = subpathway.split(":");
-                            List<String> sb = null;
-                            if (!line[2].equals("#")) sb = Stream.of(line[2].split(",")).collect(Collectors.toList());
-                            ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), sb);
+                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                    for (String rawOccurrence : rawOccurrences) {
+                        if (rawOccurrence.startsWith(searchingFilter)) {
+                            // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
+                            String[] line = rawOccurrence.split(":");
+                            List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
+                            List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
+                            ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), occurrences, interactsWith);
                         }
                     }
                 }
