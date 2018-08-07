@@ -38,7 +38,7 @@ public class Entry {
     private List<String> fireworksSpecies;
 
     // Icons
-    private String iconName; // human readable name, without underscore to separate words
+    private String iconName; // original filename, name might have solr highlighting
     private String iconGroup;
     private String iconCuratorName;
     private String iconCuratorOrcidId;
@@ -50,7 +50,6 @@ public class Entry {
     private List<String> iconXRefs;
     private List<String> iconStIds;
     private List<String> iconEhlds;
-
 
     public String getRegulatorId() {
         return regulatorId;

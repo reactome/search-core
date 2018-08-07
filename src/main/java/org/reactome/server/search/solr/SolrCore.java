@@ -280,7 +280,7 @@ class SolrCore {
         if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
-        parameters.addFilterQuery(DIAGRAMS + ":" +queryObject.getFilter());
+        parameters.addFilterQuery(DIAGRAMS + ":" + queryObject.getFilter());
         parameters.setStart(queryObject.getStart());
         parameters.setRows(queryObject.getRows());
         parameters.setQuery(queryObject.getQuery());
@@ -356,7 +356,7 @@ class SolrCore {
     QueryResponse getIcon(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
-        parameters.setQuery("name_exact:" + queryObject.getQuery());
+        parameters.setQuery("iconName:" + queryObject.getQuery());
         parameters.setFilterQueries(ICON_TYPE_QUERY);
         parameters.set("mm", "100%"); // exact match
         return querysolrClient(parameters);
