@@ -47,7 +47,7 @@ public class Entry {
     private String iconDesignerOrcidId;
     private String iconDesignerUrl;
     private List<String> iconCVTerms;
-    private List<String> iconXRefs;
+    private List<String> iconReferences;
     private List<String> iconStIds;
     private List<String> iconEhlds;
 
@@ -331,12 +331,12 @@ public class Entry {
         this.iconCVTerms = iconCVTerms;
     }
 
-    public List<String> getIconXRefs() {
-        return iconXRefs;
+    public List<String> getIconReferences() {
+        return iconReferences;
     }
 
-    public void setIconXRefs(List<String> iconXRefs) {
-        this.iconXRefs = iconXRefs;
+    public void setIconReferences(List<String> iconReferences) {
+        this.iconReferences = iconReferences;
     }
 
     public List<String> getIconStIds() {

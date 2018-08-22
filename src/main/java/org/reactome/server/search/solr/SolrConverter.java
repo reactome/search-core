@@ -71,7 +71,7 @@ public class SolrConverter {
     private static final String ICON_DESIGNER_URL = "iconDesignerUrl";
     private static final String ICON_DESIGNER_ORCIDID = "iconDesignerOrcidId";
     private static final String ICON_CVTERMS = "iconCVTerms";
-    private static final String ICON_XREFS = "iconXRefs";
+    private static final String ICON_REFERENCES = "iconReferences";
     private static final String ICON_STIDS = "iconStIds";
     private static final String ICON_EHLDS = "iconEhlds";
 
@@ -484,10 +484,10 @@ public class SolrConverter {
                 entry.setIconCVTerms(iconCVTerms.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
-        if (solrDocument.containsKey(ICON_XREFS)) {
-            Collection<Object> iconXRefs = solrDocument.getFieldValues(ICON_XREFS);
-            if (iconXRefs != null && !iconXRefs.isEmpty()) {
-                entry.setIconXRefs(iconXRefs.stream().map(Object::toString).collect(Collectors.toList()));
+        if (solrDocument.containsKey(ICON_REFERENCES)) {
+            Collection<Object> iconRefs = solrDocument.getFieldValues(ICON_REFERENCES);
+            if (iconRefs != null && !iconRefs.isEmpty()) {
+                entry.setIconReferences(iconRefs.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
         if (solrDocument.containsKey(ICON_STIDS)) {
