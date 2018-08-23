@@ -248,10 +248,19 @@ public class SearchService {
     /**
      * This is stored in the occurrences multivalue field having diagram:isInDiagram:[list of subpathways occurrences]
      *
-     * @param queryObject - has the stId of the element we are search and the diagram to filter
+     * @param queryObject - has the stId of the element we are searching and the diagram to filter
      */
     public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
         return solrConverter.getDiagramOccurrencesResult(queryObject);
+    }
+
+    /**
+     * This is stored in the occurrences multivalue field having diagram:isInDiagram:[list of subpathways occurrences]
+     *
+     * @param queryObject - has the term we are searching to flag the corresponding element and the diagram to filter
+     */
+    public List<DiagramOccurrencesResult> getDiagramFlagging(Query queryObject) throws SolrSearcherException {
+        return solrConverter.getDiagramFlagging(queryObject);
     }
 
     /**

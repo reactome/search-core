@@ -8,9 +8,17 @@ import java.util.List;
 public class DiagramOccurrencesResult {
 
     // flag if the search term is present in the given diagram
+    private String inDiagram;
     private Boolean isInDiagram;
     private List<String> occurrences;
     private List<String> interactsWith;
+
+    public DiagramOccurrencesResult(String inDiagram, List<String> occurrences, List<String> interactsWith) {
+        this.inDiagram = inDiagram;
+        this.isInDiagram = inDiagram != null && !inDiagram.isEmpty();
+        this.occurrences = occurrences;
+        this.interactsWith = interactsWith;
+    }
 
     public DiagramOccurrencesResult(Boolean isInDiagram, List<String> occurrences, List<String> interactsWith) {
         this.isInDiagram = isInDiagram;
@@ -18,27 +26,18 @@ public class DiagramOccurrencesResult {
         this.interactsWith = interactsWith;
     }
 
-    public Boolean getInDiagram() {
-        return isInDiagram;
+    public String getInDiagram() {
+        return inDiagram;
     }
 
-    public void setInDiagram(Boolean inDiagram) {
-        isInDiagram = inDiagram;
-    }
+    public Boolean isInDiagram() { return isInDiagram;}
 
     public List<String> getOccurrences() {
         return occurrences;
-    }
-
-    public void setOccurrences(List<String> occurrences) {
-        this.occurrences = occurrences;
     }
 
     public List<String> getInteractsWith() {
         return interactsWith;
     }
 
-    public void setInteractsWith(List<String> interactsWith) {
-        this.interactsWith = interactsWith;
-    }
 }

@@ -34,6 +34,8 @@ import java.util.List;
  * SolrCore returns a QueryResponse (SolrObject)
  *
  * @author Florian Korninger (fkorn@ebi.ac.uk)
+ * @author Guilherme Viter (gviteri@ebi.ac.uk)
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  * @version 1.0
  */
 @Component
@@ -55,6 +57,7 @@ class SolrCore {
     private final static String FIREWORKS_FLAGGING_REQUEST_HANDLER = "/fireworksFlagging";
     private final static String DIAGRAM_REQUEST_HANDLER = "/diagrams";
     private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagramOccurrences";
+    private final static String DIAGRAM_FLAG_REQUEST_HANDLER = "/diagramFlagging";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
@@ -66,7 +69,8 @@ class SolrCore {
     private final static String COMPARTMENT_FACET = "compartment_facet";
     private final static String FIREWORK_SPECIES = "fireworksSpecies";
     private final static String DIAGRAMS = "diagrams";
-    private final static String DIAGRAMOCCURRENCES = "occurrences";
+    private final static String DIAGRAM_OCCURRENCES = "occurrences";
+    private final static String ST_ID = "stId";
     private final static String LLPS = "llps";
 
     private final static String SPECIES_TAG = "{!tag=sf}";
@@ -293,7 +297,21 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_OCCURRENCES_REQUEST_HANDLER);
         parameters.setQuery(queryObject.getQuery());
-        parameters.setFields(DIAGRAMOCCURRENCES); // solr response will contain only DIAGRAMOCCURRENCES.
+        parameters.setFields(DIAGRAM_OCCURRENCES); // solr response will contain only DIAGRAM_OCCURRENCES.
+        return querysolrClient(parameters);
+    }
+
+    /**
+     * Getting document based on the given stId (entry selected by the user).
+     * Only subpathways field is returned.
+     */
+    QueryResponse getDiagramFlagging(Query queryObject) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(DIAGRAM_FLAG_REQUEST_HANDLER);
+        parameters.setQuery(queryObject.getQuery() + " AND occurrences:" + queryObject.getFilter() + "*");
+        parameters.setFields(DIAGRAM_OCCURRENCES, ST_ID); // solr response will contain only DIAGRAM_OCCURRENCES and ST_ID.
+        //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
+        parameters.setRows(100);
         return querysolrClient(parameters);
     }
 

@@ -16,6 +16,8 @@ import java.util.stream.Stream;
  * Converts a Solr QueryResponse into Objects provided by Project Models
  *
  * @author Florian Korninger (fkorn@ebi.ac.uk)
+ * @author Guilherme Viter (gviteri@ebi.ac.uk)
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  * @version 1.0
  */
 @Component
@@ -222,6 +224,37 @@ public class SolrConverter {
             }
         }
         return ret;
+    }
+
+    /**
+     * This is stored in the subpathways multivalue field having diagram:isInDiagram:[list of subpathways]
+     *
+     * @param queryObject - has the term we are searching to flag the corresponding element and the diagram to filter
+     */
+    public List<DiagramOccurrencesResult> getDiagramFlagging(Query queryObject) throws SolrSearcherException {
+        List<DiagramOccurrencesResult> rtn = new ArrayList<>();
+        QueryResponse response = solrCore.getDiagramFlagging(queryObject);
+        if (response != null && queryObject != null) {
+            String targetedDiagram = queryObject.getFilter();
+            List<SolrDocument> solrDocuments = response.getResults();
+            for (SolrDocument solrDocument : solrDocuments) {
+                if (solrDocument.containsKey(OCCURRENCES)) {
+                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                    for (String rawOccurrence : rawOccurrences) {
+                        if (rawOccurrence.startsWith(targetedDiagram)) {
+                            // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
+                            String[] line = rawOccurrence.split(":");
+                            List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
+                            List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
+                            Boolean isInDiagram = Boolean.valueOf(line[1]);
+                            String stId = isInDiagram ? (String) solrDocument.getFieldValue(ST_ID) : null;
+                            rtn.add(new DiagramOccurrencesResult(stId , occurrences, interactsWith));
+                        }
+                    }
+                }
+            }
+        }
+        return rtn;
     }
 
     /**
