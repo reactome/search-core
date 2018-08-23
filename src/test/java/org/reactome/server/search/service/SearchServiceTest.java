@@ -267,7 +267,7 @@ public class SearchServiceTest {
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
-        assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+        assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.isInDiagram());
         assertNotNull(diagramOccurrencesResult.getOccurrences());
         assertTrue("1 or more occurrences is expected", 1 <= diagramOccurrencesResult.getOccurrences().size());
     }
@@ -283,7 +283,7 @@ public class SearchServiceTest {
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
-        assertTrue("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+        assertTrue("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.isInDiagram());
         assertNull(diagramOccurrencesResult.getOccurrences());
     }
 
