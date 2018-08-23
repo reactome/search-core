@@ -1,6 +1,10 @@
 package org.reactome.server.search.domain;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
@@ -8,36 +12,51 @@ import java.util.List;
 public class DiagramOccurrencesResult {
 
     // flag if the search term is present in the given diagram
-    private String inDiagram;
-    private Boolean isInDiagram;
-    private List<String> occurrences;
-    private List<String> interactsWith;
+    private String diagramEntity;
+    private Boolean inDiagram;
+    private Set<String> occurrences = new HashSet<>();
+    private Set<String> interactsWith = new HashSet<>();
 
-    public DiagramOccurrencesResult(String inDiagram, List<String> occurrences, List<String> interactsWith) {
+    public DiagramOccurrencesResult() {
+    }
+
+    public DiagramOccurrencesResult(String diagramEntity, Collection<String> occurrences, Collection<String> interactsWith) {
+        this.diagramEntity = diagramEntity;
+        this.inDiagram = diagramEntity != null && !diagramEntity.isEmpty();
+        addOccurrences(occurrences);
+        addInteractsWith(interactsWith);
+    }
+
+    public DiagramOccurrencesResult(Boolean inDiagram, Collection<String> occurrences, Collection<String> interactsWith) {
         this.inDiagram = inDiagram;
-        this.isInDiagram = inDiagram != null && !inDiagram.isEmpty();
-        this.occurrences = occurrences;
-        this.interactsWith = interactsWith;
+        addOccurrences(occurrences);
+        addInteractsWith(interactsWith);
     }
 
-    public DiagramOccurrencesResult(Boolean isInDiagram, List<String> occurrences, List<String> interactsWith) {
-        this.isInDiagram = isInDiagram;
-        this.occurrences = occurrences;
-        this.interactsWith = interactsWith;
+    public String getDiagramEntity() {
+        return diagramEntity;
     }
 
-    public String getInDiagram() {
-        return inDiagram;
+    public Boolean getInDiagram() { return inDiagram;}
+
+    public void addOccurrences(Collection<String> occurrences){
+        if(occurrences!=null) this.occurrences.addAll(occurrences);
     }
 
-    public Boolean isInDiagram() { return isInDiagram;}
-
-    public List<String> getOccurrences() {
-        return occurrences;
+    public Collection<String> getOccurrences() {
+        return occurrences.isEmpty() ? null : occurrences;
     }
 
-    public List<String> getInteractsWith() {
-        return interactsWith;
+    public void addInteractsWith(Collection<String> interactsWith){
+        if(interactsWith!=null) this.interactsWith.addAll(interactsWith);
     }
 
+    public Collection<String> getInteractsWith() {
+        return interactsWith.isEmpty() ? null : interactsWith;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty(){
+        return occurrences.isEmpty() && interactsWith.isEmpty();
+    }
 }
