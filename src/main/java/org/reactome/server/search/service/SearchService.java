@@ -27,10 +27,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.reactome.server.search.util.ReportInformationEnum.*;
@@ -311,14 +308,14 @@ public class SearchService {
     }
 
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {
-        Integer typeCount;
+        int typeCount;
         if (query.getTypes() != null && !query.getTypes().isEmpty()) {
             typeCount = query.getTypes().size();
         } else {
             typeCount = facetMapping.getTypeFacet().getAvailable().size();
         }
         if (typeCount != 0) {
-            Integer rows = rowCount;
+            int rows = rowCount;
             if (cluster) {
                 rows = rowCount / typeCount;
             }
@@ -343,6 +340,29 @@ public class SearchService {
         return max;
     }
 
+    /**
+     * Returns all icons
+     */
+    public List<Entry> getAllIcons() throws SolrSearcherException {
+        List<Entry> rtn = null;
+        List<String> types = Collections.singletonList("Icon");
+
+        // Simple query to get number of matches
+        Query query = new Query("*:*", null, types, null, null, 0, 0);
+        GroupedResult results = solrConverter.getEntries(query);
+        int rows = results.getNumberOfMatches();
+
+        // Query all the icons
+        query = new Query("*:*", null, types, null, null, 0, rows);
+        results = solrConverter.getEntries(query);
+
+        if (results != null && results.getResults() != null) {
+            rtn = results.getResults().get(0).getEntries();
+        }
+
+        return rtn;
+    }
+
     private void doAsyncReport(Query queryObject, Set<TargetResult> targetResults) {
         if (!targetResults.isEmpty()) {
             doAsyncTargetReport(queryObject, targetResults);
@@ -363,7 +383,7 @@ public class SearchService {
         // In the same search we might have one target and term(s) not found. Targets are done in the line above
         // and the others will be the new QueryObject just to be able to reuse the report method.
         Set<String> targetsNotFound = targetResults.stream().filter(t -> !t.isTarget()).map(TargetResult::getTerm).collect(Collectors.toSet());
-        if (targetsNotFound != null && !targetsNotFound.isEmpty()) {
+        if (!targetsNotFound.isEmpty()) {
             queryObject.setQuery(String.join(" ", targetsNotFound));
             new Thread(() -> report("notfound", queryObject, null), "ReportNotFoundTargetThread").start();
         }

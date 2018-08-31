@@ -376,7 +376,7 @@ class SolrCore {
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery("iconName:" + queryObject.getQuery());
         parameters.setFilterQueries(ICON_TYPE_QUERY);
-        parameters.set("mm", "100%"); // exact match
+        parameters.set("mm", "100%"); // min match - one field or another is fine
         return querysolrClient(parameters);
     }
 

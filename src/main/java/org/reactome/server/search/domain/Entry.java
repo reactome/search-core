@@ -2,6 +2,7 @@ package org.reactome.server.search.domain;
 
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Internal Model for Reactome Entries
@@ -48,7 +49,7 @@ public class Entry {
     private String iconDesignerUrl;
     private List<String> iconCVTerms;
     private List<String> iconReferences;
-    private List<String> iconStIds;
+    private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
 
     public String getRegulatorId() {
@@ -339,12 +340,12 @@ public class Entry {
         this.iconReferences = iconReferences;
     }
 
-    public List<String> getIconStIds() {
-        return iconStIds;
+    public Set<IconPhysicalEntity> getIconPhysicalEntities() {
+        return iconPhysicalEntities;
     }
 
-    public void setIconStIds(List<String> iconStIds) {
-        this.iconStIds = iconStIds;
+    public void setIconPhysicalEntities(Set<IconPhysicalEntity> iconPhysicalEntities) {
+        this.iconPhysicalEntities = iconPhysicalEntities;
     }
 
     public List<String> getIconEhlds() {

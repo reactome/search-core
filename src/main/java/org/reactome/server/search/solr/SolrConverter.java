@@ -74,7 +74,7 @@ public class SolrConverter {
     private static final String ICON_DESIGNER_ORCIDID = "iconDesignerOrcidId";
     private static final String ICON_CVTERMS = "iconCVTerms";
     private static final String ICON_REFERENCES = "iconReferences";
-    private static final String ICON_STIDS = "iconStIds";
+    private static final String ICON_PHYSICAL_ENTITY = "iconPhysicalEntity";
     private static final String ICON_EHLDS = "iconEhlds";
 
     @Autowired
@@ -523,10 +523,15 @@ public class SolrConverter {
                 entry.setIconReferences(iconRefs.stream().map(Object::toString).collect(Collectors.toList()));
             }
         }
-        if (solrDocument.containsKey(ICON_STIDS)) {
-            Collection<Object> iconStIds = solrDocument.getFieldValues(ICON_STIDS);
+        if (solrDocument.containsKey(ICON_PHYSICAL_ENTITY)) {
+            Collection<Object> iconStIds = solrDocument.getFieldValues(ICON_PHYSICAL_ENTITY);
             if (iconStIds != null && !iconStIds.isEmpty()) {
-                entry.setIconStIds(iconStIds.stream().map(Object::toString).collect(Collectors.toList()));
+                Set<IconPhysicalEntity> iconPhysicalEntities = new TreeSet<>();
+                for (Object iconStId : iconStIds) {
+                    String[] iconPE = ((String) iconStId).split("#");
+                    iconPhysicalEntities.add(new IconPhysicalEntity(iconPE[0], iconPE[1], iconPE[2], iconPE[3]));
+                }
+                entry.setIconPhysicalEntities(iconPhysicalEntities);
             }
         }
         if (solrDocument.containsKey(ICON_EHLDS)) {

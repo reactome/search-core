@@ -395,15 +395,26 @@ public class SearchServiceTest {
         logger.info("Started testing searchService.getIconFacetingInformation()");
         Query query = new Query("{!term f=iconGroup}proteins", null, null, null, null);
         Result icons = searchService.getIconsResult(query, 30, 1);
-        System.out.println(icons);
+        assertNotNull(icons);
+        assertNotNull(icons.getEntries());
+        assertTrue("Couldn't find all the icons", icons.getEntries().size() >= 20);
     }
 
     @Test
     public void testGetIcon() throws SolrSearcherException {
-        logger.info("Started testing ");
+        logger.info("Started testing searchService.testGetIcon");
         String name = "ATM";
         Query query = new Query(name, null, null, null, null);
         Entry icon = searchService.getIcon(query);
-        System.out.println(icon);
+        assertNotNull(icon);
+        assertEquals(name, icon.getIconName());
+    }
+
+    @Test
+    public void testGetAllIcons() throws SolrSearcherException {
+        logger.info("Started testing searchService.testGetAllIcons");
+        List<Entry> icons = searchService.getAllIcons();
+        assertNotNull(icons);
+        assertTrue("Couldn't find all the icons", icons.size() >= 1150 && icons.size() <= 1500);
     }
 }
