@@ -361,7 +361,7 @@ class SolrCore {
     QueryResponse getIconsResult(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
-        parameters.setSort("name_exact", SolrQuery.ORDER.asc);
+        parameters.setSort("iconName_sort", SolrQuery.ORDER.asc);
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.setStart(queryObject.getStart());
             parameters.setRows(queryObject.getRows());
