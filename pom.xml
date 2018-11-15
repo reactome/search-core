@@ -31,7 +31,6 @@
     </developers>
 
     <properties>
-        <reactome.version>1.2.13</reactome.version>
         <solr.version>6.1.0</solr.version>
         <spring.version>4.2.4.RELEASE</spring.version>
         <aspectj.version>1.8.8</aspectj.version>
@@ -54,12 +53,6 @@
     </properties>
 
     <dependencies>
-        <!--Reactome MySql adapter-->
-        <dependency>
-            <groupId>org.reactome.base</groupId>
-            <artifactId>reactome-base</artifactId>
-            <version>${reactome.version}</version>
-        </dependency>
         <!-- Solr -->
         <dependency>
             <groupId>org.apache.solr</groupId>
