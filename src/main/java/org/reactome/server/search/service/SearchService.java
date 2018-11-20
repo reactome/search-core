@@ -219,6 +219,10 @@ public class SearchService {
      * @return FireworksResult
      */
     public FireworksResult getFireworks(Query queryObject) throws SolrSearcherException {
+        if (queryObject.getSpecies() != null) {
+            queryObject.getSpecies().add("Entries without species");
+        }
+
         FireworksResult ret = solrConverter.getFireworksResult(queryObject);
         if (ret != null && ret.getFound() == 0) {
             Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
