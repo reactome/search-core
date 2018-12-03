@@ -170,7 +170,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         Query query = new Query("transp", species, null, null, null);
         GroupedResult groupedResult = searchService.getEntries(query, true);
-        assertEquals(5, groupedResult.getNumberOfGroups());
+        assertTrue(5 <= groupedResult.getNumberOfGroups());
         assertTrue(300 <= groupedResult.getNumberOfMatches());
     }
 
@@ -403,7 +403,7 @@ public class SearchServiceTest {
     @Test
     public void testGetIcon() throws SolrSearcherException {
         logger.info("Started testing searchService.testGetIcon");
-        String name = "ATM";
+        String name = "R-ICO-013100";
         Query query = new Query(name, null, null, null, null);
         Entry icon = searchService.getIcon(query);
         assertNotNull(icon);
