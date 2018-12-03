@@ -386,14 +386,14 @@ public class SearchServiceTest {
     public void getIconFacetingInformation() throws SolrSearcherException {
         logger.info("Started testing searchService.getIconFacetingInformation()");
         FacetMapping facetMapping = searchService.getIconFacetingInformation();
-        List<FacetContainer> cc = facetMapping.getIconGroupFacet().getAvailable();
+        List<FacetContainer> cc = facetMapping.getIconCategoriesFacet().getAvailable();
         assertTrue("Icon faceting didn't match", cc.size() >= 8);
     }
 
     @Test
     public void testIconsResult() throws SolrSearcherException {
         logger.info("Started testing searchService.getIconFacetingInformation()");
-        Query query = new Query("{!term f=iconGroup}proteins", null, null, null, null);
+        Query query = new Query("{!term f=iconCategories}protein", null, null, null, null);
         Result icons = searchService.getIconsResult(query, 30, 1);
         assertNotNull(icons);
         assertNotNull(icons.getEntries());
@@ -407,7 +407,7 @@ public class SearchServiceTest {
         Query query = new Query(name, null, null, null, null);
         Entry icon = searchService.getIcon(query);
         assertNotNull(icon);
-        assertEquals(name, icon.getIconName());
+        assertEquals(name, icon.getName());
     }
 
     @Test

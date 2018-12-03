@@ -374,7 +374,7 @@ class SolrCore {
     QueryResponse getIcon(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
-        parameters.setQuery("iconName:" + queryObject.getQuery());
+        parameters.setQuery("stId:" + queryObject.getQuery());
         parameters.setFilterQueries(ICON_TYPE_QUERY);
         parameters.set("mm", "100%"); // min match - one field or another is fine
         return querysolrClient(parameters);
@@ -390,7 +390,6 @@ class SolrCore {
     private String getFilterString(List<String> facet, String fieldName) {
         if (facet != null) {
             facet.removeAll(Collections.singletonList(""));
-            //noinspection SuspiciousMethodCalls
             facet.removeAll(Collections.singletonList(null));
             if(!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
                 return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";

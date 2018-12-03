@@ -13,7 +13,7 @@ public class FacetMapping {
     private FacetList typeFacet;
     private FacetList keywordFacet;
     private FacetList compartmentFacet;
-    private FacetList iconGroupFacet;
+    private FacetList iconCategoriesFacet;
 
     public long getTotalNumFount() {
         return totalNumFount;
@@ -55,11 +55,11 @@ public class FacetMapping {
         this.compartmentFacet = compartmentFacet;
     }
 
-    public FacetList getIconGroupFacet() {
-        return iconGroupFacet;
+    public FacetList getIconCategoriesFacet() {
+        return iconCategoriesFacet;
     }
 
-    public void setIconGroupFacet(FacetList iconGroupFacet) {
-        this.iconGroupFacet = iconGroupFacet;
+    public void setIconCategoriesFacet(FacetList iconCategoriesFacet) {
+        this.iconCategoriesFacet = iconCategoriesFacet;
     }
 }

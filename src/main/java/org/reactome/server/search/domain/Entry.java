@@ -40,14 +40,13 @@ public class Entry {
 
     // Icons
     private String iconName; // original filename, name might have solr highlighting
-    private String iconGroup;
+    private List<String> iconCategories;
     private String iconCuratorName;
     private String iconCuratorOrcidId;
     private String iconCuratorUrl;
     private String iconDesignerName;
     private String iconDesignerOrcidId;
     private String iconDesignerUrl;
-    private List<String> iconCVTerms;
     private List<String> iconReferences;
     private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
@@ -156,6 +155,10 @@ public class Entry {
         this.stId = stId;
     }
 
+    /**
+     * Get entry name
+     * @return name might contain highlighting added by solr.
+     */
     public String getName() {
         return name;
     }
@@ -260,6 +263,12 @@ public class Entry {
         this.fireworksSpecies = fireworksSpecies;
     }
 
+    /**
+     * This is the iconName. @getName() returns the same information.
+     * However if a solr search hits the name, then solr highlights the term in the name,
+     * and we can't use inside a title or as just name.
+     * @return plain icon name, same as written in the <name></name> in the metadata
+     */
     public String getIconName() {
         return iconName;
     }
@@ -268,12 +277,12 @@ public class Entry {
         this.iconName = iconName;
     }
 
-    public String getIconGroup() {
-        return iconGroup;
+    public List<String> getIconCategories() {
+        return iconCategories;
     }
 
-    public void setIconGroup(String iconGroup) {
-        this.iconGroup = iconGroup;
+    public void setIconCategories(List<String> iconCategories) {
+        this.iconCategories = iconCategories;
     }
 
     public String getIconCuratorName() {
@@ -322,14 +331,6 @@ public class Entry {
 
     public void setIconDesignerUrl(String iconDesignerUrl) {
         this.iconDesignerUrl = iconDesignerUrl;
-    }
-
-    public List<String> getIconCVTerms() {
-        return iconCVTerms;
-    }
-
-    public void setIconCVTerms(List<String> iconCVTerms) {
-        this.iconCVTerms = iconCVTerms;
     }
 
     public List<String> getIconReferences() {
