@@ -407,7 +407,7 @@ public class SearchServiceTest {
         Query query = new Query(name, null, null, null, null);
         Entry icon = searchService.getIcon(query);
         assertNotNull(icon);
-        assertEquals(name, icon.getName());
+        assertEquals(name, icon.getStId());
     }
 
     @Test
