@@ -669,11 +669,12 @@ public class SolrConverter {
                     for (String rawOccurrence : rawOccurrences) {
                         // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
                         String[] line = rawOccurrence.split(":");
+                        String pathwayStId = line[0];
                         boolean interacts = !line[3].equals("#");
                         // if there is(are) interactor(s), then get the diagram (first value) so the Fireworks can flag them.
-                        if(interacts) {
+                        if(interacts && rtn.getLlps() != null && !rtn.getLlps().contains(pathwayStId)) {
                             // get the diagram and add it
-                            rtn.addInteractsWith(line[0]);
+                            rtn.addInteractsWith(pathwayStId);
                         }
                     }
                 }
