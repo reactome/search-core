@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.reactome.server.search.util.ReportInformationEnum.*;
@@ -265,9 +268,9 @@ public class SearchService {
     }
 
     /**
-     * Return a list of StableIds to be flagged in the Fireworks
+     * Return a list of StableIds to be flagged in the Fireworks and the diagram that it might interacts with
      */
-    public Collection<String> fireworksFlagging(Query queryObject) throws SolrSearcherException {
+    public FireworksOccurrencesResult fireworksFlagging(Query queryObject) throws SolrSearcherException {
         return solrConverter.fireworksFlagging(queryObject);
     }
 

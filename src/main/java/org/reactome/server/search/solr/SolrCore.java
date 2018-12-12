@@ -320,7 +320,7 @@ class SolrCore {
     QueryResponse fireworksFlagging(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FIREWORKS_FLAGGING_REQUEST_HANDLER);
-        parameters.setFields(LLPS);
+        parameters.setFields(LLPS, DIAGRAM_OCCURRENCES);
         parameters.setQuery(queryObject.getQuery());
 
         if (queryObject.getSpecies() == null) queryObject.setSpecies(new ArrayList<>());

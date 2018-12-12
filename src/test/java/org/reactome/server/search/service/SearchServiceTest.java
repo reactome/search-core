@@ -290,12 +290,13 @@ public class SearchServiceTest {
     @Test
     public void testFireworksFlagging() throws SolrSearcherException {
         // By default filter query by Human and Entries without species
-        String term = "PTEN";
+        String term = "TPM3";
         Query query = new Query(term, null, null, null, null);
-        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+        FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
-        assertTrue("12 or more fireworks flagging stid are expected", 12 <= fireworksFlaggingSet.size());
+        assertTrue("7 or more fireworks flagging 'lower level' pathways are expected", 7 <= fireworksFlaggingSet.getLlps().size());
+        assertTrue("8 or more fireworks flagging 'interacts with' stid are expected", 8 <= fireworksFlaggingSet.getInteractsWith().size());
     }
 
     @Test
@@ -306,7 +307,7 @@ public class SearchServiceTest {
 
         String term = "NTN1";
         Query query = new Query(term, species, null, null, null);
-        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+        FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
     }
@@ -316,10 +317,10 @@ public class SearchServiceTest {
         // By default filter query by Human and Entries without species
         String term = "CHEBI:15377";
         Query query = new Query(term, null, null, null, null);
-        Collection<String> fireworksFlaggingSet = searchService.fireworksFlagging(query);
+        FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
-        assertTrue("4000 or more fireworks flagging stid are expected", 4000 <= fireworksFlaggingSet.size());
+        assertTrue("4000 or more fireworks flagging stid are expected", 4000 <= fireworksFlaggingSet.getLlps().size());
     }
 
     @Test

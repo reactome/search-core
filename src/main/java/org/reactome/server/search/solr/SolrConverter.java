@@ -655,18 +655,31 @@ public class SolrConverter {
         return null;
     }
 
-    public Set<String> fireworksFlagging(Query queryObject) throws SolrSearcherException {
-        Set<String> ret = new HashSet<>();
+    public FireworksOccurrencesResult fireworksFlagging(Query queryObject) throws SolrSearcherException {
+        FireworksOccurrencesResult rtn = new FireworksOccurrencesResult();
         QueryResponse response = solrCore.fireworksFlagging(queryObject);
         if (response != null && queryObject != null) {
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
                 if (solrDocument.containsKey(LLPS)) {
-                    ret.addAll(solrDocument.getFieldValues(LLPS).stream().map(Object::toString).collect(Collectors.toList()));
+                    rtn.addLlps(solrDocument.getFieldValues(LLPS).stream().map(Object::toString).collect(Collectors.toList()));
+                }
+                if (solrDocument.containsKey(OCCURRENCES)) {
+                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                    for (String rawOccurrence : rawOccurrences) {
+                        // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
+                        String[] line = rawOccurrence.split(":");
+                        boolean interacts = !line[3].equals("#");
+                        // if there is(are) interactor(s), then get the diagram (first value) so the Fireworks can flag them.
+                        if(interacts) {
+                            // get the diagram and add it
+                            rtn.addInteractsWith(line[0]);
+                        }
+                    }
                 }
             }
         }
-        return ret;
+        return rtn;
     }
 
     /**
