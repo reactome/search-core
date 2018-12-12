@@ -672,7 +672,7 @@ public class SolrConverter {
                         String pathwayStId = line[0];
                         boolean interacts = !line[3].equals("#");
                         // if there is(are) interactor(s), then get the diagram (first value) so the Fireworks can flag them.
-                        if(interacts && rtn.getLlps() != null && !rtn.getLlps().contains(pathwayStId)) {
+                        if(interacts) {
                             // get the diagram and add it
                             rtn.addInteractsWith(pathwayStId);
                         }
@@ -680,6 +680,10 @@ public class SolrConverter {
                 }
             }
         }
+
+        // if it is in llps, remove from interacts with
+        if (rtn.getLlps() != null && rtn.getInteractsWith() != null) rtn.getLlps().forEach(s->rtn.getInteractsWith().remove(s));
+
         return rtn;
     }
 

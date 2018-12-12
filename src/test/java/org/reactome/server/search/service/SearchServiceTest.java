@@ -296,7 +296,7 @@ public class SearchServiceTest {
 
         assertFalse(fireworksFlaggingSet.isEmpty());
         assertTrue("7 or more fireworks flagging 'lower level' pathways are expected", 7 <= fireworksFlaggingSet.getLlps().size());
-        assertTrue("8 or more fireworks flagging 'interacts with' stid are expected", 8 <= fireworksFlaggingSet.getInteractsWith().size());
+        assertTrue("6 or more fireworks flagging 'interacts with' stid are expected", 6 <= fireworksFlaggingSet.getInteractsWith().size());
     }
 
     @Test
