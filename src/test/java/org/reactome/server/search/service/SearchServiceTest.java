@@ -160,7 +160,7 @@ public class SearchServiceTest {
 
         Query query = new Query(searchTerm, species, types, compartment, keywords);
         SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
-        assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 2);
+        assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 3);
     }
 
     @Test
