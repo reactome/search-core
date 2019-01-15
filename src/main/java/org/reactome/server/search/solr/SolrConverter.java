@@ -41,10 +41,6 @@ public class SolrConverter {
     private static final String EXACT_TYPE = "exactType";
     private static final String DATABASE_NAME = "databaseName";
     private static final String REFERENCE_URL = "referenceURL";
-    private static final String REGULATOR = "regulator";
-    private static final String REGULATED_ENTITY = "regulatedEntity";
-    private static final String REGULATOR_ID = "regulatorId";
-    private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
     private static final String COMPARTMENT_NAME = "compartmentName";
     private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
     private static final String FIREWORKS_SPECIES = "fireworksSpecies";
@@ -425,8 +421,6 @@ public class SolrConverter {
             }
             entry.setDatabaseName((String) solrDocument.getFieldValue(DATABASE_NAME));
             entry.setReferenceURL((String) solrDocument.getFieldValue(REFERENCE_URL));
-            entry.setRegulatorId((String) solrDocument.getFieldValue(REGULATOR_ID));
-            entry.setRegulatedEntityId((String) solrDocument.getFieldValue(REGULATED_ENTITY_ID));
             if (solrDocument.containsKey(COMPARTMENT_NAME)) {
                 Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENT_NAME);
                 if (compartments != null && !compartments.isEmpty()) {
@@ -448,8 +442,6 @@ public class SolrConverter {
                 entry.setSummation((String) solrDocument.getFieldValue(SUMMATION));
                 entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME));
                 entry.setReferenceIdentifier(selectRightReferenceIdentifier(solrDocument));
-                entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR));
-                entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY));
             }
             if (solrDocument.containsKey(INFERRED_SUMMATION)) {
                 entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
@@ -574,16 +566,6 @@ public class SolrConverter {
             entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME));
         }
         entry.setReferenceIdentifier(selectRightHighlightingForReferenceIdentifiers(solrDocument, snippets));
-        if (snippets.containsKey(REGULATOR) && snippets.get(REGULATOR) != null && !snippets.get(REGULATOR).isEmpty()) {
-            entry.setRegulator(snippets.get(REGULATOR).get(0));
-        } else {
-            entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR));
-        }
-        if (snippets.containsKey(REGULATED_ENTITY) && snippets.get(REGULATED_ENTITY) != null && !snippets.get(REGULATED_ENTITY).isEmpty()) {
-            entry.setRegulatedEntity(snippets.get(REGULATED_ENTITY).get(0));
-        } else {
-            entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY));
-        }
     }
 
     private String selectRightHighlightingForReferenceIdentifiers(SolrDocument solrDocument, Map<String, List<String>> snippets) {

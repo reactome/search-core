@@ -27,10 +27,6 @@ public class Entry {
     private Boolean isDisease;
     private String databaseName;
     private String referenceURL;
-    private String regulator;
-    private String regulatedEntity;
-    private String regulatorId;
-    private String regulatedEntityId;
     private String authoredPathways;
     private String authoredReactions;
     private String reviewedPathways;
@@ -50,38 +46,6 @@ public class Entry {
     private List<String> iconReferences;
     private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
-
-    public String getRegulatorId() {
-        return regulatorId;
-    }
-
-    public void setRegulatorId(String regulatorId) {
-        this.regulatorId = regulatorId;
-    }
-
-    public String getRegulatedEntityId() {
-        return regulatedEntityId;
-    }
-
-    public void setRegulatedEntityId(String regulatedEntityId) {
-        this.regulatedEntityId = regulatedEntityId;
-    }
-
-    public String getRegulator() {
-        return regulator;
-    }
-
-    public void setRegulator(String regulator) {
-        this.regulator = regulator;
-    }
-
-    public String getRegulatedEntity() {
-        return regulatedEntity;
-    }
-
-    public void setRegulatedEntity(String regulatedEntity) {
-        this.regulatedEntity = regulatedEntity;
-    }
 
     public String getDatabaseName() {
         return databaseName;

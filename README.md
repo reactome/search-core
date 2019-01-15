@@ -5,7 +5,7 @@
 #### What is Reactome Search ?
 Reactome Search is a project that optimizes the queries in Reactome Website. Based on Apache Lucene, Reactome Graph Database is fully indexed by Apache SolR. SolR is versatile, it's configured and parametrized to face Reactome needs and requirements, delivering a high performance and accurate result list. The Search Project is split into 'Indexer' and 'Search':
 
-* Indexer: querying Reactome Graph Database and index PhysicalEntities, Event and Regulation into SolR documents
+* Indexer: querying Reactome Graph Database and index PhysicalEntities and Event into SolR documents
 * Search: Spring MVC Application which queries SolR documents in order to optimize the searching for Reactome Pathway Browser.
 
 #### Search Core
