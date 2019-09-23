@@ -12,88 +12,178 @@ import java.util.Map;
 public class Query {
 
     private String query;
-    private String filter; //fq
+    private String originalQuery;
+    private String filterQuery; //fq
     private List<String> species;
     private List<String> types;
     private List<String> keywords;
-    private List<String> compartment;
+    private List<String> compartments;
     private Integer start;
     private Integer rows;
     private Map<String, String> reportInfo; // extra information for report, useragent, ip, etc
 
-    public Query() {
+    /**
+     * Builder by default will keep a copy of the original query.
+     * In case the query String is massaged to get accurate results from solr,
+     * the query itself must not be use in a report, instead use originalQuery
+     */
+    public static class Builder {
+        private String query;
+        private String originalQuery;
+        private String filterQuery; //fq
+        private List<String> species = null;
+        private List<String> types = null;
+        private List<String> keywords = null;
+        private List<String> compartments = null;
+        private Integer start;
+        private Integer rows;
+        private Map<String, String> reportInfo = null; // extra information for report, useragent, ip, etc
 
+        /**
+         * When building, the query is automatically copied to the originalQuery.
+         * If the query is already modified, make sure you invoke keepOriginalQuery if you to store the query in a
+         * report later.
+         */
+        public Builder(String query) {
+            this.query = query;
+            this.originalQuery = query;
+        }
+
+        public Builder keepOriginalQuery(String originalQuery){
+            this.originalQuery = originalQuery;
+            return this;
+        }
+
+        public Builder addFilterQuery(String filterQuery){
+            this.filterQuery = filterQuery;
+            return this;
+        }
+
+        public Builder forSpecies(List<String> species){
+            this.species = species;
+            return this;
+        }
+
+        public Builder withTypes(List<String> types){
+            this.types = types;
+            return this;
+        }
+
+        public Builder withKeywords(List<String> keywords){
+            this.keywords = keywords;
+            return this;
+        }
+
+        public Builder inCompartments(List<String> compartments){
+            this.compartments = compartments;
+            return this;
+        }
+
+        public Builder start(Integer start){
+            this.start = start;
+            return this;
+        }
+
+        public Builder numberOfrows(Integer rows){
+            this.rows = rows;
+            return this;
+        }
+
+        public Builder withReportInfo(Map<String, String> reportInfo) {
+            this.reportInfo = reportInfo;
+            return this;
+        }
+
+        public Query build(){
+            Query ret = new Query();
+            ret.query = this.query;
+            ret.originalQuery = this.originalQuery;
+            ret.filterQuery = this.filterQuery;
+            ret.species = this.species;
+            ret.types = this.types;
+            ret.keywords = this.keywords;
+            ret.compartments = this.compartments;
+            ret.start = this.start;
+            ret.rows = this.rows;
+            ret.reportInfo = this.reportInfo;
+            return ret;
+        }
     }
 
-    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
-        this.query = query;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-    }
 
-    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
-        this.query = query;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-        this.reportInfo = reportInfo;
-    }
+    private Query() {}
 
-    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
-        this.query = query;
-        this.filter = filter;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-    }
-
-    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
-        this.query = query;
-        this.filter = filter;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-        this.reportInfo = reportInfo;
-    }
-
-    public Query(String query, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
-        this.query = query;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-        this.start = start;
-        this.rows = rows;
-    }
-
-    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
-        this.query = query;
-        this.filter = filter;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-        this.start = start;
-        this.rows = rows;
-    }
-
-    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows, Map<String, String> reportInfo) {
-        this.query = query;
-        this.filter = filter;
-        this.species = species;
-        this.types = types;
-        this.keywords = keywords;
-        this.compartment = compartment;
-        this.start = start;
-        this.rows = rows;
-        this.reportInfo = reportInfo;
-    }
-
+//    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
+//        this.query = query;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//    }
+//
+//    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
+//        this.query = query;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//        this.reportInfo = reportInfo;
+//    }
+//
+//    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
+//        this.query = query;
+//        this.filter = filter;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//    }
+//
+//    //
+//    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
+//        this.query = query;
+//        this.filter = filter;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//        this.reportInfo = reportInfo;
+//    }
+//
+//    public Query(String query, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
+//        this.query = query;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//        this.start = start;
+//        this.rows = rows;
+//    }
+//
+//    //
+//    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
+//        this.query = query;
+//        this.filter = filter;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//        this.start = start;
+//        this.rows = rows;
+//    }
+//
+//    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows, Map<String, String> reportInfo) {
+//        this.query = query;
+//        this.filter = filter;
+//        this.species = species;
+//        this.types = types;
+//        this.keywords = keywords;
+//        this.compartment = compartment;
+//        this.start = start;
+//        this.rows = rows;
+//        this.reportInfo = reportInfo;
+//    }
+//
     public String getQuery() {
         return query;
     }
@@ -102,12 +192,20 @@ public class Query {
         this.query = query;
     }
 
-    public String getFilter() {
-        return filter;
+    public String getOriginalQuery() {
+        return originalQuery;
     }
 
-    public void setFilter(String filter) {
-        this.filter = filter;
+    public void setOriginalQuery(String originalQuery) {
+        this.originalQuery = originalQuery;
+    }
+
+    public String getFilterQuery() {
+        return filterQuery;
+    }
+
+    public void setFilterQuery(String filterQuery) {
+        this.filterQuery = filterQuery;
     }
 
     public List<String> getSpecies() {
@@ -134,12 +232,12 @@ public class Query {
         this.keywords = keywords;
     }
 
-    public List<String> getCompartment() {
-        return compartment;
+    public List<String> getCompartments() {
+        return compartments;
     }
 
-    public void setCompartment(List<String> compartment) {
-        this.compartment = compartment;
+    public void setCompartments(List<String> compartments) {
+        this.compartments = compartments;
     }
 
     public Integer getStart() {

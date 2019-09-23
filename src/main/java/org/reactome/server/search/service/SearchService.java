@@ -76,7 +76,8 @@ public class SearchService {
     public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
-            query = new Query(query.getQuery(), null, null, null, null, query.getReportInfo());
+            query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
+            // query.getQuery(), null, null, null, null, query.getReportInfo());
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
@@ -159,13 +160,13 @@ public class SearchService {
                 }
                 queryObject.setKeywords(keywords);
             }
-            if (queryObject.getCompartment() != null && facetMapping.getCompartmentFacet().getSelected().size() != queryObject.getCompartment().size()) {
+            if (queryObject.getCompartments() != null && facetMapping.getCompartmentFacet().getSelected().size() != queryObject.getCompartments().size()) {
                 correctFacets = false;
                 List<String> compartments = new ArrayList<>();
                 for (FacetContainer container : facetMapping.getCompartmentFacet().getSelected()) {
                     compartments.add(container.getName());
                 }
-                queryObject.setCompartment(compartments);
+                queryObject.setCompartments(compartments);
             }
             if (correctFacets) {
                 return facetMapping;
@@ -355,12 +356,12 @@ public class SearchService {
         List<String> types = Collections.singletonList("Icon");
 
         // Simple query to get number of matches
-        Query query = new Query("*:*", null, types, null, null, 0, 0);
+        Query query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(0).build();
         GroupedResult results = solrConverter.getEntries(query);
         int rows = results.getNumberOfMatches();
 
         // Query all the icons
-        query = new Query("*:*", null, types, null, null, 0, rows);
+        query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(rows).build();
         results = solrConverter.getEntries(query);
 
         if (results != null && results.getResults() != null) {
@@ -428,7 +429,7 @@ public class SearchService {
                 StringEntity entity = new StringEntity(json.toString());
                 httpPost.setEntity(entity);
             } else {
-                String json = objectMapper.writeValueAsString(new ReportEntity(queryObject.getQuery(), ""));
+                String json = objectMapper.writeValueAsString(new ReportEntity(queryObject.getOriginalQuery(), ""));
                 StringEntity entity = new StringEntity(json);
                 httpPost.setEntity(entity);
             }

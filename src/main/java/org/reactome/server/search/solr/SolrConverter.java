@@ -216,7 +216,7 @@ public class SolrConverter {
         DiagramOccurrencesResult ret = null;
         QueryResponse response = solrCore.getDiagramOccurrences(queryObject);
         if (response != null && queryObject != null) {
-            String searchingFilter = queryObject.getFilter();
+            String searchingFilter = queryObject.getFilterQuery();
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
                 if (solrDocument.containsKey(OCCURRENCES)) {
@@ -245,7 +245,7 @@ public class SolrConverter {
         List<DiagramOccurrencesResult> rtn = new ArrayList<>();
         QueryResponse response = solrCore.getDiagramFlagging(queryObject);
         if (response != null && queryObject != null) {
-            String targetedDiagram = queryObject.getFilter();
+            String targetedDiagram = queryObject.getFilterQuery();
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
                 if (solrDocument.containsKey(OCCURRENCES)) {
@@ -331,7 +331,7 @@ public class SolrConverter {
             facetMapping.setSpeciesFacet(getFacets(response.getFacetField(SPECIES_FACET), queryObject.getSpecies()));
             facetMapping.setTypeFacet(getFacets(response.getFacetField(TYPES), queryObject.getTypes()));
             facetMapping.setKeywordFacet(getFacets(response.getFacetField(KEYWORDS), queryObject.getKeywords()));
-            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENT_FACET), queryObject.getCompartment()));
+            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENT_FACET), queryObject.getCompartments()));
             return facetMapping;
         }
         return null;

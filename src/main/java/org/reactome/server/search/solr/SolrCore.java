@@ -154,7 +154,7 @@ class SolrCore {
         parameters.setRequestHandler(CLUSTERED_REQUEST_HANDLER);
         parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
@@ -178,7 +178,7 @@ class SolrCore {
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
@@ -236,8 +236,8 @@ class SolrCore {
         if (queryObject.getKeywords() != null && !queryObject.getKeywords().isEmpty()) {
             parameters.addFilterQuery(KEYWORD_TAG + getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
         }
-        if (queryObject.getCompartment() != null && !queryObject.getCompartment().isEmpty()) {
-            parameters.addFilterQuery(COMPARTMENT_TAG + getFilterString(queryObject.getCompartment(), COMPARTMENT_FACET));
+        if (queryObject.getCompartments() != null && !queryObject.getCompartments().isEmpty()) {
+            parameters.addFilterQuery(COMPARTMENT_TAG + getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         }
         parameters.setQuery(queryObject.getQuery());
         return querysolrClient(parameters);
@@ -284,7 +284,7 @@ class SolrCore {
         if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
-        parameters.addFilterQuery(DIAGRAMS + ":" + queryObject.getFilter());
+        parameters.addFilterQuery(DIAGRAMS + ":" + queryObject.getFilterQuery());
         parameters.setStart(queryObject.getStart());
         parameters.setRows(queryObject.getRows());
         parameters.setQuery(queryObject.getQuery());
@@ -310,7 +310,7 @@ class SolrCore {
     QueryResponse getDiagramFlagging(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_FLAG_REQUEST_HANDLER);
-        parameters.setQuery(queryObject.getQuery() + " AND occurrences:" + queryObject.getFilter() + "*");
+        parameters.setQuery(queryObject.getQuery() + " AND occurrences:" + queryObject.getFilterQuery() + "*");
         parameters.setFields(DIAGRAM_OCCURRENCES, ST_ID); // solr response will contain only DIAGRAM_OCCURRENCES and ST_ID.
         //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
         parameters.setRows(100);

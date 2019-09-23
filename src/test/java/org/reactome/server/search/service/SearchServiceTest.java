@@ -45,7 +45,7 @@ public class SearchServiceTest {
         List<String> types = new ArrayList<>();
         types.add("Pathway");
         types.add("Reaction");
-        query = new Query("apoptosis", species, types, null, null);
+        query = new Query.Builder("apoptosis").forSpecies(species).withTypes(types).build();
     }
 
     @Before
@@ -127,7 +127,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         species.add("Entries without species");
 
-        Query query = new Query(searchTerm, species, null, null, null);
+        Query query = new Query.Builder(searchTerm).forSpecies(species).build();
 
         SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
 
@@ -158,9 +158,9 @@ public class SearchServiceTest {
         List<String> keywords = new ArrayList<>();
         keywords.add("binds");
 
-        Query query = new Query(searchTerm, species, types, compartment, keywords);
+        Query query = new Query.Builder(searchTerm).forSpecies(species).withTypes(types).inCompartments(compartment).withKeywords(keywords).build();
         SearchResult searchResult = searchService.getSearchResult(query, rowCount, page, true);
-        assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 2);
+        assertEquals(searchResult.getGroupedResult().getNumberOfMatches(), 3);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        Query query = new Query("transp", species, null, null, null);
+        Query query = new Query.Builder("transp").forSpecies(species).build();
         GroupedResult groupedResult = searchService.getEntries(query, true);
         assertTrue(5 <= groupedResult.getNumberOfGroups());
         assertTrue(300 <= groupedResult.getNumberOfMatches());
@@ -179,7 +179,7 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        Query query = new Query("PTEN", species, Collections.singletonList("Protein"), null, null);
+        Query query = new Query.Builder("PTEN").forSpecies(species).withTypes(Collections.singletonList("Protein")).build();
         FireworksResult fireworksResult = searchService.getFireworks(query);
         assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
     }
@@ -189,7 +189,7 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
-        Query query = new Query("IKZF3", species, Collections.singletonList("Interactor"), null, null);
+        Query query = new Query.Builder("IKZF3").forSpecies(species).withTypes(Collections.singletonList("Interactor")).build();
         FireworksResult fireworksResult = searchService.getFireworks(query);
         assertTrue("1 or more results are expected", 1 <= fireworksResult.getFound());
     }
@@ -201,7 +201,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String term = "KIF";
         String diagram = "R-HSA-8848021";
-        Query query = new Query(term, diagram, species, null, null, null);
+        Query query = new Query.Builder(term).addFilterQuery(diagram).forSpecies(species).build();
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
         assertTrue("8 or more results diagram results are expected", 8 <= dss.getDiagramResult().getFound());
@@ -220,7 +220,7 @@ public class SearchServiceTest {
         species.add("Entries without species");
         String term = "ATP";
         String diagram = "R-HSA-69620";
-        Query query = new Query(term, diagram, species, null, null, null);
+        Query query = new Query.Builder(term).addFilterQuery(diagram).forSpecies(species).build();
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
         assertTrue("2 or more results diagram results are expected", 2 <= dss.getDiagramResult().getFound());
@@ -232,13 +232,14 @@ public class SearchServiceTest {
         // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Gallus gallus");
-        Query query = new Query("PG", species, null, null, null);
+        Query query = new Query.Builder("PG").forSpecies(species).build();
         FireworksResult fireworksResult = searchService.getFireworks(query);
 
         assertNotNull(fireworksResult);
         assertNotNull(fireworksResult.getEntries());
+        assertNotEquals(fireworksResult.getEntries(), 0);
         List<Entry> fsten = fireworksResult.getEntries().stream().filter(entry -> entry.getFireworksSpecies().size() >= 10).collect(Collectors.toList());
-        assertTrue("14 species or more are expected", 10 <= fsten.iterator().next().getFireworksSpecies().size());
+        assertTrue("10 species or more are expected", 10 <= fsten.iterator().next().getFireworksSpecies().size());
     }
 
     @Test
@@ -248,7 +249,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String term = "MAD";
         String diagram = "R-HSA-8848021";
-        Query query = new Query(term, diagram, species, null, null, null);
+        Query query = new Query.Builder(term).addFilterQuery(diagram).forSpecies(species).build();
         DiagramResult diagramResults = searchService.getDiagrams(query);
 
         assertNotNull(diagramResults);
@@ -263,7 +264,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String termStId = "R-HSA-879382";
         String diagram = "R-HSA-168164";
-        Query query = new Query(termStId, diagram, species, null, null, null);
+        Query query = new Query.Builder(termStId).addFilterQuery(diagram).forSpecies(species).build();
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
@@ -279,7 +280,7 @@ public class SearchServiceTest {
         species.add("Homo sapiens");
         String termStId = "R-HSA-879382";
         String diagram = "R-HSA-6798695"; // 168164
-        Query query = new Query(termStId, diagram, species, null, null, null);
+        Query query = new Query.Builder(termStId).addFilterQuery(diagram).forSpecies(species).build();
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
@@ -291,7 +292,7 @@ public class SearchServiceTest {
     public void testFireworksFlagging() throws SolrSearcherException {
         // By default filter query by Human and Entries without species
         String term = "TPM3";
-        Query query = new Query(term, null, null, null, null);
+        Query query = new Query.Builder(term).build();
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
@@ -306,7 +307,7 @@ public class SearchServiceTest {
         species.add("Bos taurus");
 
         String term = "NTN1";
-        Query query = new Query(term, species, null, null, null);
+        Query query = new Query.Builder(term).forSpecies(species).build();
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
@@ -316,7 +317,7 @@ public class SearchServiceTest {
     public void testFireworksFlaggingSmallMolecule() throws SolrSearcherException {
         // By default filter query by Human and Entries without species
         String term = "CHEBI:15377";
-        Query query = new Query(term, null, null, null, null);
+        Query query = new Query.Builder(term).build();
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
@@ -330,7 +331,7 @@ public class SearchServiceTest {
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
-        Query query = new Query(q, species, null, null, null);
+        Query query = new Query.Builder(q).forSpecies(species).build();
         // The reporting is done the report project. Just check if the solr core is available.
         Set<TargetResult> targets = searchService.getTargets(query);
         assertNotNull(targets);
@@ -346,7 +347,7 @@ public class SearchServiceTest {
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
-        Query query = new Query(q, species, null, null, null);
+        Query query = new Query.Builder(q).forSpecies(species).build();
         SearchResult searchResult = searchService.getSearchResult(query, 30, 1, true);
         assertNotNull(searchResult);
         assertNotNull(searchResult.getGroupedResult());
@@ -367,7 +368,7 @@ public class SearchServiceTest {
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
-        Query query = new Query(q, species, null, null, null);
+        Query query = new Query.Builder(q).forSpecies(species).build();
         SearchResult searchResult = searchService.getSearchResult(query, 30, 1, true);
         assertNotNull(searchResult);
         assertNotNull(searchResult.getGroupedResult());
@@ -394,7 +395,7 @@ public class SearchServiceTest {
     @Test
     public void testIconsResult() throws SolrSearcherException {
         logger.info("Started testing searchService.getIconFacetingInformation()");
-        Query query = new Query("{!term f=iconCategories}protein", null, null, null, null);
+        Query query = new Query.Builder("{!term f=iconCategories}protein").build();
         Result icons = searchService.getIconsResult(query, 30, 1);
         assertNotNull(icons);
         assertNotNull(icons.getEntries());
@@ -405,7 +406,7 @@ public class SearchServiceTest {
     public void testGetIcon() throws SolrSearcherException {
         logger.info("Started testing searchService.testGetIcon");
         String name = "R-ICO-013100";
-        Query query = new Query(name, null, null, null, null);
+        Query query = new Query.Builder(name).build();
         Entry icon = searchService.getIcon(query);
         assertNotNull(icon);
         assertEquals(name, icon.getStId());
