@@ -70,10 +70,10 @@ public class SearchService {
      * @param query    QueryObject
      * @param rowCount number of rows displayed in one page
      * @param page     page number
-     * @param cluster  clustered or not clustered result
+     * @param grouped  grouped or not grouped result
      * @return Grouped result
      */
-    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
+    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean grouped) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
             query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
@@ -81,8 +81,8 @@ public class SearchService {
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
-            setPagingParameters(query, facetMapping, rowCount, page, cluster);
-            GroupedResult groupedResult = getEntries(query, cluster);
+            setPagingParameters(query, facetMapping, rowCount, page, grouped);
+            GroupedResult groupedResult = getEntries(query, grouped);
             return new SearchResult(facetMapping, groupedResult, getHighestResultCount(groupedResult), query.getRows());
         }
 
@@ -101,11 +101,11 @@ public class SearchService {
      *                    start specifies the starting point (offset) and rows the amount of entries returned in total
      * @return GroupedResult
      */
-    public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
+    public GroupedResult getEntries(Query queryObject, Boolean grouped) throws SolrSearcherException {
         GroupedResult ret;
-        cluster = cluster == null ? true : cluster;
-        if (cluster) {
-            ret = solrConverter.getClusteredEntries(queryObject);
+        grouped = grouped == null ? true : grouped;
+        if (grouped) {
+            ret = solrConverter.getGroupedEntries(queryObject);
         } else {
             ret = solrConverter.getEntries(queryObject);
         }

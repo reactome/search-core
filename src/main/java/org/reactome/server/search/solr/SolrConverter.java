@@ -273,9 +273,9 @@ public class SolrConverter {
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return GroupedResponse
      */
-    public GroupedResult getClusteredEntries(Query queryObject) throws SolrSearcherException {
+    public GroupedResult getGroupedEntries(Query queryObject) throws SolrSearcherException {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
-            QueryResponse queryResponse = solrCore.searchCluster(queryObject);
+            QueryResponse queryResponse = solrCore.groupedSearch(queryObject);
             if (queryResponse != null) {
                 return parseClusteredResponse(queryResponse);
             }

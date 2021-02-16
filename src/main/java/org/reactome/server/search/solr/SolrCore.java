@@ -47,18 +47,18 @@ class SolrCore {
     private final String solrCore;
 
     private final static String SEARCH_REQUEST_HANDLER = "/search";
-    private final static String CLUSTERED_REQUEST_HANDLER = "/browse";
+    private final static String GROUPED_SEARCH_REQUEST_HANDLER = "/search/grouped";
     private final static String SUGGEST_REQUEST_HANDLER = "/suggest";
     private final static String EXISTS_REQUEST_HANDLER = "/exists";
     private final static String FACET_REQUEST_HANDLER = "/facet";
     private final static String TOTAL_FACET_REQUEST_HANDLER = "/facetall";
     private final static String SPELLCHECK_REQUEST_HANDLER = "/spellcheck";
     private final static String FIREWORKS_REQUEST_HANDLER = "/fireworks";
-    private final static String FIREWORKS_FLAGGING_REQUEST_HANDLER = "/fireworksFlagging";
+    private final static String FIREWORKS_FLAGGING_REQUEST_HANDLER = "/fireworks/flagging";
     private final static String DIAGRAM_REQUEST_HANDLER = "/diagrams";
-    private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagramOccurrences";
-    private final static String ICON_FACET_HANDLER = "/iconFacet";
-    private final static String DIAGRAM_FLAG_REQUEST_HANDLER = "/diagramFlagging";
+    private final static String DIAGRAM_OCCURRENCES_REQUEST_HANDLER = "/diagrams/occurrences";
+    private final static String ICON_FACET_HANDLER = "/icon/facet";
+    private final static String DIAGRAM_FLAG_REQUEST_HANDLER = "/diagrams/flagging";
 
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
@@ -112,6 +112,7 @@ class SolrCore {
 
     /**
      * Method for testing if a connection to Solr can be established
+     *
      * @return true if status is ok
      */
     boolean ping() {
@@ -143,15 +144,15 @@ class SolrCore {
 
     /**
      * Converts all parameters of the given queryObject to Solr parameters and queries Solr Server
-     * With this search handler the result will be clustered
+     * With this search handler the result will be grouped by their type
      *
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return QueryResponse
      */
-    QueryResponse searchCluster(Query queryObject) throws SolrSearcherException {
+    QueryResponse groupedSearch(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
 
-        parameters.setRequestHandler(CLUSTERED_REQUEST_HANDLER);
+        parameters.setRequestHandler(GROUPED_SEARCH_REQUEST_HANDLER);
         parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
@@ -273,6 +274,7 @@ class SolrCore {
 
     /**
      * Getting all documents of a given term filtering by the Diagram stId where the user is
+     *
      * @return QueryResponse
      */
     QueryResponse getDiagrams(Query queryObject) throws SolrSearcherException {
@@ -325,7 +327,8 @@ class SolrCore {
 
         if (queryObject.getSpecies() == null) queryObject.setSpecies(new ArrayList<>());
         if (queryObject.getSpecies().isEmpty()) queryObject.getSpecies().add("Homo sapiens");
-        if (!queryObject.getSpecies().contains("Entries without species")) queryObject.getSpecies().add("Entries without species");
+        if (!queryObject.getSpecies().contains("Entries without species"))
+            queryObject.getSpecies().add("Entries without species");
 
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
@@ -391,7 +394,7 @@ class SolrCore {
         if (facet != null) {
             facet.removeAll(Collections.singletonList(""));
             facet.removeAll(Collections.singletonList(null));
-            if(!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
+            if (!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
                 return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
             }
         }
