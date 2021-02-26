@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,15 +36,15 @@ public class SolrConverter {
     private static final String ICON_CATEGORIES_FACET = "iconCategories_facet";
     private static final String SUMMATION = "summation";
     private static final String INFERRED_SUMMATION = "inferredSummation";
+    private static final String REFERENCE_URL = "referenceURL";
     private static final String REFERENCE_NAME = "referenceName";
     private static final String REFERENCE_IDENTIFIERS = "referenceIdentifiers";
     private static final String IS_DISEASE = "isDisease";
     private static final String EXACT_TYPE = "exactType";
     private static final String DATABASE_NAME = "databaseName";
-    private static final String REFERENCE_URL = "referenceURL";
     private static final String REGULATOR = "regulator";
-    private static final String REGULATED_ENTITY = "regulatedEntity";
     private static final String REGULATOR_ID = "regulatorId";
+    private static final String REGULATED_ENTITY = "regulatedEntity";
     private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
     private static final String COMPARTMENT_NAME = "compartmentName";
     private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
@@ -258,7 +259,7 @@ public class SolrConverter {
                             List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
                             Boolean isInDiagram = Boolean.valueOf(line[1]);
                             String stId = isInDiagram ? (String) solrDocument.getFieldValue(ST_ID) : null;
-                            rtn.add(new DiagramOccurrencesResult(stId , occurrences, interactsWith));
+                            rtn.add(new DiagramOccurrencesResult(stId, occurrences, interactsWith));
                         }
                     }
                 }
@@ -273,9 +274,9 @@ public class SolrConverter {
      * @param queryObject QueryObject (query, types, species, keywords, compartments, start, rows)
      * @return GroupedResponse
      */
-    public GroupedResult getClusteredEntries(Query queryObject) throws SolrSearcherException {
+    public GroupedResult getGroupedEntries(Query queryObject) throws SolrSearcherException {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
-            QueryResponse queryResponse = solrCore.searchCluster(queryObject);
+            QueryResponse queryResponse = solrCore.groupedSearch(queryObject);
             if (queryResponse != null) {
                 return parseClusteredResponse(queryResponse);
             }
@@ -407,39 +408,30 @@ public class SolrConverter {
     private Entry buildEntry(SolrDocument solrDocument, Map<String, Map<String, List<String>>> highlighting) {
         if (solrDocument != null && !solrDocument.isEmpty()) {
             Entry entry = new Entry();
-            entry.setDbId((String) solrDocument.getFieldValue(DB_ID));
 
-            if (solrDocument.containsKey(ST_ID)) {
-                entry.setStId((String) solrDocument.getFieldValue(ST_ID));
-                entry.setId((String) solrDocument.getFieldValue(ST_ID));
-            } else {
-                entry.setId((String) solrDocument.getFieldValue(DB_ID));
-            }
+            entry.setDbId((String) solrDocument.getFieldValue(DB_ID));
+            entry.setStId((String) solrDocument.getFieldValue(ST_ID));
+            entry.setId((String)
+                    (solrDocument.containsKey(ST_ID) ? solrDocument.getFieldValue(ST_ID) : solrDocument.getFieldValue(DB_ID)));
 
             entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
             entry.setIsDisease((Boolean) solrDocument.getFieldValue(IS_DISEASE));
-            //Only the first species is taken into account
-            Collection<Object> species = solrDocument.getFieldValues(SPECIES);
-            if (species != null) {
-                entry.setSpecies(species.stream().map(Object::toString).collect(Collectors.toList()));
-            }
             entry.setDatabaseName((String) solrDocument.getFieldValue(DATABASE_NAME));
             entry.setReferenceURL((String) solrDocument.getFieldValue(REFERENCE_URL));
             entry.setRegulatorId((String) solrDocument.getFieldValue(REGULATOR_ID));
             entry.setRegulatedEntityId((String) solrDocument.getFieldValue(REGULATED_ENTITY_ID));
-            if (solrDocument.containsKey(COMPARTMENT_NAME)) {
-                Collection<Object> compartments = solrDocument.getFieldValues(COMPARTMENT_NAME);
-                if (compartments != null && !compartments.isEmpty()) {
-                    entry.setCompartmentNames(compartments.stream().map(Object::toString).collect(Collectors.toList()));
-                }
-            }
+            entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
+            entry.setAuthoredPathways((String) solrDocument.getFieldValue(AUTHORED_PATHWAYS));
+            entry.setAuthoredReactions((String) solrDocument.getFieldValue(AUTHORED_REACTIONS));
+            entry.setReviewedPathways((String) solrDocument.getFieldValue(REVIEWED_PATHWAYS));
+            entry.setReviewedReactions((String) solrDocument.getFieldValue(REVIEWED_REACTIONS));
+            entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
 
-            if (solrDocument.containsKey(COMPARTMENT_ACCESSION)) {
-                Collection<Object> compartmentsAccessions = solrDocument.getFieldValues(COMPARTMENT_ACCESSION);
-                if (compartmentsAccessions != null && !compartmentsAccessions.isEmpty()) {
-                    entry.setCompartmentAccession(compartmentsAccessions.stream().map(Object::toString).collect(Collectors.toList()));
-                }
-            }
+            //Only the first species is taken into account
+            entry.setSpecies(getStringListField(solrDocument, SPECIES));
+            entry.setCompartmentNames(getStringListField(solrDocument, COMPARTMENT_NAME));
+            entry.setCompartmentAccession(getStringListField(solrDocument, COMPARTMENT_ACCESSION));
+
 
             if (highlighting != null && highlighting.containsKey(entry.getDbId())) {
                 setHighlighting(entry, solrDocument, highlighting.get(entry.getDbId()));
@@ -447,27 +439,9 @@ public class SolrConverter {
                 entry.setName((String) solrDocument.getFieldValue(NAME));
                 entry.setSummation((String) solrDocument.getFieldValue(SUMMATION));
                 entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME));
-                entry.setReferenceIdentifier(selectRightReferenceIdentifier(solrDocument));
                 entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR));
                 entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY));
-            }
-            if (solrDocument.containsKey(INFERRED_SUMMATION)) {
-                entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
-            }
-            if (solrDocument.containsKey(AUTHORED_PATHWAYS)) {
-                entry.setAuthoredPathways((String) solrDocument.getFieldValue(AUTHORED_PATHWAYS));
-            }
-            if (solrDocument.containsKey(AUTHORED_REACTIONS)) {
-                entry.setAuthoredReactions((String) solrDocument.getFieldValue(AUTHORED_REACTIONS));
-            }
-            if (solrDocument.containsKey(REVIEWED_PATHWAYS)) {
-                entry.setReviewedPathways((String) solrDocument.getFieldValue(REVIEWED_PATHWAYS));
-            }
-            if (solrDocument.containsKey(REVIEWED_REACTIONS)) {
-                entry.setReviewedReactions((String) solrDocument.getFieldValue(REVIEWED_REACTIONS));
-            }
-            if (solrDocument.containsKey(ORCIDID)) {
-                entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
+                entry.setReferenceIdentifier(selectRightReferenceIdentifier(solrDocument));
             }
 
             buildIconEntry(solrDocument, entry);
@@ -478,60 +452,34 @@ public class SolrConverter {
     }
 
     private void buildIconEntry(SolrDocument solrDocument, Entry entry) {
-        if (solrDocument.containsKey(ICON_NAME)) {
-            // Icon Name stores the plain name. After search the name itself might have the highlighting.
-            entry.setIconName((String) solrDocument.getFieldValue(ICON_NAME));
-        }
-        if (solrDocument.containsKey(ICON_CATEGORIES)) {
-            Collection<Object> iconCategories = solrDocument.getFieldValues(ICON_CATEGORIES);
-            if (iconCategories != null && !iconCategories.isEmpty()) {
-                entry.setIconCategories(iconCategories.stream().map(Object::toString).collect(Collectors.toList()));
-            }
-        }
+        // Icon Name stores the plain name. After search the name itself might have the highlighting.
+        entry.setIconName((String) solrDocument.getFieldValue(ICON_NAME));
+        entry.setIconCuratorName((String) solrDocument.getFieldValue(ICON_CURATOR_NAME));
+        entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue(ICON_CURATOR_ORCIDID));
+        entry.setIconCuratorUrl((String) solrDocument.getFieldValue(ICON_CURATOR_URL));
+        entry.setIconDesignerName((String) solrDocument.getFieldValue(ICON_DESIGNER_NAME));
+        entry.setIconDesignerUrl((String) solrDocument.getFieldValue(ICON_DESIGNER_URL));
+        entry.setIconDesignerOrcidId((String) solrDocument.getFieldValue(ICON_DESIGNER_ORCIDID));
 
-        if (solrDocument.containsKey(ICON_CURATOR_NAME)) {
-            entry.setIconCuratorName((String) solrDocument.getFieldValue(ICON_CURATOR_NAME));
-        }
-        if (solrDocument.containsKey(ICON_CURATOR_ORCIDID)) {
-            entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue(ICON_CURATOR_ORCIDID));
-        }
-        if (solrDocument.containsKey(ICON_CURATOR_URL)) {
-            entry.setIconCuratorUrl((String) solrDocument.getFieldValue(ICON_CURATOR_URL));
-        }
+        entry.setIconCategories(getStringListField(solrDocument, ICON_CATEGORIES));
+        entry.setIconReferences(getStringListField(solrDocument, ICON_REFERENCES));
+        entry.setIconEhlds(getStringListField(solrDocument, ICON_EHLDS));
+        entry.setIconPhysicalEntities(
+                getStringListField(solrDocument, ICON_PHYSICAL_ENTITIES)
+                        .stream()
+                        .map(iconPE -> {
+                            String[] iconPEs = iconPE.split("#");
+                            return new IconPhysicalEntity(iconPEs[0], iconPEs[1], iconPEs[2], iconPEs[3]);
+                        }).collect(Collectors.toCollection(TreeSet::new))
+        );
+    }
 
-        if (solrDocument.containsKey(ICON_DESIGNER_NAME)) {
-            entry.setIconDesignerName((String) solrDocument.getFieldValue(ICON_DESIGNER_NAME));
+    private List<String> getStringListField(SolrDocument document, String field) {
+        Collection<Object> objects = document.getFieldValues(field);
+        if (objects != null && !objects.isEmpty()) {
+            return objects.stream().map(Objects::toString).collect(Collectors.toList());
         }
-        if (solrDocument.containsKey(ICON_DESIGNER_URL)) {
-            entry.setIconDesignerUrl((String) solrDocument.getFieldValue(ICON_DESIGNER_URL));
-        }
-        if (solrDocument.containsKey(ICON_DESIGNER_ORCIDID)) {
-            entry.setIconDesignerOrcidId((String) solrDocument.getFieldValue(ICON_DESIGNER_ORCIDID));
-        }
-
-        if (solrDocument.containsKey(ICON_REFERENCES)) {
-            Collection<Object> iconRefs = solrDocument.getFieldValues(ICON_REFERENCES);
-            if (iconRefs != null && !iconRefs.isEmpty()) {
-                entry.setIconReferences(iconRefs.stream().map(Object::toString).collect(Collectors.toList()));
-            }
-        }
-        if (solrDocument.containsKey(ICON_PHYSICAL_ENTITIES)) {
-            Collection<Object> iconStIds = solrDocument.getFieldValues(ICON_PHYSICAL_ENTITIES);
-            if (iconStIds != null && !iconStIds.isEmpty()) {
-                Set<IconPhysicalEntity> iconPhysicalEntities = new TreeSet<>();
-                for (Object iconStId : iconStIds) {
-                    String[] iconPE = ((String) iconStId).split("#");
-                    iconPhysicalEntities.add(new IconPhysicalEntity(iconPE[0], iconPE[1], iconPE[2], iconPE[3]));
-                }
-                entry.setIconPhysicalEntities(iconPhysicalEntities);
-            }
-        }
-        if (solrDocument.containsKey(ICON_EHLDS)) {
-            Collection<Object> iconEhlds = solrDocument.getFieldValues(ICON_EHLDS);
-            if (iconEhlds != null && !iconEhlds.isEmpty()) {
-                entry.setIconEhlds(iconEhlds.stream().map(Object::toString).collect(Collectors.toList()));
-            }
-        }
+        return null;
     }
 
     private String selectRightReferenceIdentifier(SolrDocument solrDocument) {
@@ -558,48 +506,34 @@ public class SolrConverter {
      * @param snippets     Map containing the Highlighted Strings
      */
     private void setHighlighting(Entry entry, SolrDocument solrDocument, Map<String, List<String>> snippets) {
-        if (snippets.containsKey(NAME) && snippets.get(NAME) != null && !snippets.get(NAME).isEmpty()) {
-            entry.setName(snippets.get(NAME).get(0));
-        } else {
-            entry.setName((String) solrDocument.getFieldValue(NAME));
-        }
-        if (snippets.containsKey(SUMMATION) && snippets.get(SUMMATION) != null && !snippets.get(SUMMATION).isEmpty()) {
-            entry.setSummation(snippets.get(SUMMATION).get(0));
-        } else {
-            entry.setSummation((String) solrDocument.getFieldValue(SUMMATION));
-        }
-        if (snippets.containsKey(REFERENCE_NAME) && snippets.get(REFERENCE_NAME) != null && !snippets.get(REFERENCE_NAME).isEmpty()) {
-            entry.setReferenceName(snippets.get(REFERENCE_NAME).get(0));
-        } else {
-            entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME));
-        }
         entry.setReferenceIdentifier(selectRightHighlightingForReferenceIdentifiers(solrDocument, snippets));
-        if (snippets.containsKey(REGULATOR) && snippets.get(REGULATOR) != null && !snippets.get(REGULATOR).isEmpty()) {
-            entry.setRegulator(snippets.get(REGULATOR).get(0));
-        } else {
-            entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR));
-        }
-        if (snippets.containsKey(REGULATED_ENTITY) && snippets.get(REGULATED_ENTITY) != null && !snippets.get(REGULATED_ENTITY).isEmpty()) {
-            entry.setRegulatedEntity(snippets.get(REGULATED_ENTITY).get(0));
-        } else {
-            entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY));
+
+        snippetHighlight(entry, Entry::setName, NAME, snippets);
+        snippetHighlight(entry, Entry::setSummation, SUMMATION, snippets);
+        snippetHighlight(entry, Entry::setReferenceName, REFERENCE_NAME, snippets);
+        snippetHighlight(entry, Entry::setRegulator, REGULATOR, snippets);
+        snippetHighlight(entry, Entry::setRegulatedEntity, REGULATED_ENTITY, snippets);
+    }
+
+    private void snippetHighlight(Entry entry, BiConsumer<Entry, String> fieldSetter, String field, Map<String, List<String>> snippets) {
+        List<String> snippet = snippets.get(field);
+        if (snippet != null && !snippet.isEmpty()) {
+            fieldSetter.accept(entry, snippet.get(0));
         }
     }
 
     private String selectRightHighlightingForReferenceIdentifiers(SolrDocument solrDocument, Map<String, List<String>> snippets) {
-        String candidate = null;
-        if (snippets.containsKey(REFERENCE_IDENTIFIERS) && snippets.get(REFERENCE_IDENTIFIERS) != null && !snippets.get(REFERENCE_IDENTIFIERS).isEmpty()) {
-            for (String snippet : snippets.get(REFERENCE_IDENTIFIERS)) {
+        List<String> identifierSnippets = snippets.get(REFERENCE_IDENTIFIERS);
+        if (identifierSnippets != null && !identifierSnippets.isEmpty()) {
+            for (String snippet : identifierSnippets) {
                 if (snippet.contains("highlighting")) {
                     return snippet;
-                } else {
-                    candidate = candidate == null ? snippet : candidate;
                 }
             }
+            return identifierSnippets.get(0);
         } else {
             return selectRightReferenceIdentifier(solrDocument);
         }
-        return candidate;
     }
 
     /**
@@ -672,7 +606,7 @@ public class SolrConverter {
                         String pathwayStId = line[0];
                         boolean interacts = !line[3].equals("#");
                         // if there is(are) interactor(s), then get the diagram (first value) so the Fireworks can flag them.
-                        if(interacts) {
+                        if (interacts) {
                             // get the diagram and add it
                             rtn.addInteractsWith(pathwayStId);
                         }
@@ -682,7 +616,8 @@ public class SolrConverter {
         }
 
         // if it is in llps, remove from interacts with
-        if (rtn.getLlps() != null && rtn.getInteractsWith() != null) rtn.getLlps().forEach(s->rtn.getInteractsWith().remove(s));
+        if (rtn.getLlps() != null && rtn.getInteractsWith() != null)
+            rtn.getLlps().forEach(s -> rtn.getInteractsWith().remove(s));
 
         return rtn;
     }

@@ -20,6 +20,7 @@ public class Query {
     private List<String> compartments;
     private Integer start;
     private Integer rows;
+    private ParserType parserType; // defType
     private Map<String, String> reportInfo; // extra information for report, useragent, ip, etc
 
     /**
@@ -37,6 +38,7 @@ public class Query {
         private List<String> compartments = null;
         private Integer start;
         private Integer rows;
+        private ParserType parserType = ParserType.STD; // defType
         private Map<String, String> reportInfo = null; // extra information for report, useragent, ip, etc
 
         /**
@@ -94,6 +96,11 @@ public class Query {
             return this;
         }
 
+        public Builder withParserType(ParserType parserType) {
+            this.parserType = parserType;
+            return this;
+        }
+
         public Query build(){
             Query ret = new Query();
             ret.query = this.query;
@@ -106,84 +113,13 @@ public class Query {
             ret.start = this.start;
             ret.rows = this.rows;
             ret.reportInfo = this.reportInfo;
+            ret.parserType = this.parserType;
             return ret;
         }
     }
 
-
     private Query() {}
 
-//    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
-//        this.query = query;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//    }
-//
-//    public Query(String query, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
-//        this.query = query;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//        this.reportInfo = reportInfo;
-//    }
-//
-//    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords) {
-//        this.query = query;
-//        this.filter = filter;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//    }
-//
-//    //
-//    public Query(String query, String filter, List<String> species, List<String> types, List<String> compartment, List<String> keywords, Map<String, String> reportInfo) {
-//        this.query = query;
-//        this.filter = filter;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//        this.reportInfo = reportInfo;
-//    }
-//
-//    public Query(String query, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
-//        this.query = query;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//        this.start = start;
-//        this.rows = rows;
-//    }
-//
-//    //
-//    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows) {
-//        this.query = query;
-//        this.filter = filter;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//        this.start = start;
-//        this.rows = rows;
-//    }
-//
-//    public Query(String query, String filter, List<String> species, List<String> types, List<String> keywords, List<String> compartment, Integer start, Integer rows, Map<String, String> reportInfo) {
-//        this.query = query;
-//        this.filter = filter;
-//        this.species = species;
-//        this.types = types;
-//        this.keywords = keywords;
-//        this.compartment = compartment;
-//        this.start = start;
-//        this.rows = rows;
-//        this.reportInfo = reportInfo;
-//    }
-//
     public String getQuery() {
         return query;
     }
@@ -262,5 +198,13 @@ public class Query {
 
     public void setReportInfo(Map<String, String> reportInfo) {
         this.reportInfo = reportInfo;
+    }
+
+    public ParserType getParserType() {
+        return parserType;
+    }
+
+    public void setParserType(ParserType parserType) {
+        this.parserType = parserType;
     }
 }

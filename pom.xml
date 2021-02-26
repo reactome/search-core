@@ -5,7 +5,7 @@
     <artifactId>search-core</artifactId>
 
     <packaging>jar</packaging>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <name>search-core</name>
 
     <description>
@@ -124,7 +124,7 @@
         <repository>
             <id>central</id>
             <name>Central Repository</name>
-            <url>http://repo.maven.apache.org/maven2</url>
+            <url>https://repo.maven.apache.org/maven2</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>false</enabled>
@@ -133,7 +133,7 @@
         <repository>
             <id>central_1</id>
             <name>Maven Repository Switchboard</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>false</enabled>
@@ -142,7 +142,7 @@
         <repository>
             <id>nexus-ebi-repo</id>
             <name>The EBI internal repository</name>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
+            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

@@ -55,6 +55,7 @@ public class SearchService {
 
     @Value("${report.password:default}")
     private String reportPassword;
+
     /**
      * Method for testing if a connection to Solr can be established
      *
@@ -70,19 +71,22 @@ public class SearchService {
      * @param query    QueryObject
      * @param rowCount number of rows displayed in one page
      * @param page     page number
-     * @param cluster  clustered or not clustered result
+     * @param grouped  grouped or not grouped result
      * @return Grouped result
      */
-    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean cluster) throws SolrSearcherException {
+    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean grouped) throws SolrSearcherException {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
             query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
-            // query.getQuery(), null, null, null, null, query.getReportInfo());
+            facetMapping = getFacetingInformation(query);
+        }
+        if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
+            query.setParserType(ParserType.DISMAX);
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
-            setPagingParameters(query, facetMapping, rowCount, page, cluster);
-            GroupedResult groupedResult = getEntries(query, cluster);
+            setPagingParameters(query, facetMapping, rowCount, page, grouped);
+            GroupedResult groupedResult = getEntries(query, grouped);
             return new SearchResult(facetMapping, groupedResult, getHighestResultCount(groupedResult), query.getRows());
         }
 
@@ -101,14 +105,9 @@ public class SearchService {
      *                    start specifies the starting point (offset) and rows the amount of entries returned in total
      * @return GroupedResult
      */
-    public GroupedResult getEntries(Query queryObject, Boolean cluster) throws SolrSearcherException {
-        GroupedResult ret;
-        cluster = cluster == null ? true : cluster;
-        if (cluster) {
-            ret = solrConverter.getClusteredEntries(queryObject);
-        } else {
-            ret = solrConverter.getEntries(queryObject);
-        }
+    public GroupedResult getEntries(Query queryObject, Boolean grouped) throws SolrSearcherException {
+        grouped = grouped == null ? true : grouped;
+        GroupedResult ret = grouped ? solrConverter.getGroupedEntries(queryObject) : solrConverter.getEntries(queryObject);
 
         if (ret != null && ret.getRowCount() == 0) {
             Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);
@@ -381,8 +380,8 @@ public class SearchService {
 
     /**
      * It covers two use cases:
-     *   1- Not Found and Target
-     *   2- Not Found and not a Target
+     * 1- Not Found and Target
+     * 2- Not Found and not a Target
      */
     private void doAsyncTargetReport(Query queryObject, Set<TargetResult> targetResults) {
         Set<TargetResult> targetsOnly = targetResults.stream().filter(TargetResult::isTarget).collect(Collectors.toSet());
