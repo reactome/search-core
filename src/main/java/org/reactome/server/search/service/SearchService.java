@@ -55,6 +55,7 @@ public class SearchService {
 
     @Value("${report.password:default}")
     private String reportPassword;
+
     /**
      * Method for testing if a connection to Solr can be established
      *
@@ -379,8 +380,8 @@ public class SearchService {
 
     /**
      * It covers two use cases:
-     *   1- Not Found and Target
-     *   2- Not Found and not a Target
+     * 1- Not Found and Target
+     * 2- Not Found and not a Target
      */
     private void doAsyncTargetReport(Query queryObject, Set<TargetResult> targetResults) {
         Set<TargetResult> targetsOnly = targetResults.stream().filter(TargetResult::isTarget).collect(Collectors.toSet());
