@@ -77,7 +77,10 @@ public class SearchService {
         FacetMapping facetMapping = getFacetingInformation(query);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
             query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
-            // query.getQuery(), null, null, null, null, query.getReportInfo());
+            facetMapping = getFacetingInformation(query);
+        }
+        if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
+            query.setParserType(ParserType.DISMAX);
             facetMapping = getFacetingInformation(query);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
@@ -102,13 +105,8 @@ public class SearchService {
      * @return GroupedResult
      */
     public GroupedResult getEntries(Query queryObject, Boolean grouped) throws SolrSearcherException {
-        GroupedResult ret;
         grouped = grouped == null ? true : grouped;
-        if (grouped) {
-            ret = solrConverter.getGroupedEntries(queryObject);
-        } else {
-            ret = solrConverter.getEntries(queryObject);
-        }
+        GroupedResult ret = grouped ? solrConverter.getGroupedEntries(queryObject) : solrConverter.getEntries(queryObject);
 
         if (ret != null && ret.getRowCount() == 0) {
             Set<TargetResult> targetResults = solrConverter.getTargets(queryObject);

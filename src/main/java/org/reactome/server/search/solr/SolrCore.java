@@ -15,6 +15,7 @@ import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrException;
+import org.reactome.server.search.domain.ParserType;
 import org.reactome.server.search.domain.Query;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.reactome.server.search.util.PreemptiveAuthInterceptor;
@@ -60,6 +61,8 @@ class SolrCore {
     private final static String ICON_FACET_HANDLER = "/icon/facet";
     private final static String DIAGRAM_FLAG_REQUEST_HANDLER = "/diagrams/flagging";
 
+    private final static String SOLR_DEF_TYPE = "defType";
+    private final static String SOLR_MIN_MATCH = "mm";
     private final static String SOLR_SPELLCHECK_QUERY = "spellcheck.q";
     private final static String SOLR_GROUP_OFFSET = "group.offset";
     private final static String SOLR_GROUP_LIMIT = "group.limit";
@@ -157,6 +160,7 @@ class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
+        parameterParserType(queryObject, parameters);
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.set(SOLR_GROUP_OFFSET, queryObject.getStart());
@@ -181,6 +185,7 @@ class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
+        parameterParserType(queryObject, parameters);
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.setStart(queryObject.getStart());
@@ -228,6 +233,7 @@ class SolrCore {
     QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FACET_REQUEST_HANDLER);
+        parameterParserType(queryObject, parameters);
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
             parameters.addFilterQuery(SPECIES_TAG + getFilterString(queryObject.getSpecies(), SPECIES_FACET));
         }
@@ -379,8 +385,15 @@ class SolrCore {
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery("stId:" + queryObject.getQuery());
         parameters.setFilterQueries(ICON_TYPE_QUERY);
-        parameters.set("mm", "100%"); // min match - one field or another is fine
+        parameters.set(SOLR_MIN_MATCH, "100%"); // one field or another is fine
         return querysolrClient(parameters);
+    }
+
+
+    private void parameterParserType(Query queryObject, SolrQuery parameters) {
+        if (queryObject.getParserType() != ParserType.STD) {
+            parameters.set(SOLR_DEF_TYPE, queryObject.getParserType().defType);
+        }
     }
 
     /**
