@@ -5,7 +5,7 @@
     <artifactId>search-core</artifactId>
 
     <packaging>jar</packaging>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <name>search-core</name>
 
     <description>
@@ -36,9 +36,9 @@
         <aspectj.version>1.8.8</aspectj.version>
         <mail.version>1.5.4</mail.version>
         <activation.version>1.1.1</activation.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <logging.version>1.1.7</logging.version>
-        <jackson.databind.version>2.9.5</jackson.databind.version>
+        <jackson.databind.version>2.9.10.5</jackson.databind.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
         <jdk.version>1.8</jdk.version>

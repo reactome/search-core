@@ -479,7 +479,7 @@ public class SolrConverter {
         if (objects != null && !objects.isEmpty()) {
             return objects.stream().map(Objects::toString).collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private String selectRightReferenceIdentifier(SolrDocument solrDocument) {
