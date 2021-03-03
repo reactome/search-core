@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.reactome.server.search.CoreConfiguration;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
+import org.reactome.server.search.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +35,17 @@ public class SearchServiceTest {
     private final static Logger logger = LoggerFactory.getLogger("testLogger");
     private static final String suggest = "apoptos";
     private static final String spellcheck = "appoptosis";
+    private static List<String> types;
+    private static List<String> species;
     private static Query query;
     @Autowired
     private SearchService searchService;
 
     @BeforeClass
     public static void setUpClass() {
-        List<String> species = new ArrayList<>();
+        species = new ArrayList<>();
         species.add("Homo sapiens");
-        List<String> types = new ArrayList<>();
+        types = new ArrayList<>();
         types.add("Pathway");
         types.add("Reaction");
         query = new Query.Builder("apoptosis").forSpecies(species).withTypes(types).build();
@@ -114,6 +117,44 @@ public class SearchServiceTest {
         logger.info("GraphDb execution time: " + time + "ms");
         assertEquals(2, groupedResult.getNumberOfGroups());
         assertTrue(309 <= groupedResult.getNumberOfMatches());
+        logger.info("Finished");
+    }
+
+    @Test
+    public void testGetSearchResultUseCases() throws SolrSearcherException {
+        logger.info("Started testing searchService.searchResult with different queries");
+        int rowCount = 30;
+        int page = 1;
+        long start, time;
+        Map<String, List<String>> queryToExpectedFirstResultStId = new LinkedHashMap<>();
+
+        queryToExpectedFirstResultStId.put("pten", Lists.of("R-HSA-199420")); // Gene name
+        queryToExpectedFirstResultStId.put("GO:0051800", Lists.of("R-HSA-1676149")); // Gene Ontology of pten (Other identifiers)
+        queryToExpectedFirstResultStId.put("0051800", Lists.of("R-HSA-1676149")); // Gene Ontology ID of pten
+        queryToExpectedFirstResultStId.put("HGNC:5013", Lists.of("R-HSA-9609901")); // Reference Gene ID
+        queryToExpectedFirstResultStId.put("NCBI:3162", Lists.of("R-HSA-9609901")); // Truncated "NCBI Gene:3162" : ReferenceGene
+        queryToExpectedFirstResultStId.put("NCBI-Gene:3162", Lists.of("R-HSA-9609901")); // Replaced "NCBI Gene:3162" : ReferenceGene
+        queryToExpectedFirstResultStId.put("Lymphoid and a non-Lymphoid cell", Lists.of("R-HSA-198933")); // Pathway name containing "and" next to a stop word
+
+        for (Map.Entry<String, List<String>> searchResultCouple : queryToExpectedFirstResultStId.entrySet()) {
+            start = System.currentTimeMillis();
+            String queryString = searchResultCouple.getKey();
+            Query query = new Query.Builder(queryString).forSpecies(species).build();
+            SearchResult result = searchService.getSearchResult(query, rowCount, page, false);
+            time = System.currentTimeMillis() - start;
+            logger.info(queryString + " searched in " + time + "ms");
+
+            Set<String> resultStIds = result
+                    .getGroupedResult()
+                    .getResults().get(0)
+                    .getEntries().stream()
+                    .map(Entry::getStId).collect(Collectors.toSet());
+
+            for (String expected : searchResultCouple.getValue()) {
+                assertTrue("\"" + queryString + "\" did not match the expected document " + expected + "on the top 30 rows",
+                        resultStIds.contains(expected));
+            }
+        }
         logger.info("Finished");
     }
 
