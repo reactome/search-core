@@ -316,6 +316,7 @@ public class SearchService {
 
     private void setPagingParameters(Query query, FacetMapping facetMapping, int rowCount, int page, boolean cluster) {
         int typeCount;
+        if (query.getStart() != null && query.getRows() != null) return;
         if (query.getTypes() != null && !query.getTypes().isEmpty()) {
             typeCount = query.getTypes().size();
         } else {
