@@ -617,7 +617,13 @@ public class SolrConverter {
 
         // if it is in llps, remove from interacts with
         if (rtn.getLlps() != null && rtn.getInteractsWith() != null)
-            rtn.getLlps().forEach(s -> rtn.getInteractsWith().remove(s));
+            rtn.getLlps().forEach(s -> {
+                // getInteractsWith uses a dangerous approach where it returns null if the collection is empty.
+                // gviteri doesn't remember why it was designed like that. I will check if not null and fix that
+                // when it is safe to do.
+                if (rtn.getInteractsWith() != null && !rtn.getInteractsWith().isEmpty())
+                    rtn.getInteractsWith().remove(s);
+            });
 
         return rtn;
     }
