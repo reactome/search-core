@@ -14,8 +14,8 @@ public class DiagramOccurrencesResult {
     // flag if the search term is present in the given diagram
     private String diagramEntity;
     private Boolean inDiagram;
-    private Set<String> occurrences = new HashSet<>();
-    private Set<String> interactsWith = new HashSet<>();
+    private final Set<String> occurrences = new HashSet<>();
+    private final Set<String> interactsWith = new HashSet<>();
 
     public DiagramOccurrencesResult() {
     }

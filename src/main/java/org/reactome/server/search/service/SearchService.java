@@ -47,14 +47,17 @@ public class SearchService {
 
     private final static Logger logger = LoggerFactory.getLogger("");
 
-    @Autowired
-    private SolrConverter solrConverter;
+    private final SolrConverter solrConverter;
 
     @Value("${report.user:default}")
     private String reportUser;
 
     @Value("${report.password:default}")
     private String reportPassword;
+
+    public SearchService(@Autowired SolrConverter solrConverter) {
+        this.solrConverter = solrConverter;
+    }
 
     /**
      * Method for testing if a connection to Solr can be established
@@ -356,12 +359,12 @@ public class SearchService {
         List<String> types = Collections.singletonList("Icon");
 
         // Simple query to get number of matches
-        Query query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(0).build();
+        Query query = new Query.Builder("*:*").withTypes(types).start(0).numberOfRows(0).build();
         GroupedResult results = solrConverter.getEntries(query);
         int rows = results.getNumberOfMatches();
 
         // Query all the icons
-        query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(rows).build();
+        query = new Query.Builder("*:*").withTypes(types).start(0).numberOfRows(rows).build();
         results = solrConverter.getEntries(query);
 
         if (results != null && results.getResults() != null) {
