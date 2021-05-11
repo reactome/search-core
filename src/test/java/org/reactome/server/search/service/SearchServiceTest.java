@@ -66,7 +66,15 @@ public class SearchServiceTest {
         FacetMapping facetMapping = searchService.getTotalFacetingInformation();
         time = System.currentTimeMillis() - start;
         logger.info("GraphDb execution time: " + time + "ms");
-        assertTrue(471389 <= facetMapping.getTotalNumFount());
+        assertTrue(465000 <= facetMapping.getTotalNumFount());
+        Optional<FacetContainer> homoSapiens = facetMapping
+                .getSpeciesFacet()
+                .getAvailable()
+                .stream()
+                .filter(facetContainer -> facetContainer.getName().equals("Homo sapiens"))
+                .findFirst();
+        assertTrue(homoSapiens.isPresent());
+        assertTrue(homoSapiens.get().getCount() > 68000);
         logger.info("Finished");
     }
 
