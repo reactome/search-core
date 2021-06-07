@@ -37,7 +37,7 @@
         <mail.version>1.5.4</mail.version>
         <activation.version>1.1.1</activation.version>
         <junit.version>4.13.1</junit.version>
-        <logging.version>1.1.7</logging.version>
+        <logging.version>1.2.0</logging.version>
         <jackson.databind.version>2.9.10.5</jackson.databind.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
