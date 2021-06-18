@@ -55,6 +55,9 @@ public class SearchService {
     @Value("${report.password:default}")
     private String reportPassword;
 
+    @Value("${report.url:http://localhost:8080}")
+    private String reportUrl;
+
     public SearchService(@Autowired SolrConverter solrConverter) {
         this.solrConverter = solrConverter;
     }
@@ -412,7 +415,7 @@ public class SearchService {
             UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(reportUser, reportPassword);
             provider.setCredentials(AuthScope.ANY, credentials);
             CloseableHttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
-            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/" + requestMapping);
+            URIBuilder uriBuilder = new URIBuilder(this.reportUrl + "/report/search/" + requestMapping);
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("releaseNumber", queryObject.getReportInfo().get(RELEASEVERSION.getDesc())));
             params.add(new BasicNameValuePair("ip", queryObject.getReportInfo().get(IPADDRESS.getDesc())));
@@ -446,7 +449,7 @@ public class SearchService {
         } catch (ConnectException e) {
             logger.error("[REP002] Report service is unavailable");
         } catch (IOException | URISyntaxException e) {
-            logger.error("[REP003] An unexpected error has occurred when saving a report");
+            logger.error("[REP003] An unexpected error has occurred when saving a report : ", e);
         }
     }
 }
