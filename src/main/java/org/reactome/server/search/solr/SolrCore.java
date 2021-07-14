@@ -81,6 +81,7 @@ class SolrCore {
     private final static String KEYWORD_TAG = "{!tag=kf}";
     private final static String COMPARTMENT_TAG = "{!tag=cf}";
     private final static String ICON_TYPE_QUERY = "{!term f=type}icon";
+    private final static String ICON_EXACT_TYPE_QUERY = "exactType:Icon";
 
     private final static String ALL_FIELDS = "*:*";
 
@@ -374,6 +375,7 @@ class SolrCore {
         }
 
         parameters.setQuery(queryObject.getQuery());
+        parameters.setFilterQueries(ICON_TYPE_QUERY);
         return querysolrClient(parameters);
     }
 
@@ -381,7 +383,7 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery("stId:" + queryObject.getQuery());
-        parameters.setFilterQueries(ICON_TYPE_QUERY);
+        parameters.setFilterQueries(ICON_EXACT_TYPE_QUERY);
         parameters.set(SOLR_MIN_MATCH, "100%"); // one field or another is fine
         return querysolrClient(parameters);
     }
