@@ -25,7 +25,6 @@
         <aspectj.version>1.8.8</aspectj.version>
         <mail.version>1.5.4</mail.version>
         <activation.version>1.1.1</activation.version>
-        <junit.version>5.8.0-M1</junit.version>
         <jackson.databind.version>2.12.2</jackson.databind.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
@@ -106,7 +105,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -126,6 +124,11 @@
             </testResource>
         </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
             <!--Plugin needed to force maven resources to latest version. Default version contains a bug-->
             <!--adding debug output-->
             <plugin>
