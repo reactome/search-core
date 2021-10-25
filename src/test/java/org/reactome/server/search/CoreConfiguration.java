@@ -1,10 +1,10 @@
 package org.reactome.server.search;
 
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -19,8 +19,8 @@ import org.springframework.core.io.ClassPathResource;
 public class CoreConfiguration {
 
     @Bean
-    static PropertyPlaceholderConfigurer propConfig() {
-        PropertyPlaceholderConfigurer ppc =  new PropertyPlaceholderConfigurer();
+    static PropertySourcesPlaceholderConfigurer propConfig() {
+        PropertySourcesPlaceholderConfigurer ppc =  new PropertySourcesPlaceholderConfigurer();
         ppc.setLocation(new ClassPathResource("reactome.properties"));
         return ppc;
     }

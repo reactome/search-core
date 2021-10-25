@@ -1,47 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-parent</artifactId>
+        <version>2.5.3</version>
+    </parent>
+
     <groupId>org.reactome.server.search</groupId>
     <artifactId>search-core</artifactId>
+    <version>1.4.4-SNAPSHOT</version>
 
-    <packaging>jar</packaging>
-    <version>1.4.3</version>
     <name>search-core</name>
-
     <description>
-        The Indexer Project is used to import Reactome data into Solr and optionally create a reduced version of this data as xml.
+        The Indexer Project is used to import Reactome data into Solr and optionally create a reduced version of this
+        data as xml
     </description>
-    <organization>
-        <name>The European Bioinformatics Institute</name>
-        <url>http://www.ebi.ac.uk/</url>
-    </organization>
-    <developers>
-        <developer>
-            <id>fkorn</id>
-            <name>Florian Korninger</name>
-            <email>fkorn@ebi.ac.uk</email>
-            <organization>http://www.ebi.ac.uk/</organization>
-        </developer>
-        <developer>
-            <id>gviteri</id>
-            <name>Guilherme S Viteri</name>
-            <email>gviteri@ebi.ac.uk</email>
-            <organization>http://www.ebi.ac.uk/</organization>
-        </developer>
-    </developers>
 
     <properties>
-        <solr.version>6.1.0</solr.version>
-        <spring.version>4.2.4.RELEASE</spring.version>
+        <java.version>11</java.version>
+        <solr.version>8.5.2</solr.version>
         <aspectj.version>1.8.8</aspectj.version>
         <mail.version>1.5.4</mail.version>
         <activation.version>1.1.1</activation.version>
-        <junit.version>4.13.1</junit.version>
-        <logging.version>1.1.7</logging.version>
-        <jackson.databind.version>2.9.10.5</jackson.databind.version>
+        <junit.version>5.8.0-M1</junit.version>
+        <jackson.databind.version>2.12.2</jackson.databind.version>
 
         <maven.compiler.version>3.5.1</maven.compiler.version>
-        <jdk.version>1.8</jdk.version>
         <maven.jar.version>2.6</maven.jar.version>
         <maven.site.version>3.4</maven.site.version>
         <jackrabbit.version>2.10</jackrabbit.version>
@@ -52,26 +39,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+
     <dependencies>
         <!-- Solr -->
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        <!--Spring-->
+
+        <!-- Spring -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        <!--Spring junit test framework-->
+
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!--Aspectj AOP -->
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -83,6 +77,7 @@
             <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
         </dependency>
+
         <!-- Mail Service -->
         <dependency>
             <groupId>javax.mail</groupId>
@@ -99,58 +94,22 @@
             <artifactId>activation</artifactId>
             <version>${activation.version}</version>
         </dependency>
+
         <!-- Jackson JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.databind.version}</version>
         </dependency>
+
         <!--Junit Tests-->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--Logging: will transitively add logback core and slf4j-api-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logging.version}</version>
-        </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Central Repository</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>central_1</id>
-            <name>Maven Repository Switchboard</name>
-            <url>https://repo1.maven.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>nexus-ebi-repo</id>
-            <name>The EBI internal repository</name>
-            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <finalName>${project.name}</finalName>
@@ -179,8 +138,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.version}</version>
                 <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -205,7 +164,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
         </plugins>
     </build>
 
@@ -258,9 +216,42 @@
                     <skipEmptyReport>false</skipEmptyReport>
                     <linkXRef>false</linkXRef>
                     <sourceEncoding>utf-8</sourceEncoding>
-                    <targetJdk>${jdk.version}</targetJdk>
+                    <targetJdk>${java.version}</targetJdk>
                 </configuration>
             </plugin>
         </plugins>
     </reporting>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central_1</id>
+            <name>Maven Repository Switchboard</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>nexus-ebi-repo</id>
+            <name>The EBI internal repository</name>
+            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>

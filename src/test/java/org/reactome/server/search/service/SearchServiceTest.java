@@ -1,24 +1,21 @@
 package org.reactome.server.search.service;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.reactome.server.search.CoreConfiguration;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
-import org.reactome.server.search.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Created by:
@@ -29,30 +26,23 @@ import static org.junit.Assume.assumeTrue;
  * 507868 Will test wrong. Difference is that duplications are removed in the graph
  */
 @ContextConfiguration(classes = {CoreConfiguration.class})
-@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
 public class SearchServiceTest {
 
-    private final static Logger logger = LoggerFactory.getLogger("testLogger");
+    private static final Logger logger = LoggerFactory.getLogger("testLogger");
     private static final String suggest = "apoptos";
     private static final String spellcheck = "appoptosis";
-    private static List<String> types;
-    private static List<String> species;
-    private static Query query;
+    private static final List<String> species = List.of("Homo sapiens");
+    private static final List<String> types = List.of("Pathway", "Reaction");
+    private static final Query query = new Query.Builder("apoptosis").forSpecies(species).withTypes(types).build();
+
+
     @Autowired
     private SearchService searchService;
 
-    @BeforeClass
-    public static void setUpClass() {
-        species = new ArrayList<>();
-        species.add("Homo sapiens");
-        types = new ArrayList<>();
-        types.add("Pathway");
-        types.add("Reaction");
-        query = new Query.Builder("apoptosis").forSpecies(species).withTypes(types).build();
-    }
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    static void setUp(@Autowired SearchService searchService) {
         assumeTrue(searchService.ping());
     }
 
@@ -76,7 +66,15 @@ public class SearchServiceTest {
         FacetMapping facetMapping = searchService.getTotalFacetingInformation();
         time = System.currentTimeMillis() - start;
         logger.info("GraphDb execution time: " + time + "ms");
-        assertTrue(471389 <= facetMapping.getTotalNumFount());
+        assertTrue(465000 <= facetMapping.getTotalNumFount());
+        Optional<FacetContainer> homoSapiens = facetMapping
+                .getSpeciesFacet()
+                .getAvailable()
+                .stream()
+                .filter(facetContainer -> facetContainer.getName().equals("Homo sapiens"))
+                .findFirst();
+        assertTrue(homoSapiens.isPresent());
+        assertTrue(homoSapiens.get().getCount() > 68000);
         logger.info("Finished");
     }
 
@@ -128,13 +126,13 @@ public class SearchServiceTest {
         long start, time;
         Map<String, List<String>> queryToExpectedFirstResultStId = new LinkedHashMap<>();
 
-        queryToExpectedFirstResultStId.put("pten", Lists.of("R-HSA-199420")); // Gene name
-        queryToExpectedFirstResultStId.put("GO:0051800", Lists.of("R-HSA-1676149")); // Gene Ontology of pten (Other identifiers)
-        queryToExpectedFirstResultStId.put("0051800", Lists.of("R-HSA-1676149")); // Gene Ontology ID of pten
-        queryToExpectedFirstResultStId.put("HGNC:5013", Lists.of("R-HSA-9609901")); // Reference Gene ID
-        queryToExpectedFirstResultStId.put("NCBI:3162", Lists.of("R-HSA-9609901")); // Truncated "NCBI Gene:3162" : ReferenceGene
-        queryToExpectedFirstResultStId.put("NCBI-Gene:3162", Lists.of("R-HSA-9609901")); // Replaced "NCBI Gene:3162" : ReferenceGene
-        queryToExpectedFirstResultStId.put("Lymphoid and a non-Lymphoid cell", Lists.of("R-HSA-198933")); // Pathway name containing "and" next to a stop word
+        queryToExpectedFirstResultStId.put("pten", List.of("R-HSA-199420")); // Gene name
+        queryToExpectedFirstResultStId.put("GO:0051800", List.of("R-HSA-1676149")); // Gene Ontology of pten (Other identifiers)
+        queryToExpectedFirstResultStId.put("0051800", List.of("R-HSA-1676149")); // Gene Ontology ID of pten
+        queryToExpectedFirstResultStId.put("HGNC:5013", List.of("R-HSA-9609901")); // Reference Gene ID
+        queryToExpectedFirstResultStId.put("NCBI:3162", List.of("R-HSA-9609901")); // Truncated "NCBI Gene:3162" : ReferenceGene
+        queryToExpectedFirstResultStId.put("NCBI-Gene:3162", List.of("R-HSA-9609901")); // Replaced "NCBI Gene:3162" : ReferenceGene
+        queryToExpectedFirstResultStId.put("Lymphoid and a non-Lymphoid cell", List.of("R-HSA-198933")); // Pathway name containing "and" next to a stop word
 
         for (Map.Entry<String, List<String>> searchResultCouple : queryToExpectedFirstResultStId.entrySet()) {
             start = System.currentTimeMillis();
@@ -151,8 +149,7 @@ public class SearchServiceTest {
                     .map(Entry::getStId).collect(Collectors.toSet());
 
             for (String expected : searchResultCouple.getValue()) {
-                assertTrue("\"" + queryString + "\" did not match the expected document " + expected + "on the top 30 rows",
-                        resultStIds.contains(expected));
+                assertTrue(resultStIds.contains(expected), "\"" + queryString + "\" did not match the expected document " + expected + "on the top 30 rows");
             }
         }
         logger.info("Finished");
@@ -206,9 +203,7 @@ public class SearchServiceTest {
 
     @Test
     public void testGetEntriesNameGram() throws SolrSearcherException {
-        // Do not initialize as Collections.singletonList
-        List<String> species = new ArrayList<>();
-        species.add("Homo sapiens");
+        List<String> species = List.of("Homo sapiens");
         Query query = new Query.Builder("transp").forSpecies(species).build();
         GroupedResult groupedResult = searchService.getEntries(query, true);
         assertTrue(5 <= groupedResult.getNumberOfGroups());
@@ -217,22 +212,18 @@ public class SearchServiceTest {
 
     @Test
     public void testFireworks() throws SolrSearcherException {
-        // Do not initialize as Collections.singletonList
-        List<String> species = new ArrayList<>();
-        species.add("Homo sapiens");
+        List<String> species = List.of("Homo sapiens");
         Query query = new Query.Builder("PTEN").forSpecies(species).withTypes(Collections.singletonList("Protein")).build();
         FireworksResult fireworksResult = searchService.getFireworks(query);
-        assertTrue("15 results or more are expected", 15 <= fireworksResult.getFound());
+        assertTrue(15 <= fireworksResult.getFound(), "15 results or more are expected");
     }
 
     @Test
     public void testFireworksWithInteractors() throws SolrSearcherException {
-        // Do not initialize as Collections.singletonList
-        List<String> species = new ArrayList<>();
-        species.add("Homo sapiens");
+        List<String> species = List.of("Homo sapiens");
         Query query = new Query.Builder("IKZF3").forSpecies(species).withTypes(Collections.singletonList("Interactor")).build();
         FireworksResult fireworksResult = searchService.getFireworks(query);
-        assertTrue("1 or more results are expected", 1 <= fireworksResult.getFound());
+        assertTrue(1 <= fireworksResult.getFound(), "1 or more results are expected");
     }
 
     @Test
@@ -245,17 +236,20 @@ public class SearchServiceTest {
         Query query = new Query.Builder(term).addFilterQuery(diagram).forSpecies(species).build();
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
-        assertTrue("8 or more results diagram results are expected", 8 <= dss.getDiagramResult().getFound());
-        assertTrue("7 or more results other diagrams results are expected", 7 <= dss.getDiagramResult().getFacets().stream().findFirst().get().getCount());
-        assertEquals("Protein is expected", "Protein", dss.getDiagramResult().getFacets().stream().findFirst().get().getName());
-        assertTrue("94 or more results other diagrams results are expected", 94 <= dss.getFireworksResult().getFound());
-        assertEquals("Protein is expected", "Protein", dss.getFireworksResult().getFacets().stream().findFirst().get().getName());
-        assertTrue("60 or more results other diagrams results are expected", 60 <= dss.getFireworksResult().getFacets().stream().findFirst().get().getCount());
+        assertTrue(8 <= dss.getDiagramResult().getFound(), "8 or more results diagram results are expected");
+        Optional<FacetContainer> diagramFacets = dss.getDiagramResult().getFacets().stream().findFirst();
+        assertTrue(diagramFacets.isPresent());
+        assertTrue(7 <= diagramFacets.get().getCount(), "7 or more results other diagrams results are expected");
+        assertEquals("Protein", diagramFacets.get().getName(), "Protein is expected");
+        assertTrue(94 <= dss.getFireworksResult().getFound(), "94 or more results other diagrams results are expected");
+        Optional<FacetContainer> fireworkFacets = dss.getFireworksResult().getFacets().stream().findFirst();
+        assertTrue(fireworkFacets.isPresent());
+        assertEquals("Protein", fireworkFacets.get().getName(), "Protein is expected");
+        assertTrue(60 <= fireworkFacets.get().getCount(), "60 or more results other diagrams results are expected");
     }
 
     @Test
     public void testDiagramSearchSummarySmallMolecules() throws SolrSearcherException {
-        // Do not initialize as Collections.singletonList
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
@@ -264,13 +258,14 @@ public class SearchServiceTest {
         Query query = new Query.Builder(term).addFilterQuery(diagram).forSpecies(species).build();
         DiagramSearchSummary dss = searchService.getDiagramSearchSummary(query);
 
-        assertTrue("2 or more results diagram results are expected", 2 <= dss.getDiagramResult().getFound());
-        assertTrue("690 or more results other diagrams results are expected", 690 <= dss.getFireworksResult().getFound());
+        assertTrue(2 <= dss.getDiagramResult().getFound(), "2 or more results diagram results are expected");
+        assertTrue(690 <= dss.getFireworksResult().getFound(), "690 or more results other diagrams results are expected");
     }
 
     @Test
     public void testFireworksSpecies() throws SolrSearcherException {
         // Do not initialize as Collections.singletonList
+
         List<String> species = new ArrayList<>();
         species.add("Gallus gallus");
         Query query = new Query.Builder("PG").forSpecies(species).build();
@@ -278,9 +273,9 @@ public class SearchServiceTest {
 
         assertNotNull(fireworksResult);
         assertNotNull(fireworksResult.getEntries());
-        assertNotEquals(fireworksResult.getEntries(), 0);
+        assertNotEquals(fireworksResult.getEntries().size(), 0);
         List<Entry> fsten = fireworksResult.getEntries().stream().filter(entry -> entry.getFireworksSpecies().size() >= 10).collect(Collectors.toList());
-        assertTrue("10 species or more are expected", 10 <= fsten.iterator().next().getFireworksSpecies().size());
+        assertTrue(10 <= fsten.iterator().next().getFireworksSpecies().size(), "10 species or more are expected");
     }
 
     @Test
@@ -295,23 +290,23 @@ public class SearchServiceTest {
 
         assertNotNull(diagramResults);
         assertNotNull(diagramResults.getEntries());
-        assertTrue("2 or more entries are expected", 2 <= diagramResults.getFound());
+        assertTrue(2 <= diagramResults.getFound(), "2 or more entries are expected");
     }
 
     @Test
     public void testOccurrences() throws SolrSearcherException {
         // Do not initialize as Collections.singletonList
-        List<String> species = new ArrayList<>();
-        species.add("Homo sapiens");
+        List<String> species = List.of("Homo sapiens");
         String termStId = "R-HSA-879382";
         String diagram = "R-HSA-168164";
         Query query = new Query.Builder(termStId).addFilterQuery(diagram).forSpecies(species).build();
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
-        assertFalse("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+
+        assertFalse(diagramOccurrencesResult.getInDiagram(), "The entry " + termStId + " is not expected to be in the diagram " + diagram);
         assertNotNull(diagramOccurrencesResult.getOccurrences());
-        assertTrue("1 or more occurrences is expected", 1 <= diagramOccurrencesResult.getOccurrences().size());
+        assertTrue(1 <= diagramOccurrencesResult.getOccurrences().size(), "1 or more occurrences is expected");
     }
 
     @Test
@@ -325,7 +320,7 @@ public class SearchServiceTest {
         DiagramOccurrencesResult diagramOccurrencesResult = searchService.getDiagramOccurrencesResult(query);
 
         assertNotNull(diagramOccurrencesResult);
-        assertTrue("The entry " + termStId + " is not expected to be in the diagram " + diagram, diagramOccurrencesResult.getInDiagram());
+        assertTrue(diagramOccurrencesResult.getInDiagram(), "The entry " + termStId + " is not expected to be in the diagram " + diagram);
         assertNull(diagramOccurrencesResult.getOccurrences());
     }
 
@@ -337,8 +332,8 @@ public class SearchServiceTest {
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
-        assertTrue("7 or more fireworks flagging 'lower level' pathways are expected", 7 <= fireworksFlaggingSet.getLlps().size());
-        assertTrue("6 or more fireworks flagging 'interacts with' stid are expected", 6 <= fireworksFlaggingSet.getInteractsWith().size());
+        assertTrue(7 <= fireworksFlaggingSet.getLlps().size(), "7 or more fireworks flagging 'lower level' pathways are expected");
+        assertTrue(6 <= fireworksFlaggingSet.getInteractsWith().size(), "6 or more fireworks flagging 'interacts with' stid are expected");
     }
 
     @Test
@@ -362,7 +357,7 @@ public class SearchServiceTest {
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
         assertFalse(fireworksFlaggingSet.isEmpty());
-        assertTrue("4000 or more fireworks flagging stid are expected", 4000 <= fireworksFlaggingSet.getLlps().size());
+        assertTrue(4000 <= fireworksFlaggingSet.getLlps().size(), "4000 or more fireworks flagging stid are expected");
     }
 
     @Test
@@ -398,7 +393,7 @@ public class SearchServiceTest {
             if (result.getTypeName().equals("Person")) {
                 List<Entry> entries = result.getEntries();
                 assertNotNull(entries);
-                assertTrue("4 or more people are expected", 4 <= entries.size());
+                assertTrue(4 <= entries.size(), "4 or more people are expected");
             }
         }
     }
@@ -419,7 +414,7 @@ public class SearchServiceTest {
             if (result.getTypeName().equals("Person")) {
                 List<Entry> entries = result.getEntries();
                 assertNotNull(entries);
-                assertTrue("1 or more people are expected", 1 <= entries.size());
+                assertTrue(1 <= entries.size(), "1 or more people are expected");
 
             }
         }
@@ -430,7 +425,7 @@ public class SearchServiceTest {
         logger.info("Started testing searchService.getIconFacetingInformation()");
         FacetMapping facetMapping = searchService.getIconFacetingInformation();
         List<FacetContainer> cc = facetMapping.getIconCategoriesFacet().getAvailable();
-        assertTrue("Icon faceting didn't match", cc.size() >= 8);
+        assertTrue(cc.size() >= 8, "Icon faceting didn't match");
     }
 
     @Test
@@ -440,7 +435,7 @@ public class SearchServiceTest {
         Result icons = searchService.getIconsResult(query, 30, 1);
         assertNotNull(icons);
         assertNotNull(icons.getEntries());
-        assertTrue("Couldn't find all the icons", icons.getEntries().size() >= 20);
+        assertTrue(icons.getEntries().size() >= 20, "Couldn't find all the icons");
     }
 
     @Test
@@ -458,6 +453,6 @@ public class SearchServiceTest {
         logger.info("Started testing searchService.testGetAllIcons");
         List<Entry> icons = searchService.getAllIcons();
         assertNotNull(icons);
-        assertTrue("Couldn't find all the icons", icons.size() >= 1150 && icons.size() <= 1500);
+        assertTrue(icons.size() >= 1150 && icons.size() <= 1500, "Couldn't find all the icons");
     }
 }

@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public class FireworksOccurrencesResult {
 
-    private Set<String> llps = new HashSet<>();
-    private Set<String> interactsWith = new HashSet<>();
+    private final Set<String> llps = new HashSet<>();
+    private final Set<String> interactsWith = new HashSet<>();
 
     public FireworksOccurrencesResult() {
     }

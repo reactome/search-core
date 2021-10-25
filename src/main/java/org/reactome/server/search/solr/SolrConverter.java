@@ -77,8 +77,11 @@ public class SolrConverter {
     private static final String ICON_PHYSICAL_ENTITIES = "iconPhysicalEntities";
     private static final String ICON_EHLDS = "iconEhlds";
 
-    @Autowired
-    private SolrCore solrCore;
+    private final SolrCore solrCore;
+
+    public SolrConverter(@Autowired SolrCore solrCore) {
+        this.solrCore = solrCore;
+    }
 
     /**
      * Method for testing if a connection to Solr can be established
@@ -214,7 +217,6 @@ public class SolrConverter {
      * @param queryObject - has the stId of the element we are search and the diagram to filter
      */
     public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
-        DiagramOccurrencesResult ret = null;
         QueryResponse response = solrCore.getDiagramOccurrences(queryObject);
         if (response != null && queryObject != null) {
             String searchingFilter = queryObject.getFilterQuery();
@@ -224,17 +226,13 @@ public class SolrConverter {
                     List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
                     for (String rawOccurrence : rawOccurrences) {
                         if (rawOccurrence.startsWith(searchingFilter)) {
-                            // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
-                            String[] line = rawOccurrence.split(":");
-                            List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
-                            List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
-                            ret = new DiagramOccurrencesResult(Boolean.valueOf(line[1]), occurrences, interactsWith);
+                            return extractRawOccurrence(rawOccurrence, Optional.empty());
                         }
                     }
                 }
             }
         }
-        return ret;
+        return null;
     }
 
     /**
@@ -253,19 +251,29 @@ public class SolrConverter {
                     List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
                     for (String rawOccurrence : rawOccurrences) {
                         if (rawOccurrence.startsWith(targetedDiagram)) {
-                            // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
-                            String[] line = rawOccurrence.split(":");
-                            List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
-                            List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
-                            Boolean isInDiagram = Boolean.valueOf(line[1]);
-                            String stId = isInDiagram ? (String) solrDocument.getFieldValue(ST_ID) : null;
-                            rtn.add(new DiagramOccurrencesResult(stId, occurrences, interactsWith));
+                            rtn.add(extractRawOccurrence(rawOccurrence, Optional.of(solrDocument)));
                         }
                     }
                 }
             }
         }
         return rtn;
+    }
+
+    /**
+     * @param rawOccurrence String with the following format "Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With"
+     * @param document if null, will not use StId
+     * @return DiagramOccurrencesResult
+     */
+    private static DiagramOccurrencesResult extractRawOccurrence(String rawOccurrence, Optional<SolrDocument> document) {
+        String[] line = rawOccurrence.split(":");
+        List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
+        List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
+        Boolean isInDiagram = Boolean.valueOf(line[1]);
+
+        if (document.isEmpty()) return new DiagramOccurrencesResult(isInDiagram, occurrences, interactsWith);
+        String stId = isInDiagram ? (String) document.get().getFieldValue(ST_ID) : null;
+        return new DiagramOccurrencesResult(stId, occurrences, interactsWith);
     }
 
     /**
@@ -693,4 +701,6 @@ public class SolrConverter {
         }
         return null;
     }
+
+
 }
