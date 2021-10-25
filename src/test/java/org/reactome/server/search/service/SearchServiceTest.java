@@ -342,7 +342,7 @@ public class SearchServiceTest {
         List<String> species = new ArrayList<>();
         species.add("Bos taurus");
 
-        String term = "NTN1";
+        String term = "STAT4";
         Query query = new Query.Builder(term).forSpecies(species).build();
         FireworksOccurrencesResult fireworksFlaggingSet = searchService.fireworksFlagging(query);
 
@@ -453,6 +453,6 @@ public class SearchServiceTest {
         logger.info("Started testing searchService.testGetAllIcons");
         List<Entry> icons = searchService.getAllIcons();
         assertNotNull(icons);
-        assertTrue(icons.size() >= 1150 && icons.size() <= 1500, "Couldn't find all the icons");
+        assertTrue(icons.size() >= 2040 && icons.size() <= 3000, "Couldn't find all the icons");
     }
 }
