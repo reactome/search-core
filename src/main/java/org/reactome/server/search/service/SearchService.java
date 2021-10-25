@@ -47,14 +47,20 @@ public class SearchService {
 
     private final static Logger logger = LoggerFactory.getLogger("");
 
-    @Autowired
-    private SolrConverter solrConverter;
+    private final SolrConverter solrConverter;
 
     @Value("${report.user:default}")
     private String reportUser;
 
     @Value("${report.password:default}")
     private String reportPassword;
+
+    @Value("${report.url:http://localhost:8080}")
+    private String reportUrl;
+
+    public SearchService(@Autowired SolrConverter solrConverter) {
+        this.solrConverter = solrConverter;
+    }
 
     /**
      * Method for testing if a connection to Solr can be established
@@ -356,12 +362,12 @@ public class SearchService {
         List<String> types = Collections.singletonList("Icon");
 
         // Simple query to get number of matches
-        Query query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(0).build();
+        Query query = new Query.Builder("*:*").withTypes(types).start(0).numberOfRows(0).build();
         GroupedResult results = solrConverter.getEntries(query);
         int rows = results.getNumberOfMatches();
 
         // Query all the icons
-        query = new Query.Builder("*:*").withTypes(types).start(0).numberOfrows(rows).build();
+        query = new Query.Builder("*:*").withTypes(types).start(0).numberOfRows(rows).build();
         results = solrConverter.getEntries(query);
 
         if (results != null && results.getResults() != null) {
@@ -409,7 +415,7 @@ public class SearchService {
             UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(reportUser, reportPassword);
             provider.setCredentials(AuthScope.ANY, credentials);
             CloseableHttpClient client = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
-            URIBuilder uriBuilder = new URIBuilder("http://localhost:8080/report/search/" + requestMapping);
+            URIBuilder uriBuilder = new URIBuilder(this.reportUrl + "/report/search/" + requestMapping);
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("releaseNumber", queryObject.getReportInfo().get(RELEASEVERSION.getDesc())));
             params.add(new BasicNameValuePair("ip", queryObject.getReportInfo().get(IPADDRESS.getDesc())));
@@ -443,7 +449,7 @@ public class SearchService {
         } catch (ConnectException e) {
             logger.error("[REP002] Report service is unavailable");
         } catch (IOException | URISyntaxException e) {
-            logger.error("[REP003] An unexpected error has occurred when saving a report");
+            logger.error("[REP003] An unexpected error has occurred when saving a report : ", e);
         }
     }
 }

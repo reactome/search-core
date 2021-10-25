@@ -1,5 +1,7 @@
 package org.reactome.server.search.domain;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,22 +64,22 @@ public class Query {
         }
 
         public Builder forSpecies(List<String> species){
-            this.species = species;
+            if (species != null) this.species = new ArrayList<>(species);
             return this;
         }
 
         public Builder withTypes(List<String> types){
-            this.types = types;
+            if (types != null) this.types = new ArrayList<>(types);
             return this;
         }
 
         public Builder withKeywords(List<String> keywords){
-            this.keywords = keywords;
+            if (keywords != null) this.keywords = new ArrayList<>(keywords);
             return this;
         }
 
         public Builder inCompartments(List<String> compartments){
-            this.compartments = compartments;
+            if (compartments != null) this.compartments = new ArrayList<>(compartments);
             return this;
         }
 
@@ -86,13 +88,13 @@ public class Query {
             return this;
         }
 
-        public Builder numberOfrows(Integer rows){
+        public Builder numberOfRows(Integer rows){
             this.rows = rows;
             return this;
         }
 
         public Builder withReportInfo(Map<String, String> reportInfo) {
-            this.reportInfo = reportInfo;
+            if (reportInfo != null) this.reportInfo = new HashMap<>(reportInfo);
             return this;
         }
 

@@ -1,7 +1,5 @@
 package org.reactome.server.search.domain;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
  */
@@ -53,7 +51,7 @@ public class IconPhysicalEntity implements Comparable<IconPhysicalEntity> {
     }
 
     public String getDisplayName() {
-        return name + (StringUtils.isEmpty(compartments) ? "" : " [" + compartments + "]");
+        return name + (compartments.isBlank() ? "" : " [" + compartments + "]");
     }
 
     @Override

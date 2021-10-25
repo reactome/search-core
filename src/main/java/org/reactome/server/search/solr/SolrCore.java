@@ -1,6 +1,5 @@
 package org.reactome.server.search.solr;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -82,6 +81,7 @@ class SolrCore {
     private final static String KEYWORD_TAG = "{!tag=kf}";
     private final static String COMPARTMENT_TAG = "{!tag=cf}";
     private final static String ICON_TYPE_QUERY = "{!term f=type}icon";
+    private final static String ICON_EXACT_TYPE_QUERY = "exactType:Icon";
 
     private final static String ALL_FIELDS = "*:*";
 
@@ -153,14 +153,7 @@ class SolrCore {
      * @return QueryResponse
      */
     QueryResponse groupedSearch(Query queryObject) throws SolrSearcherException {
-        SolrQuery parameters = new SolrQuery();
-
-        parameters.setRequestHandler(GROUPED_SEARCH_REQUEST_HANDLER);
-        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
-        parameterParserType(queryObject, parameters);
+        SolrQuery parameters = initQuery(queryObject, GROUPED_SEARCH_REQUEST_HANDLER);
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.set(SOLR_GROUP_OFFSET, queryObject.getStart());
@@ -178,14 +171,7 @@ class SolrCore {
      * @return QueryResponse
      */
     QueryResponse search(Query queryObject) throws SolrSearcherException {
-        SolrQuery parameters = new SolrQuery();
-
-        parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
-        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
-        parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
-        parameterParserType(queryObject, parameters);
+        SolrQuery parameters = initQuery(queryObject, SEARCH_REQUEST_HANDLER);
 
         if (queryObject.getStart() != null && queryObject.getRows() != null) {
             parameters.setStart(queryObject.getStart());
@@ -193,6 +179,18 @@ class SolrCore {
         }
         parameters.setQuery(queryObject.getQuery());
         return querysolrClient(parameters);
+    }
+
+    private SolrQuery initQuery(Query queryObject, final String handler) {
+        SolrQuery parameters = new SolrQuery();
+
+        parameters.setRequestHandler(handler);
+        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), SPECIES_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
+        parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
+        parameterParserType(queryObject, parameters);
+        return parameters;
     }
 
     /**
@@ -377,6 +375,7 @@ class SolrCore {
         }
 
         parameters.setQuery(queryObject.getQuery());
+        parameters.setFilterQueries(ICON_TYPE_QUERY);
         return querysolrClient(parameters);
     }
 
@@ -384,7 +383,7 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
         parameters.setQuery("stId:" + queryObject.getQuery());
-        parameters.setFilterQueries(ICON_TYPE_QUERY);
+        parameters.setFilterQueries(ICON_EXACT_TYPE_QUERY);
         parameters.set(SOLR_MIN_MATCH, "100%"); // one field or another is fine
         return querysolrClient(parameters);
     }
@@ -408,7 +407,7 @@ class SolrCore {
             facet.removeAll(Collections.singletonList(""));
             facet.removeAll(Collections.singletonList(null));
             if (!facet.isEmpty() && fieldName != null && !fieldName.isEmpty()) {
-                return fieldName + ":(\"" + StringUtils.join(facet, "\" OR \"") + "\")";
+                return fieldName + ":(\"" + String.join("\" OR \"", facet) + "\")";
             }
         }
         return "";

@@ -9,7 +9,7 @@ public enum ReportInformationEnum {
     USERAGENT("user-agent"),
     IPADDRESS("ip-address");
 
-    private String desc;
+    private final String desc;
 
     ReportInformationEnum(String desc) {
         this.desc = desc;
