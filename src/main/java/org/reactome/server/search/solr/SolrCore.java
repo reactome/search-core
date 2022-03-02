@@ -315,7 +315,7 @@ class SolrCore {
     QueryResponse getDiagramFlagging(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_FLAG_REQUEST_HANDLER);
-        parameters.setQuery(queryObject.getQuery() + " AND occurrences:" + queryObject.getFilterQuery() + "*");
+        parameters.setQuery(String.format("%s:%s AND %s:%s*", ST_ID, queryObject.getQuery(), DIAGRAM_OCCURRENCES, queryObject.getFilterQuery()));
         parameters.setFields(DIAGRAM_OCCURRENCES, ST_ID); // solr response will contain only DIAGRAM_OCCURRENCES and ST_ID.
         //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
         parameters.setRows(100);
