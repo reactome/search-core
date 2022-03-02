@@ -11,7 +11,7 @@
 
     <groupId>org.reactome.server.search</groupId>
     <artifactId>search-core</artifactId>
-    <version>1.4.4</version>
+    <version>1.4.5-SNAPSHOT</version>
 
     <name>search-core</name>
     <description>
