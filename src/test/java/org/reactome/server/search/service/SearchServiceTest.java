@@ -51,10 +51,22 @@ public class SearchServiceTest {
         logger.info("Started testing searchService.getFacetingInformation");
         long start, time;
         start = System.currentTimeMillis();
-        FacetMapping facetMapping = searchService.getFacetingInformation(query);
+        FacetMapping facetMapping = searchService.getFacetingInformation(query, false);
         time = System.currentTimeMillis() - start;
         logger.info("GraphDb execution time: " + time + "ms");
         assertTrue(309 <= facetMapping.getTotalNumFount());
+        logger.info("Finished");
+    }
+
+    @Test
+    public void testGetForcedFilteredFacetingInformation() throws SolrSearcherException {
+        logger.info("Started testing searchService.getFacetingInformation");
+        long start, time;
+        start = System.currentTimeMillis();
+        FacetMapping facetMapping = searchService.getFacetingInformation(new Query.Builder("dog").withTypes(List.of("Icon")).build(), true);
+        time = System.currentTimeMillis() - start;
+        logger.info("GraphDb execution time: " + time + "ms");
+        assertEquals(0, facetMapping.getTotalNumFount());
         logger.info("Finished");
     }
 

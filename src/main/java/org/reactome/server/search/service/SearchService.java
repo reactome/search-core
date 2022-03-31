@@ -81,14 +81,28 @@ public class SearchService {
      * @return Grouped result
      */
     public SearchResult getSearchResult(Query query, int rowCount, int page, boolean grouped) throws SolrSearcherException {
-        FacetMapping facetMapping = getFacetingInformation(query);
+        return this.getSearchResult(query, rowCount, page, grouped, false);
+    }
+
+    /**
+     * This method is a simple aggregation of service methods used in the Content project
+     *
+     * @param query    QueryObject
+     * @param rowCount number of rows displayed in one page
+     * @param page     page number
+     * @param grouped  grouped or not grouped result
+     * @param forceFilters Avoid removing of filters when they yield to no results
+     * @return Grouped result
+     */
+    public SearchResult getSearchResult(Query query, int rowCount, int page, boolean grouped, boolean forceFilters) throws SolrSearcherException {
+        FacetMapping facetMapping = getFacetingInformation(query, forceFilters);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
             query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
-            facetMapping = getFacetingInformation(query);
+            facetMapping = getFacetingInformation(query, forceFilters);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
             query.setParserType(ParserType.DISMAX);
-            facetMapping = getFacetingInformation(query);
+            facetMapping = getFacetingInformation(query, forceFilters);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
             setPagingParameters(query, facetMapping, rowCount, page, grouped);
@@ -131,12 +145,14 @@ public class SearchService {
      * (this will help preventing false faceting information when filter are contradictory to each other)
      *
      * @param queryObject query and filter (species types keywords compartments)
+     * @param forceFilters Avoid removing of filters when they yield to no results
      * @return FacetMapping
      */
-    public FacetMapping getFacetingInformation(Query queryObject) throws SolrSearcherException {
+    public FacetMapping getFacetingInformation(Query queryObject, boolean forceFilters) throws SolrSearcherException {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
 
             FacetMapping facetMapping = solrConverter.getFacetingInformation(queryObject);
+            if (forceFilters) return facetMapping;
             boolean correctFacets = true;
             // Each faceting group(species,types,keywords,compartments) is dependent from all selected filters of other faceting groups
             // This brings the risk of having filters that contradict each other. To avoid having selected facets that will cause problems
