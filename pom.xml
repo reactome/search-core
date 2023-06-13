@@ -6,12 +6,12 @@
     <parent>
         <groupId>org.reactome.maven</groupId>
         <artifactId>reactome-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
     </parent>
 
     <groupId>org.reactome.server.search</groupId>
     <artifactId>search-core</artifactId>
-    <version>1.4.11-SNAPSHOT</version>
+    <version>1.4.11</version>
 
     <name>search-core</name>
     <description>
