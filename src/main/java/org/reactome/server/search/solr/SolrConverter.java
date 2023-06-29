@@ -516,6 +516,7 @@ public class SolrConverter {
     private void setHighlighting(Entry entry, SolrDocument solrDocument, Map<String, List<String>> snippets) {
         entry.setReferenceIdentifier(selectRightHighlightingForReferenceIdentifiers(solrDocument, snippets));
 
+        snippetHighlight(entry, Entry::setStId, ST_ID, snippets);
         snippetHighlight(entry, Entry::setName, NAME, snippets);
         snippetHighlight(entry, Entry::setSummation, SUMMATION, snippets);
         snippetHighlight(entry, Entry::setReferenceName, REFERENCE_NAME, snippets);
