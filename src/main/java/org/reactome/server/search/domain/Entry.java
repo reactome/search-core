@@ -51,6 +51,21 @@ public class Entry {
     private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
 
+    // Deleted
+    private String reason;
+    private String explanation;
+    private String date;
+    private List<Long> replacementDbIds;
+    private List<String> replacementStIds;
+
+    public boolean isIcon() {
+        return this.type.equalsIgnoreCase("icon");
+    }
+
+    public boolean isDeleted() {
+        return this.type.equalsIgnoreCase("deleted");
+    }
+
     public String getRegulatorId() {
         return regulatorId;
     }
@@ -355,5 +370,53 @@ public class Entry {
 
     public void setIconEhlds(List<String> iconEhlds) {
         this.iconEhlds = iconEhlds;
+    }
+
+    public Boolean getDisease() {
+        return isDisease;
+    }
+
+    public void setDisease(Boolean disease) {
+        isDisease = disease;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public void setExplanation(String explanation) {
+        this.explanation = explanation;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public List<Long> getReplacementDbIds() {
+        return replacementDbIds;
+    }
+
+    public void setReplacementDbIds(List<Long> replacementDbIds) {
+        this.replacementDbIds = replacementDbIds;
+    }
+
+    public List<String> getReplacementStIds() {
+        return replacementStIds;
+    }
+
+    public void setReplacementStIds(List<String> replacementStIds) {
+        this.replacementStIds = replacementStIds;
     }
 }
