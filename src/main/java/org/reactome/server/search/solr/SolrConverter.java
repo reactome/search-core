@@ -41,6 +41,7 @@ public class SolrConverter {
     private static final String REFERENCE_IDENTIFIERS = "referenceIdentifiers";
     private static final String IS_DISEASE = "isDisease";
     private static final String EXACT_TYPE = "exactType";
+    private static final String TYPE = "type";
     private static final String DATABASE_NAME = "databaseName";
     private static final String REGULATOR = "regulator";
     private static final String REGULATOR_ID = "regulatorId";
@@ -76,6 +77,13 @@ public class SolrConverter {
     private static final String ICON_REFERENCES = "iconReferences";
     private static final String ICON_PHYSICAL_ENTITIES = "iconPhysicalEntities";
     private static final String ICON_EHLDS = "iconEhlds";
+
+    private static final String DELETED = "deleted";
+    private static final String DELETED_REASON = "deletedReason";
+    private static final String DELETED_EXPLANATION = "explanation";
+    private static final String DELETED_DATE = "date";
+    private static final String DELETED_REPLACEMENT_DB_IDS = "replacementDbIds";
+    private static final String DELETED_REPLACEMENT_ST_IDS = "replacementStIds";
 
     private final SolrCore solrCore;
 
@@ -453,6 +461,7 @@ public class SolrConverter {
             }
 
             buildIconEntry(solrDocument, entry);
+            buildDeletedEntry(solrDocument, entry);
 
             return entry;
         }
@@ -482,10 +491,30 @@ public class SolrConverter {
         );
     }
 
+    private void buildDeletedEntry(SolrDocument solrDocument, Entry entry) {
+        entry.setDeleted((Boolean) solrDocument.getFieldValue(DELETED));
+        entry.setReason((String) solrDocument.getFieldValue(DELETED_REASON));
+        entry.setExplanation((String) solrDocument.getFieldValue(DELETED_EXPLANATION));
+        entry.setDate((Date) solrDocument.getFieldValue(DELETED_DATE));
+        entry.setReplacementDbIds(getLongListField(solrDocument, DELETED_REPLACEMENT_DB_IDS));
+        entry.setReplacementStIds(getStringListField(solrDocument, DELETED_REPLACEMENT_ST_IDS));
+    }
+
     private List<String> getStringListField(SolrDocument document, String field) {
         Collection<Object> objects = document.getFieldValues(field);
         if (objects != null && !objects.isEmpty()) {
             return objects.stream().map(Objects::toString).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    private  List<Long> getLongListField(SolrDocument document, String field) {
+        Collection<Object> objects = document.getFieldValues(field);
+        if (objects != null && !objects.isEmpty()) {
+            return objects.stream()
+                    .map(o -> (String) o)
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

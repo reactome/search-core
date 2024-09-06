@@ -1,6 +1,8 @@
 package org.reactome.server.search.domain;
 
 
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -52,9 +54,10 @@ public class Entry {
     private List<String> iconEhlds;
 
     // Deleted
+    private Boolean deleted;
     private String reason;
     private String explanation;
-    private String date;
+    private Date date;
     private List<Long> replacementDbIds;
     private List<String> replacementStIds;
 
@@ -63,7 +66,7 @@ public class Entry {
     }
 
     public boolean isDeleted() {
-        return this.type.equalsIgnoreCase("deleted");
+        return this.deleted != null ? this.deleted : false;
     }
 
     public String getRegulatorId() {
@@ -380,6 +383,14 @@ public class Entry {
         isDisease = disease;
     }
 
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public String getReason() {
         return reason;
     }
@@ -396,11 +407,11 @@ public class Entry {
         this.explanation = explanation;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
