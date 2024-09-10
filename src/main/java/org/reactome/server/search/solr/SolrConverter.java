@@ -262,7 +262,7 @@ public class SolrConverter {
 
     /**
      * @param rawOccurrence String with the following format "Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With"
-     * @param document if null, will not use StId
+     * @param document      if null, will not use StId
      * @return DiagramOccurrencesResult
      */
     private static DiagramOccurrencesResult extractRawOccurrence(String rawOccurrence, Optional<SolrDocument> document) {
@@ -302,16 +302,16 @@ public class SolrConverter {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
             QueryResponse queryResponse = solrCore.search(queryObject);
             if (queryResponse != null) {
-                return parseResponse(queryResponse);
+                return parseResponse(queryResponse, false);
             }
         }
         return null;
     }
 
-    private GroupedResult parseResponse(QueryResponse queryResponse) {
+    private GroupedResult parseResponse(QueryResponse queryResponse, boolean ignoreHighlight) {
         if (queryResponse != null) {
             List<SolrDocument> solrDocuments = queryResponse.getResults();
-            Map<String, Map<String, List<String>>> highlighting = queryResponse.getHighlighting();
+            Map<String, Map<String, List<String>>> highlighting = !ignoreHighlight ? queryResponse.getHighlighting() : new HashMap<>();
             List<Result> resultList = new ArrayList<>();
             List<Entry> entries = new ArrayList<>();
 
@@ -516,6 +516,7 @@ public class SolrConverter {
     private void setHighlighting(Entry entry, SolrDocument solrDocument, Map<String, List<String>> snippets) {
         entry.setReferenceIdentifier(selectRightHighlightingForReferenceIdentifiers(solrDocument, snippets));
 
+        snippetHighlight(entry, Entry::setStId, ST_ID, snippets);
         snippetHighlight(entry, Entry::setName, NAME, snippets);
         snippetHighlight(entry, Entry::setSummation, SUMMATION, snippets);
         snippetHighlight(entry, Entry::setReferenceName, REFERENCE_NAME, snippets);
@@ -684,7 +685,7 @@ public class SolrConverter {
         if (queryObject != null && queryObject.getQuery() != null && !queryObject.getQuery().isEmpty()) {
             QueryResponse queryResponse = solrCore.getIconsResult(queryObject);
             if (queryResponse != null) {
-                return parseResponse(queryResponse).getResults().get(0);
+                return parseResponse(queryResponse, false).getResults().get(0);
             }
         }
         return null;
@@ -695,7 +696,7 @@ public class SolrConverter {
             QueryResponse queryResponse = solrCore.getIcon(queryObject);
             if (queryResponse != null) {
                 if (queryResponse.getResults().getNumFound() > 0L) {
-                    return parseResponse(queryResponse).getResults().get(0).getEntries().get(0);
+                    return parseResponse(queryResponse, true).getResults().get(0).getEntries().get(0);
                 }
             }
         }
