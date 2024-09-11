@@ -1,6 +1,8 @@
 package org.reactome.server.search.domain;
 
 
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -50,6 +52,22 @@ public class Entry {
     private List<String> iconReferences;
     private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
+
+    // Deleted
+    private Boolean deleted;
+    private String reason;
+    private String explanation;
+    private Date date;
+    private List<Long> replacementDbIds;
+    private List<String> replacementStIds;
+
+    public boolean isIcon() {
+        return this.type.equalsIgnoreCase("icon");
+    }
+
+    public boolean isDeleted() {
+        return this.deleted != null ? this.deleted : false;
+    }
 
     public String getRegulatorId() {
         return regulatorId;
@@ -355,5 +373,61 @@ public class Entry {
 
     public void setIconEhlds(List<String> iconEhlds) {
         this.iconEhlds = iconEhlds;
+    }
+
+    public Boolean getDisease() {
+        return isDisease;
+    }
+
+    public void setDisease(Boolean disease) {
+        isDisease = disease;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public void setExplanation(String explanation) {
+        this.explanation = explanation;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public List<Long> getReplacementDbIds() {
+        return replacementDbIds;
+    }
+
+    public void setReplacementDbIds(List<Long> replacementDbIds) {
+        this.replacementDbIds = replacementDbIds;
+    }
+
+    public List<String> getReplacementStIds() {
+        return replacementStIds;
+    }
+
+    public void setReplacementStIds(List<String> replacementStIds) {
+        this.replacementStIds = replacementStIds;
     }
 }

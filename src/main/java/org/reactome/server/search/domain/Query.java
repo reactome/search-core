@@ -20,6 +20,7 @@ public class Query {
     private List<String> types;
     private List<String> keywords;
     private List<String> compartments;
+    private Boolean deleted;
     private Integer start;
     private Integer rows;
     private ParserType parserType; // defType
@@ -38,6 +39,7 @@ public class Query {
         private List<String> types = null;
         private List<String> keywords = null;
         private List<String> compartments = null;
+        private Boolean deleted = Boolean.FALSE;
         private Integer start;
         private Integer rows;
         private ParserType parserType = ParserType.STD; // defType
@@ -83,6 +85,11 @@ public class Query {
             return this;
         }
 
+        public Builder withDeleted(Boolean deleted){
+            this.deleted = deleted;
+            return this;
+        }
+
         public Builder start(Integer start){
             this.start = start;
             return this;
@@ -112,6 +119,7 @@ public class Query {
             ret.types = this.types;
             ret.keywords = this.keywords;
             ret.compartments = this.compartments;
+            ret.deleted = this.deleted;
             ret.start = this.start;
             ret.rows = this.rows;
             ret.reportInfo = this.reportInfo;
@@ -176,6 +184,14 @@ public class Query {
 
     public void setCompartments(List<String> compartments) {
         this.compartments = compartments;
+    }
+
+    public Boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Integer getStart() {

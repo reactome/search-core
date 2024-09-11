@@ -188,6 +188,7 @@ class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getTypes(), TYPE_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
+        parameters.addFilterQuery(queryObject.isDeleted() ? "deleted:true" : "-deleted");
         parameterParserType(queryObject, parameters);
         return parameters;
     }
@@ -243,6 +244,7 @@ class SolrCore {
         if (queryObject.getCompartments() != null && !queryObject.getCompartments().isEmpty()) {
             parameters.addFilterQuery(COMPARTMENT_TAG + getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         }
+        parameters.addFilterQuery(queryObject.isDeleted() ? "deleted:true" : "-deleted");
         parameters.setQuery(queryObject.getQuery());
         return querysolrClient(parameters);
     }
