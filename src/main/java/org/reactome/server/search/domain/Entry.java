@@ -62,7 +62,7 @@ public class Entry {
     private List<String> replacementStIds;
 
     public boolean isIcon() {
-        return this.type.equalsIgnoreCase("icon");
+        return this.exactType.equalsIgnoreCase("icon");
     }
 
     public boolean isDeleted() {
