@@ -1,0 +1,29 @@
+NOTICE
+
+This project includes software developed by the Eclipse Foundation and its contributors under the
+Eclipse Public License (EPL).
+
+Included Dependencies:
+
+AspectJ Runtime (org.aspectj:aspectjrt)
+
+AspectJ Weaver (org.aspectj:aspectjweaver)
+
+These dependencies are licensed under the Eclipse Public License (EPL), which can be found at:
+
+https://www.eclipse.org/legal/epl-2.0/
+
+Copyright Notices:
+
+AspectJ is an open-source project maintained by the Eclipse Foundation. Copyrights for individual contributions are
+held by their respective authors and contributors.
+
+For more details on AspectJ, please visit:
+
+https://www.eclipse.org/aspectj/
+
+Disclaimer:
+
+This project makes use of third-party software. The original license and copyright of the software remain with their
+respective authors. The inclusion of these dependencies does not imply endorsement by their original authors.
+
