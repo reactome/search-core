@@ -3,7 +3,7 @@ package org.reactome.server.search.domain;
 import java.util.List;
 
 /**
- * @author Guilherme Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme Viteri (gviteri@ebi.ac.uk)
  */
 public class DiagramResult {
 

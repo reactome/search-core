@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme S Viteri (gviteri@ebi.ac.uk)
  */
 public class DiagramOccurrencesResult {
 

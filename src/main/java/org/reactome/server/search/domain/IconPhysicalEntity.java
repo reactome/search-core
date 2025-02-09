@@ -1,7 +1,7 @@
 package org.reactome.server.search.domain;
 
 /**
- * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme S Viteri (gviteri@ebi.ac.uk)
  */
 
 public class IconPhysicalEntity implements Comparable<IconPhysicalEntity> {

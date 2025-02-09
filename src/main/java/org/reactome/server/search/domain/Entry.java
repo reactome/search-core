@@ -267,7 +267,7 @@ public class Entry {
      * This is the iconName. @getName() returns the same information.
      * However if a solr search hits the name, then solr highlights the term in the name,
      * and we can't use inside a title or as just name.
-     * @return plain icon name, same as written in the <name></name> in the metadata
+     * @return plain icon name, same as written with a name xml tag in the metadata
      */
     public String getIconName() {
         return iconName;

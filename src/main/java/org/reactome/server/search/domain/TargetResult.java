@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  *
- * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme S Viteri (gviteri@ebi.ac.uk)
  */
 public class TargetResult {
     private String term;

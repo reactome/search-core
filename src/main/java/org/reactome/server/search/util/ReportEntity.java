@@ -1,7 +1,7 @@
 package org.reactome.server.search.util;
 
 /**
- * @author Guilherme S Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme S Viteri (gviteri@ebi.ac.uk)
  */
 
 public class ReportEntity {
