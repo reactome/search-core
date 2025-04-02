@@ -153,6 +153,7 @@ public class SearchServiceTest {
             SearchResult result = searchService.getSearchResult(query, rowCount, page, false);
             time = System.currentTimeMillis() - start;
             logger.info(queryString + " searched in " + time + "ms");
+            assertNotNull(result, queryString + " should return a search result");
 
             Set<String> resultStIds = result
                     .getGroupedResult()
