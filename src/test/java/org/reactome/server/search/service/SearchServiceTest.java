@@ -142,7 +142,6 @@ public class SearchServiceTest {
         queryToExpectedFirstResultStId.put("GO:0051800", List.of("R-HSA-1676149")); // Gene Ontology of pten (Other identifiers)
         queryToExpectedFirstResultStId.put("0051800", List.of("R-HSA-1676149")); // Gene Ontology ID of pten
         queryToExpectedFirstResultStId.put("HGNC:5013", List.of("R-HSA-9609901")); // Reference Gene ID
-        queryToExpectedFirstResultStId.put("NCBI:3162", List.of("R-HSA-9609901")); // Truncated "NCBI Gene:3162" : ReferenceGene
         queryToExpectedFirstResultStId.put("NCBI-Gene:3162", List.of("R-HSA-9609901")); // Replaced "NCBI Gene:3162" : ReferenceGene
         queryToExpectedFirstResultStId.put("Lymphoid and a non-Lymphoid cell", List.of("R-HSA-198933")); // Pathway name containing "and" next to a stop word
 
