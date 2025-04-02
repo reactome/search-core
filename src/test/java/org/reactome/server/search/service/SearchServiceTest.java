@@ -376,7 +376,7 @@ public class SearchServiceTest {
     @Test
     public void testTargetForReactome() {
         // By default filter query by Human and Entries without species
-        String q = "A6NCF5 NOTTARGET";
+        String q = "A4QN25 NOTTARGET";
         List<String> species = new ArrayList<>();
         species.add("Homo sapiens");
         species.add("Entries without species");
