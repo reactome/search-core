@@ -215,11 +215,12 @@ class SolrCore {
     }
 
     @NonNull
-    QueryResponse batchRetrieveFromStableIds(@NonNull List<String> stableIds, @NonNull List<String> fields) throws SolrSearcherException {
+    QueryResponse batchRetrieveFromStableIds(@NonNull List<String> stableIds, @NonNull List<String> fields, String... filterQueries) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SELECT_REQUEST_HANDLER);
         parameters.setQuery("{!terms f=stId}" + String.join(",", stableIds).toLowerCase()); // Important to be lower case as we are bypassing normal stId transformation by using {!terms}
         parameters.setRows(stableIds.size());
+        parameters.setFilterQueries(filterQueries);
         parameters.setFields(fields.toArray(String[]::new));
         return querysolrClient(parameters);
     }

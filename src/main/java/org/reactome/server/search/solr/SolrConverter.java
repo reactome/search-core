@@ -290,7 +290,7 @@ public class SolrConverter {
     }
 
     @NonNull
-    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable List<Field> fields) throws SolrSearcherException {
+    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable String species, @Nullable List<Field> fields) throws SolrSearcherException {
         if (dbId == null) return List.of();
         String occurrenceField = includeInteractors ? OCCURRENCES_INTERACTOR.name : OCCURRENCES.name;
         SolrDocument entityDocument = this.solrCore.retrieveFromDbId(dbId, List.of(occurrenceField));
@@ -301,7 +301,10 @@ public class SolrConverter {
 
         if (directlyInDiagram) occurrencesStream = occurrencesStream.filter(DiagramOccurrencesResult::getInDiagram);
         List<String> occurrencesPathwayStIds = occurrencesStream.map(DiagramOccurrencesResult::getDiagramEntity).collect(Collectors.toList());
-        return batchRetrieveFromStIds(occurrencesPathwayStIds, fields);
+
+        return species != null
+                ? batchRetrieveFromStIds(occurrencesPathwayStIds, fields, SPECIES.name + ":" + species)
+                : batchRetrieveFromStIds(occurrencesPathwayStIds, fields);
     }
 
     @NonNull
@@ -324,11 +327,11 @@ public class SolrConverter {
     }
 
     @NonNull
-    public List<Entry> batchRetrieveFromStIds(List<String> stIds, @Nullable List<Field> fields) throws SolrSearcherException {
+    public List<Entry> batchRetrieveFromStIds(List<String> stIds, @Nullable List<Field> fields, String... filterQueries) throws SolrSearcherException {
         if (stIds == null) return List.of();
         if (fields == null) fields = List.of();
         List<String> internalFields = fields.stream().map(Field::getName).collect(Collectors.toList());
-        QueryResponse response = solrCore.batchRetrieveFromStableIds(stIds, internalFields);
+        QueryResponse response = solrCore.batchRetrieveFromStableIds(stIds, internalFields, filterQueries);
         if (response != null) {
             return response.getResults().stream().map(solrDocument -> buildEntry(solrDocument, null)).collect(Collectors.toList());
         }

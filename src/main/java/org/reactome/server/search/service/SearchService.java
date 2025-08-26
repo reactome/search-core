@@ -333,8 +333,8 @@ public class SearchService {
     }
 
     @NonNull
-    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
-        return solrConverter.getContainingPathwaysOf(dbId, includeInteractors, directlyInDiagram, fields);
+    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable String species, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.getContainingPathwaysOf(dbId, includeInteractors, directlyInDiagram, species, fields);
     }
 
     @NonNull
