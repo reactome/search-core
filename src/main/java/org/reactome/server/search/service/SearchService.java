@@ -21,16 +21,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.reactome.server.search.util.ReportInformationEnum.*;
@@ -87,10 +86,10 @@ public class SearchService {
     /**
      * This method is a simple aggregation of service methods used in the Content project
      *
-     * @param query    QueryObject
-     * @param rowCount number of rows displayed in one page
-     * @param page     page number
-     * @param grouped  grouped or not grouped result
+     * @param query        QueryObject
+     * @param rowCount     number of rows displayed in one page
+     * @param page         page number
+     * @param grouped      grouped or not grouped result
      * @param forceFilters Avoid removing of filters when they yield to no results
      * @return Grouped result
      */
@@ -102,6 +101,10 @@ public class SearchService {
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
             query.setParserType(ParserType.DISMAX);
+            facetMapping = getFacetingInformation(query, forceFilters);
+        }
+        if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
+            query.setScope(Query.Scope.BOTH);
             facetMapping = getFacetingInformation(query, forceFilters);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() > 0) {
@@ -144,7 +147,7 @@ public class SearchService {
      * This Method will query solr once again if the number of selected filters and found facets differ
      * (this will help preventing false faceting information when filter are contradictory to each other)
      *
-     * @param queryObject query and filter (species types keywords compartments)
+     * @param queryObject  query and filter (species types keywords compartments)
      * @param forceFilters Avoid removing of filters when they yield to no results
      * @return FacetMapping
      */
@@ -268,7 +271,12 @@ public class SearchService {
      * - Retrieve list of occurrences (getDiagramOccurrencesResults)
      */
     public DiagramResult getDiagrams(Query queryObject) throws SolrSearcherException {
-        return solrConverter.getDiagrams(queryObject);
+        DiagramResult result = solrConverter.getDiagrams(queryObject);
+        if (result == null || result.getFound() == 0) {
+            queryObject.setScope(Query.Scope.BOTH);
+            result = solrConverter.getDiagrams(queryObject);
+        }
+        return result;
     }
 
     /**
@@ -277,7 +285,12 @@ public class SearchService {
      * @param queryObject - has the stId of the element we are searching and the diagram to filter
      */
     public DiagramOccurrencesResult getDiagramOccurrencesResult(Query queryObject) throws SolrSearcherException {
-        return solrConverter.getDiagramOccurrencesResult(queryObject);
+        DiagramOccurrencesResult result = solrConverter.getDiagramOccurrencesResult(queryObject);
+        if (result == null) {
+            queryObject.setScope(Query.Scope.BOTH);
+            result = solrConverter.getDiagramOccurrencesResult(queryObject);
+        }
+        return result;
     }
 
     /**
@@ -286,6 +299,7 @@ public class SearchService {
      * @param queryObject - has the term we are searching to flag the corresponding element and the diagram to filter
      */
     public List<DiagramOccurrencesResult> getDiagramFlagging(Query queryObject) throws SolrSearcherException {
+        queryObject.setScope(Query.Scope.BOTH); // For flagging, we need to support all types of entity
         return solrConverter.getDiagramFlagging(queryObject);
     }
 
@@ -293,6 +307,7 @@ public class SearchService {
      * Return a list of StableIds to be flagged in the Fireworks and the diagram that it might interacts with
      */
     public FireworksOccurrencesResult fireworksFlagging(Query queryObject) throws SolrSearcherException {
+        queryObject.setScope(Query.Scope.BOTH); // For flagging, we need to support all types of entity
         return solrConverter.fireworksFlagging(queryObject);
     }
 
@@ -309,7 +324,37 @@ public class SearchService {
         }
         DiagramResult diagrams = solrConverter.getDiagrams(queryObject);
         FireworksResult fireworks = solrConverter.getFireworksResult(queryObject);
+        if (fireworks == null || fireworks.getFound() == 0) {
+            queryObject.setScope(Query.Scope.BOTH);
+            diagrams = solrConverter.getDiagrams(queryObject);
+            fireworks = solrConverter.getFireworksResult(queryObject);
+        }
         return new DiagramSearchSummary(diagrams, fireworks);
+    }
+
+    @NonNull
+    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.getContainingPathwaysOf(dbId, includeInteractors, directlyInDiagram, fields);
+    }
+
+    @NonNull
+    public List<Entry> getPhysicalEntitiesOfReference(String stId, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.getPhysicalEntitiesOfReference(stId, fields);
+    }
+
+    @NonNull
+    public List<Entry> batchRetrieveFromStIds(List<String> stIds, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.batchRetrieveFromStIds(stIds, fields);
+    }
+
+    @NonNull
+    public List<Entry> batchRetrieveFromDbIds(List<Long> dbIds, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.batchRetrieveFromDbIds(dbIds, fields);
+    }
+
+    @Nullable
+    public Entry retrieveFromDbId(Long dbId, @Nullable List<SolrConverter.Field> fields) throws SolrSearcherException {
+        return solrConverter.retrieveFromDbId(dbId, fields);
     }
 
     /**

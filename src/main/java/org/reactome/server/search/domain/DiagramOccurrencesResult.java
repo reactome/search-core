@@ -20,6 +20,13 @@ public class DiagramOccurrencesResult {
     public DiagramOccurrencesResult() {
     }
 
+    public DiagramOccurrencesResult(String diagramEntity, Boolean inDiagram, Collection<String> occurrences, Collection<String> interactsWith) {
+        this.diagramEntity = diagramEntity;
+        this.inDiagram = inDiagram;
+        addOccurrences(occurrences);
+        addInteractsWith(interactsWith);
+    }
+
     public DiagramOccurrencesResult(String diagramEntity, Collection<String> occurrences, Collection<String> interactsWith) {
         this.diagramEntity = diagramEntity;
         this.inDiagram = diagramEntity != null && !diagramEntity.isEmpty();

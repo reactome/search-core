@@ -1,17 +1,22 @@
 package org.reactome.server.search.solr;
 
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.*;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.reactome.server.search.domain.*;
 import org.reactome.server.search.exception.SolrSearcherException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.reactome.server.search.solr.SolrConverter.Field.*;
 
 /**
  * Converts a Solr QueryResponse into Objects provided by Project Models
@@ -24,58 +29,82 @@ import java.util.stream.Stream;
 @Component
 public class SolrConverter {
 
-    // REACTOME
-    private static final String DB_ID = "dbId";
-    private static final String ST_ID = "stId";
-    private static final String NAME = "name";
-    private static final String SPECIES = "species";
-    private static final String SPECIES_FACET = "species_facet";
-    private static final String TYPES = "type_facet";
-    private static final String KEYWORDS = "keywords_facet";
-    private static final String COMPARTMENT_FACET = "compartment_facet";
-    private static final String ICON_CATEGORIES_FACET = "iconCategories_facet";
-    private static final String SUMMATION = "summation";
-    private static final String INFERRED_SUMMATION = "inferredSummation";
-    private static final String REFERENCE_URL = "referenceURL";
-    private static final String REFERENCE_NAME = "referenceName";
-    private static final String REFERENCE_IDENTIFIERS = "referenceIdentifiers";
-    private static final String IS_DISEASE = "isDisease";
-    private static final String EXACT_TYPE = "exactType";
-    private static final String DATABASE_NAME = "databaseName";
-    private static final String REGULATOR = "regulator";
-    private static final String REGULATOR_ID = "regulatorId";
-    private static final String REGULATED_ENTITY = "regulatedEntity";
-    private static final String REGULATED_ENTITY_ID = "regulatedEntityId";
-    private static final String COMPARTMENT_NAME = "compartmentName";
-    private static final String COMPARTMENT_ACCESSION = "compartmentAccession";
-    private static final String FIREWORKS_SPECIES = "fireworksSpecies";
-    private static final String OCCURRENCES = "occurrences";
-    private static final String LLPS = "llps";
-    private static final String AUTHORED_PATHWAYS = "authoredPathways";
-    private static final String AUTHORED_REACTIONS = "authoredReactions";
-    private static final String REVIEWED_PATHWAYS = "reviewedPathways";
-    private static final String REVIEWED_REACTIONS = "reviewedReactions";
-    private static final String ORCIDID = "orcidId";
+    public enum Field {
+        // REACTOME
+        DB_ID("dbId"),
+        ST_ID("stId"),
+        PHYSICAL_ENTITIES_DB_ID("physicalEntitiesDbId"),
+        NAME("name"),
+        SPECIES("species"),
+        SPECIES_FACET("species_facet"),
+        TYPES("type_facet"),
+        KEYWORDS("keywords_facet"),
+        COMPARTMENT_FACET("compartment_facet"),
+        ICON_CATEGORIES_FACET("iconCategories_facet"),
+        SUMMATION("summation"),
+        INFERRED_SUMMATION("inferredSummation"),
+        REFERENCE_URL("referenceURL"),
+        REFERENCE_NAME("referenceName"),
+        REFERENCE_IDENTIFIERS("referenceIdentifiers"),
+        IS_DISEASE("isDisease"),
+        HAS_REFERENCE_ENTITY("hasReferenceEntity"),
+        HAS_EHLD("hasEHLD"),
+        EXACT_TYPE("exactType"),
+        DATABASE_NAME("databaseName"),
+        REGULATOR("regulator"),
+        REGULATOR_ID("regulatorId"),
+        REGULATED_ENTITY("regulatedEntity"),
+        REGULATED_ENTITY_ID("regulatedEntityId"),
+        COMPARTMENT_NAME("compartmentName"),
+        COMPARTMENT_ACCESSION("compartmentAccession"),
+        FIREWORKS_SPECIES("fireworksSpecies"),
+        OCCURRENCES("occurrences"),
+        OCCURRENCES_INTERACTOR("occurrencesWithInteractor"),
+        DIAGRAMS("diagrams"),
+        DIAGRAMS_INTERACTOR("diagramsWithInteractor"),
+        LLPS("llps"),
+        AUTHORED_PATHWAYS("authoredPathways"),
+        AUTHORED_REACTIONS("authoredReactions"),
+        REVIEWED_PATHWAYS("reviewedPathways"),
+        REVIEWED_REACTIONS("reviewedReactions"),
+        ORCIDID("orcidId"),
 
-    // TARGET
-    private static final String TARGET_IDENTIFIER = "identifier";
-    private static final String TARGET_ACCESSIONS = "accessions";
-    private static final String TARGET_GENENAMES = "geneNames";
-    private static final String TARGET_SYNONYMS = "synonyms";
-    private static final String TARGET_RESOURCE = "resource";
+        // TARGET
+        TARGET_IDENTIFIER("identifier"),
+        TARGET_ACCESSIONS("accessions"),
+        TARGET_GENENAMES("geneNames"),
+        TARGET_SYNONYMS("synonyms"),
+        TARGET_RESOURCE("resource"),
 
-    // ICONS
-    private static final String ICON_NAME = "iconName";
-    private static final String ICON_CATEGORIES = "iconCategories";
-    private static final String ICON_CURATOR_NAME = "iconCuratorName";
-    private static final String ICON_CURATOR_ORCIDID = "iconCuratorOrcidId";
-    private static final String ICON_CURATOR_URL = "iconCuratorUrl";
-    private static final String ICON_DESIGNER_NAME = "iconDesignerName";
-    private static final String ICON_DESIGNER_URL = "iconDesignerUrl";
-    private static final String ICON_DESIGNER_ORCIDID = "iconDesignerOrcidId";
-    private static final String ICON_REFERENCES = "iconReferences";
-    private static final String ICON_PHYSICAL_ENTITIES = "iconPhysicalEntities";
-    private static final String ICON_EHLDS = "iconEhlds";
+        // ICONS
+        ICON_NAME("iconName"),
+        ICON_CATEGORIES("iconCategories"),
+        ICON_CURATOR_NAME("iconCuratorName"),
+        ICON_CURATOR_ORCIDID("iconCuratorOrcidId"),
+        ICON_CURATOR_URL("iconCuratorUrl"),
+        ICON_DESIGNER_NAME("iconDesignerName"),
+        ICON_DESIGNER_URL("iconDesignerUrl"),
+        ICON_DESIGNER_ORCIDID("iconDesignerOrcidId"),
+        ICON_REFERENCES("iconReferences"),
+        ICON_PHYSICAL_ENTITIES("iconPhysicalEntities"),
+        ICON_EHLDS("iconEhlds");
+
+        public final String name;
+
+        Field(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static Field valueOfName(String name) {
+            return nameToField.get(name);
+        }
+
+        private static final Map<String, Field> nameToField = Arrays.stream(Field.values()).collect(Collectors.toMap(f -> f.name, f -> f));
+    }
 
     private final SolrCore solrCore;
 
@@ -160,8 +189,8 @@ public class SolrConverter {
             List<Entry> entries = new ArrayList<>();
             for (SolrDocument solrDocument : solrDocuments) {
                 Entry entry = buildEntry(solrDocument, null);
-                if (solrDocument.containsKey(FIREWORKS_SPECIES)) {
-                    Collection<Object> fireworksSpecies = solrDocument.getFieldValues(FIREWORKS_SPECIES);
+                if (solrDocument.containsKey(FIREWORKS_SPECIES.name)) {
+                    Collection<Object> fireworksSpecies = solrDocument.getFieldValues(FIREWORKS_SPECIES.name);
                     entry.setFireworksSpecies(fireworksSpecies.stream().map(Object::toString).collect(Collectors.toList()));
                 }
 
@@ -171,7 +200,7 @@ public class SolrConverter {
             List<FacetContainer> facets = new ArrayList<>();
             for (FacetField facetField : response.getFacetFields()) {
                 //only the TYPES facets is used in the handler, so no need to check the others
-                if (!facetField.getName().equals(TYPES)) continue;
+                if (!facetField.getName().equals(Field.TYPES.name)) continue;
                 facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
             }
 
@@ -201,7 +230,7 @@ public class SolrConverter {
             List<FacetContainer> facets = new ArrayList<>();
             if (response.getFacetFields() != null) {
                 for (FacetField facetField : response.getFacetFields()) {
-                    if (facetField.getName().equals(TYPES)) {
+                    if (facetField.getName().equals(TYPES.name)) {
                         facets.addAll(facetField.getValues().stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList()));
                     }
                 }
@@ -222,8 +251,8 @@ public class SolrConverter {
             String searchingFilter = queryObject.getFilterQuery();
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
-                if (solrDocument.containsKey(OCCURRENCES)) {
-                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                if (solrDocument.containsKey(queryObject.getOccurrencesFieldName())) {
+                    List<String> rawOccurrences = solrDocument.getFieldValues(queryObject.getOccurrencesFieldName()).stream().map(Object::toString).collect(Collectors.toList());
                     for (String rawOccurrence : rawOccurrences) {
                         if (rawOccurrence.startsWith(searchingFilter)) {
                             return extractRawOccurrence(rawOccurrence, Optional.empty());
@@ -247,8 +276,8 @@ public class SolrConverter {
             String targetedDiagram = queryObject.getFilterQuery();
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
-                if (solrDocument.containsKey(OCCURRENCES)) {
-                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                if (solrDocument.containsKey(queryObject.getOccurrencesFieldName())) {
+                    List<String> rawOccurrences = solrDocument.getFieldValues(queryObject.getOccurrencesFieldName()).stream().map(Object::toString).collect(Collectors.toList());
                     for (String rawOccurrence : rawOccurrences) {
                         if (rawOccurrence.startsWith(targetedDiagram)) {
                             rtn.add(extractRawOccurrence(rawOccurrence, Optional.of(solrDocument)));
@@ -260,6 +289,71 @@ public class SolrConverter {
         return rtn;
     }
 
+    @NonNull
+    public List<Entry> getContainingPathwaysOf(Long dbId, Boolean includeInteractors, Boolean directlyInDiagram, @Nullable List<Field> fields) throws SolrSearcherException {
+        if (dbId == null) return List.of();
+        String occurrenceField = includeInteractors ? OCCURRENCES_INTERACTOR.name : OCCURRENCES.name;
+        SolrDocument entityDocument = this.solrCore.retrieveFromDbId(dbId, List.of(occurrenceField));
+        if (entityDocument == null || !entityDocument.containsKey(occurrenceField)) return List.of();
+        Stream<DiagramOccurrencesResult> occurrencesStream = entityDocument.getFieldValues(occurrenceField).stream()
+                .map(Object::toString)
+                .map(raw -> extractRawOccurrence(raw, Optional.empty()));
+
+        if (directlyInDiagram) occurrencesStream = occurrencesStream.filter(DiagramOccurrencesResult::getInDiagram);
+        List<String> occurrencesPathwayStIds = occurrencesStream.map(DiagramOccurrencesResult::getDiagramEntity).collect(Collectors.toList());
+        return batchRetrieveFromStIds(occurrencesPathwayStIds, fields);
+    }
+
+    @NonNull
+    public List<Entry> getPhysicalEntitiesOfReference(String stId, @Nullable List<Field> fields) throws SolrSearcherException {
+        if (stId == null) return List.of();
+        SolrDocument entityDocument = this.solrCore.retrieveFromStId(stId, List.of(PHYSICAL_ENTITIES_DB_ID.name));
+        if (entityDocument == null || !entityDocument.containsKey(PHYSICAL_ENTITIES_DB_ID.name)) return List.of();
+
+        if (fields != null && fields.size() == 1 && fields.get(0) == DB_ID) // Special case when we only want the DB ID
+            return entityDocument.getFieldValues(PHYSICAL_ENTITIES_DB_ID.name).stream().map(dbId -> {
+                Entry entry = new Entry();
+                entry.setDbId(dbId.toString());
+                return entry;
+            }).collect(Collectors.toList());
+
+        List<Long> physicalEntitiesDbId = entityDocument.getFieldValues(PHYSICAL_ENTITIES_DB_ID.name).stream()
+                .map(dbId -> Long.parseLong(dbId.toString()))
+                .collect(Collectors.toList());
+        return batchRetrieveFromDbIds(physicalEntitiesDbId, fields);
+    }
+
+    @NonNull
+    public List<Entry> batchRetrieveFromStIds(List<String> stIds, @Nullable List<Field> fields) throws SolrSearcherException {
+        if (stIds == null) return List.of();
+        if (fields == null) fields = List.of();
+        List<String> internalFields = fields.stream().map(Field::getName).collect(Collectors.toList());
+        QueryResponse response = solrCore.batchRetrieveFromStableIds(stIds, internalFields);
+        if (response != null) {
+            return response.getResults().stream().map(solrDocument -> buildEntry(solrDocument, null)).collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
+    @NonNull
+    public List<Entry> batchRetrieveFromDbIds(List<Long> dbIds, @Nullable List<Field> fields) throws SolrSearcherException {
+        if (dbIds == null) return List.of();
+        if (fields == null) fields = List.of();
+        SolrDocumentList response = solrCore.batchRetrieveFromDbIds(dbIds, fields.stream().map(Field::name).collect(Collectors.toList()));
+        if (response != null) {
+            return response.stream().map(solrDocument -> buildEntry(solrDocument, null)).collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
+    @Nullable
+    public Entry retrieveFromDbId(@Nullable Long dbId, @Nullable List<Field> fields) throws SolrSearcherException {
+        if (dbId == null) return null;
+        if (fields == null) fields = List.of();
+        return buildEntry(this.solrCore.retrieveFromDbId(dbId, fields.stream().map(Field::name).collect(Collectors.toList())), null);
+    }
+
+
     /**
      * @param rawOccurrence String with the following format "Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With"
      * @param document      if null, will not use StId
@@ -267,12 +361,14 @@ public class SolrConverter {
      */
     private static DiagramOccurrencesResult extractRawOccurrence(String rawOccurrence, Optional<SolrDocument> document) {
         String[] line = rawOccurrence.split(":");
+        String diagramStId = line[0];
         List<String> occurrences = line[2].equals("#") ? null : Stream.of(line[2].split(",")).collect(Collectors.toList());
         List<String> interactsWith = line[3].equals("#") ? null : Stream.of(line[3].split(",")).collect(Collectors.toList());
         Boolean isInDiagram = Boolean.valueOf(line[1]);
 
-        if (document.isEmpty()) return new DiagramOccurrencesResult(isInDiagram, occurrences, interactsWith);
-        String stId = isInDiagram ? (String) document.get().getFieldValue(ST_ID) : null;
+        if (document.isEmpty())
+            return new DiagramOccurrencesResult(diagramStId, isInDiagram, occurrences, interactsWith);
+        String stId = isInDiagram ? (String) document.get().getFieldValue(ST_ID.name) : null;
         return new DiagramOccurrencesResult(stId, occurrences, interactsWith);
     }
 
@@ -337,10 +433,10 @@ public class SolrConverter {
         if (response != null && queryObject != null) {
             FacetMapping facetMapping = new FacetMapping();
             facetMapping.setTotalNumFount(response.getResults().getNumFound());
-            facetMapping.setSpeciesFacet(getFacets(response.getFacetField(SPECIES_FACET), queryObject.getSpecies()));
-            facetMapping.setTypeFacet(getFacets(response.getFacetField(TYPES), queryObject.getTypes()));
-            facetMapping.setKeywordFacet(getFacets(response.getFacetField(KEYWORDS), queryObject.getKeywords()));
-            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENT_FACET), queryObject.getCompartments()));
+            facetMapping.setSpeciesFacet(getFacets(response.getFacetField(SPECIES_FACET.name), queryObject.getSpecies()));
+            facetMapping.setTypeFacet(getFacets(response.getFacetField(TYPES.name), queryObject.getTypes()));
+            facetMapping.setKeywordFacet(getFacets(response.getFacetField(KEYWORDS.name), queryObject.getKeywords()));
+            facetMapping.setCompartmentFacet(getFacets(response.getFacetField(COMPARTMENT_FACET.name), queryObject.getCompartments()));
             return facetMapping;
         }
         return null;
@@ -383,7 +479,7 @@ public class SolrConverter {
             for (FacetField facetField : facetFields) {
                 List<FacetField.Count> fields = facetField.getValues();
                 List<FacetContainer> available = fields.stream().map(field -> new FacetContainer(field.getName(), field.getCount())).collect(Collectors.toList());
-                switch (facetField.getName()) {
+                switch (Field.valueOfName(facetField.getName())) {
                     case SPECIES_FACET:
                         facetMapping.setSpeciesFacet(new FacetList(available));
                         break;
@@ -417,38 +513,40 @@ public class SolrConverter {
         if (solrDocument != null && !solrDocument.isEmpty()) {
             Entry entry = new Entry();
 
-            entry.setDbId((String) solrDocument.getFieldValue(DB_ID));
-            entry.setStId((String) solrDocument.getFieldValue(ST_ID));
+            entry.setDbId((String) solrDocument.getFieldValue(DB_ID.name));
+            entry.setStId((String) solrDocument.getFieldValue(ST_ID.name));
             entry.setId((String)
-                    (solrDocument.containsKey(ST_ID) ? solrDocument.getFieldValue(ST_ID) : solrDocument.getFieldValue(DB_ID)));
+                    (solrDocument.containsKey(ST_ID.name) ? solrDocument.getFieldValue(ST_ID.name) : solrDocument.getFieldValue(DB_ID.name)));
 
-            entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE));
-            entry.setIsDisease((Boolean) solrDocument.getFieldValue(IS_DISEASE));
-            entry.setDatabaseName((String) solrDocument.getFieldValue(DATABASE_NAME));
-            entry.setReferenceURL((String) solrDocument.getFieldValue(REFERENCE_URL));
-            entry.setRegulatorId((String) solrDocument.getFieldValue(REGULATOR_ID));
-            entry.setRegulatedEntityId((String) solrDocument.getFieldValue(REGULATED_ENTITY_ID));
-            entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION));
-            entry.setAuthoredPathways((String) solrDocument.getFieldValue(AUTHORED_PATHWAYS));
-            entry.setAuthoredReactions((String) solrDocument.getFieldValue(AUTHORED_REACTIONS));
-            entry.setReviewedPathways((String) solrDocument.getFieldValue(REVIEWED_PATHWAYS));
-            entry.setReviewedReactions((String) solrDocument.getFieldValue(REVIEWED_REACTIONS));
-            entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID));
+            entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE.name));
+            entry.setIsDisease((Boolean) solrDocument.getFieldValue(IS_DISEASE.name));
+            entry.setHasReferenceEntity((Boolean) solrDocument.getFieldValue(HAS_REFERENCE_ENTITY.name));
+            entry.setHasEHLD((Boolean) solrDocument.getFieldValue(HAS_EHLD.name));
+            entry.setDatabaseName((String) solrDocument.getFieldValue(DATABASE_NAME.name));
+            entry.setReferenceURL((String) solrDocument.getFieldValue(REFERENCE_URL.name));
+            entry.setRegulatorId((String) solrDocument.getFieldValue(REGULATOR_ID.name));
+            entry.setRegulatedEntityId((String) solrDocument.getFieldValue(REGULATED_ENTITY_ID.name));
+            entry.setSummation((String) solrDocument.getFieldValue(INFERRED_SUMMATION.name));
+            entry.setAuthoredPathways((String) solrDocument.getFieldValue(AUTHORED_PATHWAYS.name));
+            entry.setAuthoredReactions((String) solrDocument.getFieldValue(AUTHORED_REACTIONS.name));
+            entry.setReviewedPathways((String) solrDocument.getFieldValue(REVIEWED_PATHWAYS.name));
+            entry.setReviewedReactions((String) solrDocument.getFieldValue(REVIEWED_REACTIONS.name));
+            entry.setOrcidId((String) solrDocument.getFieldValue(ORCIDID.name));
 
             //Only the first species is taken into account
-            entry.setSpecies(getStringListField(solrDocument, SPECIES));
-            entry.setCompartmentNames(getStringListField(solrDocument, COMPARTMENT_NAME));
-            entry.setCompartmentAccession(getStringListField(solrDocument, COMPARTMENT_ACCESSION));
+            entry.setSpecies(getStringListField(solrDocument, SPECIES.name));
+            entry.setCompartmentNames(getStringListField(solrDocument, COMPARTMENT_NAME.name));
+            entry.setCompartmentAccession(getStringListField(solrDocument, COMPARTMENT_ACCESSION.name));
 
 
             if (highlighting != null && highlighting.containsKey(entry.getDbId())) {
                 setHighlighting(entry, solrDocument, highlighting.get(entry.getDbId()));
             } else {
-                entry.setName((String) solrDocument.getFieldValue(NAME));
-                entry.setSummation((String) solrDocument.getFieldValue(SUMMATION));
-                entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME));
-                entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR));
-                entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY));
+                entry.setName((String) solrDocument.getFieldValue(NAME.name));
+                entry.setSummation((String) solrDocument.getFieldValue(SUMMATION.name));
+                entry.setReferenceName((String) solrDocument.getFieldValue(REFERENCE_NAME.name));
+                entry.setRegulator((String) solrDocument.getFieldValue(REGULATOR.name));
+                entry.setRegulatedEntity((String) solrDocument.getFieldValue(REGULATED_ENTITY.name));
                 entry.setReferenceIdentifier(selectRightReferenceIdentifier(solrDocument));
             }
 
@@ -461,19 +559,19 @@ public class SolrConverter {
 
     private void buildIconEntry(SolrDocument solrDocument, Entry entry) {
         // Icon Name stores the plain name. After search the name itself might have the highlighting.
-        entry.setIconName((String) solrDocument.getFieldValue(ICON_NAME));
-        entry.setIconCuratorName((String) solrDocument.getFieldValue(ICON_CURATOR_NAME));
-        entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue(ICON_CURATOR_ORCIDID));
-        entry.setIconCuratorUrl((String) solrDocument.getFieldValue(ICON_CURATOR_URL));
-        entry.setIconDesignerName((String) solrDocument.getFieldValue(ICON_DESIGNER_NAME));
-        entry.setIconDesignerUrl((String) solrDocument.getFieldValue(ICON_DESIGNER_URL));
-        entry.setIconDesignerOrcidId((String) solrDocument.getFieldValue(ICON_DESIGNER_ORCIDID));
+        entry.setIconName((String) solrDocument.getFieldValue(ICON_NAME.name));
+        entry.setIconCuratorName((String) solrDocument.getFieldValue(ICON_CURATOR_NAME.name));
+        entry.setIconCuratorOrcidId((String) solrDocument.getFieldValue(ICON_CURATOR_ORCIDID.name));
+        entry.setIconCuratorUrl((String) solrDocument.getFieldValue(ICON_CURATOR_URL.name));
+        entry.setIconDesignerName((String) solrDocument.getFieldValue(ICON_DESIGNER_NAME.name));
+        entry.setIconDesignerUrl((String) solrDocument.getFieldValue(ICON_DESIGNER_URL.name));
+        entry.setIconDesignerOrcidId((String) solrDocument.getFieldValue(ICON_DESIGNER_ORCIDID.name));
 
-        entry.setIconCategories(getStringListField(solrDocument, ICON_CATEGORIES));
-        entry.setIconReferences(getStringListField(solrDocument, ICON_REFERENCES));
-        entry.setIconEhlds(getStringListField(solrDocument, ICON_EHLDS));
+        entry.setIconCategories(getStringListField(solrDocument, ICON_CATEGORIES.name));
+        entry.setIconReferences(getStringListField(solrDocument, ICON_REFERENCES.name));
+        entry.setIconEhlds(getStringListField(solrDocument, ICON_EHLDS.name));
         entry.setIconPhysicalEntities(
-                getStringListField(solrDocument, ICON_PHYSICAL_ENTITIES)
+                getStringListField(solrDocument, ICON_PHYSICAL_ENTITIES.name)
                         .stream()
                         .map(iconPE -> {
                             String[] iconPEs = iconPE.split("#");
@@ -491,7 +589,7 @@ public class SolrConverter {
     }
 
     private String selectRightReferenceIdentifier(SolrDocument solrDocument) {
-        Collection<Object> list = solrDocument.getFieldValues(REFERENCE_IDENTIFIERS);
+        Collection<Object> list = solrDocument.getFieldValues(REFERENCE_IDENTIFIERS.name);
         if (list != null) {
             String candidate = null;
             for (Object obj : list) {
@@ -516,12 +614,12 @@ public class SolrConverter {
     private void setHighlighting(Entry entry, SolrDocument solrDocument, Map<String, List<String>> snippets) {
         entry.setReferenceIdentifier(selectRightHighlightingForReferenceIdentifiers(solrDocument, snippets));
 
-        snippetHighlight(entry, Entry::setStId, ST_ID, snippets);
-        snippetHighlight(entry, Entry::setName, NAME, snippets);
-        snippetHighlight(entry, Entry::setSummation, SUMMATION, snippets);
-        snippetHighlight(entry, Entry::setReferenceName, REFERENCE_NAME, snippets);
-        snippetHighlight(entry, Entry::setRegulator, REGULATOR, snippets);
-        snippetHighlight(entry, Entry::setRegulatedEntity, REGULATED_ENTITY, snippets);
+        snippetHighlight(entry, Entry::setStId, ST_ID.name, snippets);
+        snippetHighlight(entry, Entry::setName, NAME.name, snippets);
+        snippetHighlight(entry, Entry::setSummation, SUMMATION.name, snippets);
+        snippetHighlight(entry, Entry::setReferenceName, REFERENCE_NAME.name, snippets);
+        snippetHighlight(entry, Entry::setRegulator, REGULATOR.name, snippets);
+        snippetHighlight(entry, Entry::setRegulatedEntity, REGULATED_ENTITY.name, snippets);
     }
 
     private void snippetHighlight(Entry entry, BiConsumer<Entry, String> fieldSetter, String field, Map<String, List<String>> snippets) {
@@ -532,7 +630,7 @@ public class SolrConverter {
     }
 
     private String selectRightHighlightingForReferenceIdentifiers(SolrDocument solrDocument, Map<String, List<String>> snippets) {
-        List<String> identifierSnippets = snippets.get(REFERENCE_IDENTIFIERS);
+        List<String> identifierSnippets = snippets.get(REFERENCE_IDENTIFIERS.name);
         if (identifierSnippets != null && !identifierSnippets.isEmpty()) {
             for (String snippet : identifierSnippets) {
                 if (snippet.contains("highlighting")) {
@@ -604,11 +702,11 @@ public class SolrConverter {
         if (response != null && queryObject != null) {
             List<SolrDocument> solrDocuments = response.getResults();
             for (SolrDocument solrDocument : solrDocuments) {
-                if (solrDocument.containsKey(LLPS)) {
-                    rtn.addLlps(solrDocument.getFieldValues(LLPS).stream().map(Object::toString).collect(Collectors.toList()));
+                if (solrDocument.containsKey(LLPS.name)) {
+                    rtn.addLlps(solrDocument.getFieldValues(LLPS.name).stream().map(Object::toString).collect(Collectors.toList()));
                 }
-                if (solrDocument.containsKey(OCCURRENCES)) {
-                    List<String> rawOccurrences = solrDocument.getFieldValues(OCCURRENCES).stream().map(Object::toString).collect(Collectors.toList());
+                if (solrDocument.containsKey(queryObject.getOccurrencesFieldName())) {
+                    List<String> rawOccurrences = solrDocument.getFieldValues(queryObject.getOccurrencesFieldName()).stream().map(Object::toString).collect(Collectors.toList());
                     for (String rawOccurrence : rawOccurrences) {
                         // Diagram:Bool(IsInDiagram):CSV of occurrences:CSV of Interacts With
                         String[] line = rawOccurrence.split(":");
@@ -653,15 +751,15 @@ public class SolrConverter {
                     boolean isTarget = false;
                     String resource = null;
                     for (SolrDocument solrDocument : solrDocuments) {
-                        String identifier = (String) solrDocument.getFieldValue(TARGET_IDENTIFIER);
-                        resource = (String) solrDocument.getFieldValue(TARGET_RESOURCE);
-                        List<String> accessions = solrDocument.getFieldValues(TARGET_ACCESSIONS).stream().map(Object::toString).collect(Collectors.toList());
+                        String identifier = (String) solrDocument.getFieldValue(TARGET_IDENTIFIER.name);
+                        resource = (String) solrDocument.getFieldValue(TARGET_RESOURCE.name);
+                        List<String> accessions = solrDocument.getFieldValues(TARGET_ACCESSIONS.name).stream().map(Object::toString).collect(Collectors.toList());
                         List<String> geneNames = null;
-                        if (solrDocument.containsKey(TARGET_GENENAMES))
-                            geneNames = solrDocument.getFieldValues(TARGET_GENENAMES).stream().map(Object::toString).collect(Collectors.toList());
+                        if (solrDocument.containsKey(TARGET_GENENAMES.name))
+                            geneNames = solrDocument.getFieldValues(TARGET_GENENAMES.name).stream().map(Object::toString).collect(Collectors.toList());
                         List<String> synonyms = null;
-                        if (solrDocument.containsKey(TARGET_SYNONYMS))
-                            synonyms = solrDocument.getFieldValues(TARGET_SYNONYMS).stream().map(Object::toString).collect(Collectors.toList());
+                        if (solrDocument.containsKey(TARGET_SYNONYMS.name))
+                            synonyms = solrDocument.getFieldValues(TARGET_SYNONYMS.name).stream().map(Object::toString).collect(Collectors.toList());
 
                         if (identifier.equalsIgnoreCase(singleTerm) ||
                                 accessions.stream().anyMatch(singleTerm::equalsIgnoreCase) ||

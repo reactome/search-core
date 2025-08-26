@@ -1,17 +1,29 @@
 package org.reactome.server.search.domain;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.reactome.server.search.solr.SolrConverter;
+import org.reactome.server.search.solr.SolrConverter.Field;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.reactome.server.search.solr.SolrConverter.Field.*;
+
 /**
  * Internal Model for Reactome Entries
+ *
  * @author Florian Korninger (fkorn@ebi.ac.uk)
  * @version 1.0
  */
 @SuppressWarnings("unused")
+@Getter
+@Setter
 public class Query {
+    public enum Scope {REFERENCE_ENTITY, PHYSICAL_ENTITY, BOTH}
 
     private String query;
     private String originalQuery;
@@ -20,6 +32,8 @@ public class Query {
     private List<String> types;
     private List<String> keywords;
     private List<String> compartments;
+    private Boolean includeInteractors;
+    private Scope scope;
     private Integer start;
     private Integer rows;
     private ParserType parserType; // defType
@@ -38,6 +52,8 @@ public class Query {
         private List<String> types = null;
         private List<String> keywords = null;
         private List<String> compartments = null;
+        private Boolean includeInteractors = false;
+        private Scope scope = Scope.REFERENCE_ENTITY;
         private Integer start;
         private Integer rows;
         private ParserType parserType = ParserType.STD; // defType
@@ -53,42 +69,52 @@ public class Query {
             this.originalQuery = query;
         }
 
-        public Builder keepOriginalQuery(String originalQuery){
+        public Builder keepOriginalQuery(String originalQuery) {
             this.originalQuery = originalQuery;
             return this;
         }
 
-        public Builder addFilterQuery(String filterQuery){
+        public Builder addFilterQuery(String filterQuery) {
             this.filterQuery = filterQuery;
             return this;
         }
 
-        public Builder forSpecies(List<String> species){
+        public Builder forSpecies(List<String> species) {
             if (species != null) this.species = new ArrayList<>(species);
             return this;
         }
 
-        public Builder withTypes(List<String> types){
+        public Builder withTypes(List<String> types) {
             if (types != null) this.types = new ArrayList<>(types);
             return this;
         }
 
-        public Builder withKeywords(List<String> keywords){
+        public Builder withKeywords(List<String> keywords) {
             if (keywords != null) this.keywords = new ArrayList<>(keywords);
             return this;
         }
 
-        public Builder inCompartments(List<String> compartments){
+        public Builder inCompartments(List<String> compartments) {
             if (compartments != null) this.compartments = new ArrayList<>(compartments);
             return this;
         }
 
-        public Builder start(Integer start){
+        public Builder includeInteractors(Boolean includeInteractors) {
+            this.includeInteractors = includeInteractors == true;
+            return this;
+        }
+
+        public Builder withScope(Scope scope) {
+            this.scope = scope;
+            return this;
+        }
+
+        public Builder start(Integer start) {
             this.start = start;
             return this;
         }
 
-        public Builder numberOfRows(Integer rows){
+        public Builder numberOfRows(Integer rows) {
             this.rows = rows;
             return this;
         }
@@ -103,7 +129,7 @@ public class Query {
             return this;
         }
 
-        public Query build(){
+        public Query build() {
             Query ret = new Query();
             ret.query = this.query;
             ret.originalQuery = this.originalQuery;
@@ -112,6 +138,8 @@ public class Query {
             ret.types = this.types;
             ret.keywords = this.keywords;
             ret.compartments = this.compartments;
+            ret.includeInteractors = this.includeInteractors;
+            ret.scope = this.scope;
             ret.start = this.start;
             ret.rows = this.rows;
             ret.reportInfo = this.reportInfo;
@@ -120,93 +148,14 @@ public class Query {
         }
     }
 
-    private Query() {}
-
-    public String getQuery() {
-        return query;
+    private Query() {
     }
 
-    public void setQuery(String query) {
-        this.query = query;
+    public String getOccurrencesFieldName() {
+        return this.includeInteractors ? OCCURRENCES_INTERACTOR.name : OCCURRENCES.name;
     }
 
-    public String getOriginalQuery() {
-        return originalQuery;
-    }
-
-    public void setOriginalQuery(String originalQuery) {
-        this.originalQuery = originalQuery;
-    }
-
-    public String getFilterQuery() {
-        return filterQuery;
-    }
-
-    public void setFilterQuery(String filterQuery) {
-        this.filterQuery = filterQuery;
-    }
-
-    public List<String> getSpecies() {
-        return species;
-    }
-
-    public void setSpecies(List<String> species) {
-        this.species = species;
-    }
-
-    public List<String> getTypes() {
-        return types;
-    }
-
-    public void setTypes(List<String> types) {
-        this.types = types;
-    }
-
-    public List<String> getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
-    }
-
-    public List<String> getCompartments() {
-        return compartments;
-    }
-
-    public void setCompartments(List<String> compartments) {
-        this.compartments = compartments;
-    }
-
-    public Integer getStart() {
-        return start;
-    }
-
-    public void setStart(Integer start) {
-        this.start = start;
-    }
-
-    public Integer getRows() {
-        return rows;
-    }
-
-    public void setRows(Integer rows) {
-        this.rows = rows;
-    }
-
-    public Map<String, String> getReportInfo() {
-        return reportInfo;
-    }
-
-    public void setReportInfo(Map<String, String> reportInfo) {
-        this.reportInfo = reportInfo;
-    }
-
-    public ParserType getParserType() {
-        return parserType;
-    }
-
-    public void setParserType(ParserType parserType) {
-        this.parserType = parserType;
+    public String getDiagramsFieldName() {
+        return this.includeInteractors ? DIAGRAMS_INTERACTOR.name : DIAGRAMS.name;
     }
 }
