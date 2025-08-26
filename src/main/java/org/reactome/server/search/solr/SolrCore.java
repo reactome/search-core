@@ -8,6 +8,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.SolrPing;
@@ -485,7 +486,7 @@ class SolrCore {
      */
     private QueryResponse querysolrClient(SolrQuery query) throws SolrSearcherException {
         try {
-            return solrClient.query(solrCore, query);
+            return solrClient.query(solrCore, query, SolrRequest.METHOD.POST);
         } catch (IOException | SolrServerException e) {
             logger.error("Solr exception occurred with query: " + query, e);
             throw new SolrSearcherException("Solr exception occurred with query: " + query, e);
