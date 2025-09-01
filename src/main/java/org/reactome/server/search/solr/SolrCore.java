@@ -208,7 +208,7 @@ class SolrCore {
                 parameters.addFilterQuery(HAS_REFERENCE_ENTITY.name + ":false"); // We want to remove physical entities if they have a referenceEntity, to only include referenceEntities and Reactome specific Entities
                 break;
             case PHYSICAL_ENTITY:
-                parameters.addFilterQuery("-" + PHYSICAL_ENTITIES_DB_ID.name + ":[\"\" TO *]"); // ONLY ReferenceEntities have a physicalEntity
+                parameters.addFilterQuery("-" + IS_REFERENCE_SUMMARY.name + ":true"); // Remove all summary entities
                 break;
             case BOTH:
                 break;

@@ -47,6 +47,7 @@ public class SolrConverter {
         REFERENCE_NAME("referenceName"),
         REFERENCE_IDENTIFIERS("referenceIdentifiers"),
         IS_DISEASE("isDisease"),
+        IS_REFERENCE_SUMMARY("isReferenceSummary"),
         HAS_REFERENCE_ENTITY("hasReferenceEntity"),
         HAS_EHLD("hasEHLD"),
         EXACT_TYPE("exactType"),
