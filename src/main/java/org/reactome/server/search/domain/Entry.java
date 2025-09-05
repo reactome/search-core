@@ -4,6 +4,7 @@ package org.reactome.server.search.domain;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -59,6 +60,21 @@ public class Entry {
     private Set<IconPhysicalEntity> iconPhysicalEntities;
     private List<String> iconEhlds;
 
+    // Deleted
+    private Boolean deleted;
+    private String reason;
+    private String explanation;
+    private Date date;
+    private List<Long> replacementDbIds;
+    private List<String> replacementStIds;
+
+    public boolean isIcon() {
+        return this.type.equalsIgnoreCase("icon");
+    }
+
+    public boolean isDeleted() {
+        return this.deleted != null ? this.deleted : false;
+    }
 
     /**
      * Get entry name
@@ -80,4 +96,15 @@ public class Entry {
     public String getIconName() {
         return iconName;
     }
+
+
+    public Boolean getDisease() {
+        return isDisease;
+    }
+
+    public void setDisease(Boolean disease) {
+        isDisease = disease;
+    }
+
+
 }

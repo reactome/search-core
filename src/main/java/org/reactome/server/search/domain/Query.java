@@ -1,10 +1,7 @@
 package org.reactome.server.search.domain;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.reactome.server.search.solr.SolrConverter;
-import org.reactome.server.search.solr.SolrConverter.Field;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +31,7 @@ public class Query {
     private List<String> compartments;
     private Boolean includeInteractors;
     private Scope scope;
+    private Boolean deleted;
     private Integer start;
     private Integer rows;
     private ParserType parserType; // defType
@@ -54,6 +52,7 @@ public class Query {
         private List<String> compartments = null;
         private Boolean includeInteractors = false;
         private Scope scope = Scope.REFERENCE_ENTITY;
+        private Boolean deleted = Boolean.FALSE;
         private Integer start;
         private Integer rows;
         private ParserType parserType = ParserType.STD; // defType
@@ -109,6 +108,11 @@ public class Query {
             return this;
         }
 
+        public Builder withDeleted(Boolean deleted) {
+            this.deleted = deleted;
+            return this;
+        }
+
         public Builder start(Integer start) {
             this.start = start;
             return this;
@@ -140,6 +144,7 @@ public class Query {
             ret.compartments = this.compartments;
             ret.includeInteractors = this.includeInteractors;
             ret.scope = this.scope;
+            ret.deleted = this.deleted;
             ret.start = this.start;
             ret.rows = this.rows;
             ret.reportInfo = this.reportInfo;
@@ -157,5 +162,9 @@ public class Query {
 
     public String getDiagramsFieldName() {
         return this.includeInteractors ? DIAGRAMS_INTERACTOR.name : DIAGRAMS.name;
+    }
+
+    public Boolean isDeleted() {
+        return deleted;
     }
 }

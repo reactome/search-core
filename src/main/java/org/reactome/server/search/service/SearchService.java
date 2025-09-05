@@ -94,12 +94,18 @@ public class SearchService {
      * @return Grouped result
      */
     public SearchResult getSearchResult(Query query, int rowCount, int page, boolean grouped, boolean forceFilters) throws SolrSearcherException {
+        query.setDeleted(false);
         FacetMapping facetMapping = getFacetingInformation(query, forceFilters);
         if (facetMapping == null || facetMapping.getTotalNumFount() < 1) {
-            query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).build();
+            query = new Query.Builder(query.getQuery()).keepOriginalQuery(query.getOriginalQuery()).withReportInfo(query.getReportInfo()).withDeleted(false).build();
             facetMapping = getFacetingInformation(query, forceFilters);
         }
         if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
+            query.setDeleted(true);
+            facetMapping = getFacetingInformation(query, forceFilters);
+        }
+        if (facetMapping != null && facetMapping.getTotalNumFount() == 0) {
+            query.setDeleted(false);
             query.setParserType(ParserType.DISMAX);
             facetMapping = getFacetingInformation(query, forceFilters);
         }
