@@ -595,12 +595,12 @@ public class SolrConverter {
     }
 
     private void buildDeletedEntry(SolrDocument solrDocument, Entry entry) {
-        entry.setDeleted((Boolean) solrDocument.getFieldValue(DELETED));
-        entry.setReason((String) solrDocument.getFieldValue(DELETED_REASON));
-        entry.setExplanation((String) solrDocument.getFieldValue(DELETED_EXPLANATION));
-        entry.setDate((Date) solrDocument.getFieldValue(DELETED_DATE));
-        entry.setReplacementDbIds(getLongListField(solrDocument, DELETED_REPLACEMENT_DB_IDS));
-        entry.setReplacementStIds(getStringListField(solrDocument, DELETED_REPLACEMENT_ST_IDS));
+        entry.setDeleted((Boolean) solrDocument.getFieldValue(DELETED.name));
+        entry.setReason((String) solrDocument.getFieldValue(DELETED_REASON.name));
+        entry.setExplanation((String) solrDocument.getFieldValue(DELETED_EXPLANATION.name));
+        entry.setDate((Date) solrDocument.getFieldValue(DELETED_DATE.name));
+        entry.setReplacementDbIds(getLongListField(solrDocument, DELETED_REPLACEMENT_DB_IDS.name));
+        entry.setReplacementStIds(getStringListField(solrDocument, DELETED_REPLACEMENT_ST_IDS.name));
     }
 
     private List<String> getStringListField(SolrDocument document, String field) {
