@@ -531,6 +531,7 @@ public class SolrConverter {
             entry.setId((String)
                     (solrDocument.containsKey(ST_ID.name) ? solrDocument.getFieldValue(ST_ID.name) : solrDocument.getFieldValue(DB_ID.name)));
 
+            entry.setType((String) solrDocument.getFieldValue(TYPE.name));
             entry.setExactType((String) solrDocument.getFieldValue(EXACT_TYPE.name));
             entry.setIsDisease((Boolean) solrDocument.getFieldValue(IS_DISEASE.name));
             entry.setHasReferenceEntity((Boolean) solrDocument.getFieldValue(HAS_REFERENCE_ENTITY.name));
