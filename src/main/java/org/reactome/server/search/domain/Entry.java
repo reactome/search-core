@@ -1,8 +1,10 @@
 package org.reactome.server.search.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import java.util.Date;
 import java.util.List;
@@ -68,8 +70,9 @@ public class Entry {
     private List<Long> replacementDbIds;
     private List<String> replacementStIds;
 
-    public boolean isIcon() {
-        return this.type.equalsIgnoreCase("icon");
+    @Nullable
+    public Boolean isIcon() {
+        return this.iconName != null ? true : null;
     }
 
     public boolean isDeleted() {
