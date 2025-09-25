@@ -8,12 +8,16 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.SolrParams;
 import org.reactome.server.search.domain.ParserType;
 import org.reactome.server.search.domain.Query;
 import org.reactome.server.search.exception.SolrSearcherException;
@@ -22,11 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.reactome.server.search.solr.SolrConverter.Field.*;
 
 /**
  * SolrCore converts Queries to SolrQueries and allows to retrieve Data from a solrClient
@@ -45,6 +54,7 @@ class SolrCore {
     private final SolrClient solrClient;
     private final String solrCore;
 
+    private final static String SELECT_REQUEST_HANDLER = "/select";
     private final static String SEARCH_REQUEST_HANDLER = "/search";
     private final static String GROUPED_SEARCH_REQUEST_HANDLER = "/search/grouped";
     private final static String SUGGEST_REQUEST_HANDLER = "/suggest";
@@ -69,11 +79,6 @@ class SolrCore {
     private final static String TYPE_FACET = "type_facet";
     private final static String KEYWORD_FACET = "keywords_facet";
     private final static String COMPARTMENT_FACET = "compartment_facet";
-    private final static String FIREWORK_SPECIES = "fireworksSpecies";
-    private final static String DIAGRAMS = "diagrams";
-    private final static String DIAGRAM_OCCURRENCES = "occurrences";
-    private final static String ST_ID = "stId";
-    private final static String LLPS = "llps";
 
     private final static String SPECIES_TAG = "{!tag=sf}";
     private final static String TYPE_TAG = "{!tag=tf}";
@@ -189,8 +194,61 @@ class SolrCore {
         parameters.addFilterQuery(getFilterString(queryObject.getCompartments(), COMPARTMENT_FACET));
         parameters.addFilterQuery(getFilterString(queryObject.getKeywords(), KEYWORD_FACET));
         parameters.addFilterQuery(queryObject.isDeleted() ? "deleted:true" : "-deleted");
+        configureScope(parameters, queryObject);
         parameterParserType(queryObject, parameters);
         return parameters;
+    }
+
+    public void configureScope(SolrQuery parameters, Query queryObject) {
+        configureScope(parameters, queryObject.getScope());
+    }
+
+    public void configureScope(SolrQuery parameters, Query.Scope scope) {
+        switch (scope) {
+            case REFERENCE_ENTITY:
+                parameters.addFilterQuery(HAS_REFERENCE_ENTITY.name + ":false"); // We want to remove physical entities if they have a referenceEntity, to only include referenceEntities and Reactome specific Entities
+                break;
+            case PHYSICAL_ENTITY:
+                parameters.addFilterQuery("-" + IS_REFERENCE_SUMMARY.name + ":true"); // Remove all summary entities
+                break;
+            case BOTH:
+                break;
+        }
+    }
+
+    @NonNull
+    QueryResponse batchRetrieveFromStableIds(@NonNull List<String> stableIds, @NonNull List<String> fields, String... filterQueries) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(SELECT_REQUEST_HANDLER);
+        parameters.setQuery("{!terms f=stId}" + String.join(",", stableIds).toLowerCase()); // Important to be lower case as we are bypassing normal stId transformation by using {!terms}
+        parameters.setRows(stableIds.size());
+        parameters.setFilterQueries(filterQueries);
+        parameters.setFields(fields.toArray(String[]::new));
+        return querysolrClient(parameters);
+    }
+
+    @NonNull
+    SolrDocumentList batchRetrieveFromDbIds(@NonNull List<Long> dbIds, @NonNull List<String> fields) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setFields(fields.toArray(String[]::new));
+        return getByDbIds(dbIds, parameters);
+    }
+
+    @Nullable
+    SolrDocument retrieveFromDbId(@NonNull Long dbId, @NonNull List<String> fields) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setFields(fields.toArray(String[]::new));
+        return getByDbId(dbId, parameters);
+    }
+
+    @Nullable
+    SolrDocument retrieveFromStId(@NonNull String stId, @NonNull List<String> fields) throws SolrSearcherException {
+        SolrQuery parameters = new SolrQuery();
+        parameters.setRequestHandler(SELECT_REQUEST_HANDLER);
+        parameters.setQuery("{!terms f=stId}" + stId.toLowerCase()); // Important to be lower case as we are bypassing normal stId transformation by using {!terms}
+        parameters.setRows(1);
+        parameters.setFields(fields.toArray(String[]::new));
+        return querysolrClient(parameters).getResults().get(0);
     }
 
     /**
@@ -230,6 +288,7 @@ class SolrCore {
      */
     QueryResponse getFacetingInformation(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
+        configureScope(parameters, queryObject);
         parameters.setRequestHandler(FACET_REQUEST_HANDLER);
         parameterParserType(queryObject, parameters);
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
@@ -258,14 +317,16 @@ class SolrCore {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(TOTAL_FACET_REQUEST_HANDLER);
         parameters.setQuery(ALL_FIELDS);
+        configureScope(parameters, Query.Scope.REFERENCE_ENTITY);
         return querysolrClient(parameters);
     }
 
     QueryResponse getFireworksResult(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FIREWORKS_REQUEST_HANDLER);
+        configureScope(parameters, queryObject);
 
-        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORK_SPECIES));
+        parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORKS_SPECIES.name));
         if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
@@ -285,13 +346,15 @@ class SolrCore {
     QueryResponse getDiagrams(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_REQUEST_HANDLER);
+        configureScope(parameters, queryObject);
+
         if (queryObject.getSpecies() != null && !queryObject.getSpecies().isEmpty()) {
-            parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORK_SPECIES));
+            parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORKS_SPECIES.name));
         }
         if (queryObject.getTypes() != null && !queryObject.getTypes().isEmpty()) {
             parameters.addFilterQuery(TYPE_TAG + getFilterString(queryObject.getTypes(), TYPE_FACET));
         }
-        parameters.addFilterQuery(DIAGRAMS + ":" + queryObject.getFilterQuery());
+        parameters.addFilterQuery(queryObject.getDiagramsFieldName() + ":" + queryObject.getFilterQuery());
         parameters.setStart(queryObject.getStart());
         parameters.setRows(queryObject.getRows());
         parameters.setQuery(queryObject.getQuery());
@@ -305,8 +368,9 @@ class SolrCore {
     QueryResponse getDiagramOccurrences(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_OCCURRENCES_REQUEST_HANDLER);
+        configureScope(parameters, queryObject);
         parameters.setQuery(queryObject.getQuery());
-        parameters.setFields(DIAGRAM_OCCURRENCES); // solr response will contain only DIAGRAM_OCCURRENCES.
+        parameters.setFields(queryObject.getOccurrencesFieldName()); // solr response will contain only DIAGRAM_OCCURRENCES.
         return querysolrClient(parameters);
     }
 
@@ -317,8 +381,9 @@ class SolrCore {
     QueryResponse getDiagramFlagging(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(DIAGRAM_FLAG_REQUEST_HANDLER);
-        parameters.setQuery(String.format("\"%s\" AND %s:%s*", queryObject.getQuery(), DIAGRAM_OCCURRENCES, queryObject.getFilterQuery()));
-        parameters.setFields(DIAGRAM_OCCURRENCES, ST_ID); // solr response will contain only DIAGRAM_OCCURRENCES and ST_ID.
+        configureScope(parameters, queryObject);
+        parameters.setQuery(String.format("\"%s\" AND %s:%s*", queryObject.getQuery(), queryObject.getOccurrencesFieldName(), queryObject.getFilterQuery()));
+        parameters.setFields(queryObject.getOccurrencesFieldName(), ST_ID.name); // solr response will contain only DIAGRAM_OCCURRENCES and ST_ID.
         //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
         parameters.setRows(100);
         return querysolrClient(parameters);
@@ -327,14 +392,15 @@ class SolrCore {
     QueryResponse fireworksFlagging(Query queryObject) throws SolrSearcherException {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(FIREWORKS_FLAGGING_REQUEST_HANDLER);
-        parameters.setFields(LLPS, DIAGRAM_OCCURRENCES);
+        configureScope(parameters, queryObject);
+        parameters.setFields(LLPS.name, queryObject.getOccurrencesFieldName());
         parameters.setQuery(queryObject.getQuery());
         if (queryObject.getSpecies() != null) {
             if (!queryObject.getSpecies().contains("Entries without species")) {
                 queryObject.getSpecies().add("Entries without species");
             }
             if (!queryObject.getSpecies().isEmpty()) {
-                parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORK_SPECIES));
+                parameters.addFilterQuery(getFilterString(queryObject.getSpecies(), FIREWORKS_SPECIES.name));
             }
         }
         //If the term returns more than 100, it is not accurate enough. Only first 100 are taken into account for flagging
@@ -349,6 +415,7 @@ class SolrCore {
     QueryResponse getTargets(Query queryObject) {
         SolrQuery parameters = new SolrQuery();
         parameters.setRequestHandler(SEARCH_REQUEST_HANDLER);
+        configureScope(parameters, queryObject);
         parameters.setQuery(queryObject.getQuery());
         try {
             return solrClient.query(TARGET_CORE, parameters);
@@ -421,10 +488,40 @@ class SolrCore {
      */
     private QueryResponse querysolrClient(SolrQuery query) throws SolrSearcherException {
         try {
-            return solrClient.query(solrCore, query);
+            return solrClient.query(solrCore, query, SolrRequest.METHOD.POST);
         } catch (IOException | SolrServerException e) {
             logger.error("Solr exception occurred with query: " + query, e);
             throw new SolrSearcherException("Solr exception occurred with query: " + query, e);
+        }
+    }
+
+    /**
+     * executes a Query
+     *
+     * @param query SolrQuery Object
+     * @return QueryResponse
+     */
+    private SolrDocumentList getByDbIds(List<Long> query, SolrParams params) throws SolrSearcherException {
+        try {
+            return solrClient.getById(solrCore, query.stream().map(Object::toString).collect(Collectors.toList()), params);
+        } catch (IOException | SolrServerException e) {
+            logger.error("Solr exception occurred with /get: " + query, e);
+            throw new SolrSearcherException("Solr exception occurred with /get: " + query, e);
+        }
+    }
+
+    /**
+     * executes a Query
+     *
+     * @param dbId a dbId
+     * @return QueryResponse
+     */
+    private SolrDocument getByDbId(Long dbId, SolrParams params) throws SolrSearcherException {
+        try {
+            return solrClient.getById(solrCore, dbId.toString(), params);
+        } catch (IOException | SolrServerException e) {
+            logger.error("Solr exception occurred with /get: " + dbId, e);
+            throw new SolrSearcherException("Solr exception occurred with /get : " + dbId, e);
         }
     }
 }
